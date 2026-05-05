@@ -257,6 +257,12 @@ const CompactEventCard = ({ evt, onClick }) => {
 
           <div className={styles.compactMetaGrid}>
              <div className={styles.metaItem}>
+                <span className={styles.metaIcon} style={{ color: eventColor }}>📅</span>
+                <span className={styles.metaText} style={{ fontWeight: '700', color: '#1e293b' }}>
+                  {evt.fecha ? new Date(evt.fecha).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) : 'Pendiente'}
+                </span>
+             </div>
+             <div className={styles.metaItem}>
                 <span className={styles.metaIcon} style={{ color: eventColor }}>🕐</span>
                 <span className={styles.metaText}>{formatTime12h(evt.horaInicio)} - {formatTime12h(evt.horaFin) || 'Fin'}</span>
              </div>
