@@ -1,0 +1,244 @@
+.header {
+  margin-bottom: 24px;
+}
+
+.controlsBar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.searchBar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: 300px;
+}
+
+.searchBar input {
+  width: 100%;
+  padding: 10px 16px 10px 40px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background-color: var(--secondary);
+}
+
+.searchIcon {
+  position: absolute;
+  left: 14px;
+  color: var(--text-muted);
+}
+
+.roleSelect {
+  padding: 10px 24px;
+  border-radius: 20px;
+  border: none;
+  background-color: var(--success);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.createBtn {
+  margin-left: auto;
+  background: linear-gradient(135deg, #ce1126 0%, #a50e1f 100%);
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 14px rgba(206,17,38,0.25);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.createBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(206,17,38,0.35);
+}
+
+.rolesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 32px;
+}
+
+.roleSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.roleTitle {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.userCard {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  gap: 16px;
+  color: #1e293b;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+  transition: all 0.2s ease;
+}
+
+.userCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+  border-color: #e2e8f0;
+}
+
+.userAvatar {
+  width: 50px;
+  height: 50px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+}
+
+.userAvatar svg {
+  width: 24px;
+  height: 24px;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.userInfo h4 {
+  font-size: 1.1rem;
+  margin: 0 0 6px 0;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.userInfo p {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin: 0 0 4px 0;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+.cardActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.editBtn, .viewBtn {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+  border: none;
+}
+
+.editBtn {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.viewBtn {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+}
+
+.editBtn:hover {
+  background-color: #e2e8f0;
+  color: #334155;
+}
+
+.viewBtn:hover {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.activeBadge {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.inactiveBadge {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.activeDot { background-color: #22c55e; }
+.inactiveDot { background-color: #ef4444; }
+
+.tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.tabBtn {
+  background: white;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  padding: 8px 18px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tabBtn:hover {
+  border-color: #ce1126;
+  color: #ce1126;
+  background-color: #fff1f2;
+}
+
+.tabBtn.active {
+  background-color: #ce1126;
+  color: white;
+  border-color: #ce1126;
+  box-shadow: 0 4px 10px rgba(206, 17, 38, 0.2);
+}
