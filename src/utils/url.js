@@ -6,8 +6,16 @@
 export const resolveImageUrl = (url) => {
   if (!url) return null;
 
-  // Si ya es una URL absoluta (HTTP/HTTPS) o un Blob (vista previa), retornar tal cual
-  if (url.startsWith('http') || url.startsWith('blob:') || url.startsWith('data:')) {
+  // Si es una URL absoluta de localhost, la normalizamos para usar el puerto actual
+  if (url.startsWith('http://localhost') || url.startsWith('https://localhost') || url.startsWith('http://127.0.0.1')) {
+    const relativePart = url.split('/api/').pop() || url.split('/archivos/').pop();
+    if (relativePart && relativePart !== url) {
+      url = `/archivos/${relativePart.includes('public/') ? '' : 'public/'}${relativePart.replace('public/', '')}`;
+    }
+  }
+
+  // Si ya es una URL absoluta (HTTP/HTTPS) externa o un Blob/Data, retornar tal cual
+  if ((url.startsWith('http') && !url.includes('localhost')) || url.startsWith('blob:') || url.startsWith('data:')) {
     return url;
   }
 
