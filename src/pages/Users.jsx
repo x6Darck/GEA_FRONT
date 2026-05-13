@@ -11,6 +11,7 @@ import Modal from '../components/ui/Modal';
 import UserDetailDrawer from '../components/ui/UserDetailDrawer';
 import { User, Mail, Phone, Lock, Shield, Building, Info, AlertCircle, X } from 'lucide-react';
 import modalStyles from '../components/ui/DetailModal.module.css';
+import { ROLE_ORDER } from '../utils/roleUtils'; // We'll create this or define locally
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -33,7 +34,7 @@ const Users = () => {
     telefono: '',
     password: '',
     idRol: '4',
-    idOficina: '1',
+    idOficina: '',
     fotoUrl: ''
   });
   const [isUploadingFoto, setIsUploadingFoto] = useState(false);
@@ -106,6 +107,11 @@ const Users = () => {
       if (commOffice) {
         nextFormData.idOficina = commOffice.id.toString();
       }
+    }
+
+    // Si el rol es Usuario Autenticado (ID 4), no requiere oficina
+    if (name === 'idRol' && value === '4') {
+      nextFormData.idOficina = ''; // O null, para indicar que no aplica
     }
 
     setFormData(nextFormData);
@@ -229,8 +235,14 @@ const Users = () => {
            ) : error ? (
               <div style={{ padding: '20px', color: 'red' }}>{error}</div>
            ) : Object.keys(groupedUsers).length > 0 ? (
-              Object.entries(groupedUsers).map(([role, roleUsers]) => (
-                <div key={role} className={styles.roleSection} style={{ marginBottom: '20px' }}>
+              Object.entries(groupedUsers)
+                .sort(([roleA], [roleB]) => {
+                   const orderA = ROLE_ORDER[roleA] || 99;
+                   const orderB = ROLE_ORDER[roleB] || 99;
+                   return orderA - orderB;
+                })
+                .map(([role, roleUsers]) => (
+                 <div key={role} className={`${styles.roleSection} ${role === 'Oficina' ? styles.bigSection : ''}`} style={{ marginBottom: '20px' }}>
                    <h3 className={styles.roleTitle}>{role}</h3>
                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '15px' }}>
                      {roleUsers.map(user => (
@@ -374,22 +386,34 @@ const Users = () => {
                       <option value="4">Usuario Autenticado</option>
                     </select>
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <label className={modalStyles.fieldLabel}><Building size={14}/> Oficina</label>
-                    <select 
-                      name="idOficina" 
-                      value={formData.idOficina} 
-                      onChange={handleInputChange} 
-                      className={modalStyles.inputField}
-                    >
-                      {offices.map(oficina => (
-                        <option key={oficina.id} value={oficina.id.toString()}>
-                          {oficina.nombre}
-                        </option>
-                      ))}
-                      {offices.length === 0 && <option value="">No hay oficinas disponibles</option>}
-                    </select>
-                  </div>
+                  {formData.idRol !== '4' && (
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <label className={modalStyles.fieldLabel}><Building size={14}/> Oficina</label>
+                      <select 
+                        name="idOficina" 
+                        value={formData.idOficina} 
+                        onChange={handleInputChange} 
+                        className={modalStyles.inputField}
+                        required={formData.idRol !== '4'}
+                      >
+                        <option value="">Seleccionar Oficina...</option>
+                        {offices.map(oficina => (
+                          <option key={oficina.id} value={oficina.id.toString()}>
+                            {oficina.nombre}
+                          </option>
+                        ))}
+                        {offices.length === 0 && <option value="">No hay oficinas disponibles</option>}
+                      </select>
+                    </div>
+                  )}
+                  {formData.idRol === '4' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                       <div style={{ backgroundColor: '#f8fafc', padding: '10px 12px', borderRadius: '10px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <Info size={14} color="#64748b" />
+                          <span style={{ fontSize: '11px', color: '#64748b' }}>Los estudiantes no requieren asignación de oficina.</span>
+                       </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

@@ -7,6 +7,7 @@ import { getEventosPublicados } from '../services/eventos.service';
 import Spinner from '../components/ui/Spinner';
 import EventModal from '../components/ui/EventModal';
 import { resolveImageUrl } from '../utils/url';
+import { formatLocalDate, getTodayStr } from '../utils/dateUtils';
 
 /* ─── Helper: resolves image URL ─────────────────────────────────── */
 const resolveImg = (url) => resolveImageUrl(url);
@@ -125,7 +126,7 @@ const EventCard = ({ evt, onClick }) => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#64748b' }}>
             <span style={{ color: eventColor, fontSize: '14px' }}>📅</span>
-            <span style={{ fontWeight: '500' }}>{evt.fecha ? evt.fecha.split('T')[0] : 'Fecha por confirmar'}</span>
+            <span style={{ fontWeight: '500' }}>{evt.fecha ? formatLocalDate(evt.fecha, { day: 'numeric', month: 'long', year: 'numeric' }) : 'Fecha por confirmar'}</span>
             <span style={{ color: '#cbd5e1' }}>•</span>
             <span style={{ color: eventColor }}>🕐</span>
             <span style={{ fontWeight: '500' }}>{formatTime12h(evt.horaInicio) || '--:--'}</span>
@@ -259,7 +260,7 @@ const CompactEventCard = ({ evt, onClick }) => {
              <div className={styles.metaItem}>
                 <span className={styles.metaIcon} style={{ color: eventColor }}>📅</span>
                 <span className={styles.metaText} style={{ fontWeight: '700', color: '#1e293b' }}>
-                  {evt.fecha ? new Date(evt.fecha).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) : 'Pendiente'}
+                  {evt.fecha ? formatLocalDate(evt.fecha) : 'Pendiente'}
                 </span>
              </div>
              <div className={styles.metaItem}>
@@ -430,7 +431,7 @@ const Lightbox = ({ evt, onClose }) => {
           </div>
 
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', fontSize: '12px', color: '#64748b' }}>
-            <span>📆 {evt.fecha ? evt.fecha.split('T')[0] : '-'}</span>
+            <span>📆 {evt.fecha ? formatLocalDate(evt.fecha, { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}</span>
             <span>🕐 {formatTime12h(evt.horaInicio)} {evt.horaFin ? ` a ${formatTime12h(evt.horaFin)}` : ''}</span>
             {evt.lugar && <span>📍 {evt.lugar}</span>}
             {evt.linkConexion && (
@@ -603,7 +604,7 @@ const CalendarView = () => {
 
   // Filtered list for search bar and upcoming list (only future events)
   const filteredEvents = useMemo(() => {
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = getTodayStr();
     
     // 1. First filter by date (only today onwards)
     const futureOnly = upcomingEvents.filter(e => {

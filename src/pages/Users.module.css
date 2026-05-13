@@ -67,14 +67,38 @@
 
 .rolesGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-auto-flow: dense;
   gap: 32px;
+  align-items: flex-start;
 }
 
 .roleSection {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+/* La sección de Oficina (con muchos usuarios) se expande para llenar el espacio */
+.bigSection {
+  grid-column: span 2;
+}
+
+@media (max-width: 1100px) {
+  .bigSection {
+    grid-column: span 1;
+  }
+}
+
+@media (min-width: 1600px) {
+  .bigSection {
+    grid-column: span 3;
+  }
+}
+
+/* Si hay espacio de sobra (zoom out), asegurar que los cards internos se expandan */
+.roleSection > div {
+  width: 100%;
 }
 
 .roleTitle {

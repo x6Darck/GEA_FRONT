@@ -78,9 +78,11 @@ const UserDetailDrawer = ({ isOpen, onClose, user, initialMode = 'VIEW', onRefre
   }, [isOpen, user, initialMode, offices.length]);
 
   // Si no tenemos oficinaNombre en el user, intentamos buscarla en la lista cargada
-  const displayOficina = user?.oficinaNombre && user.oficinaNombre !== 'No asignada' 
-    ? user.oficinaNombre 
-    : offices.find(o => o.id?.toString() === formData.idOficina)?.nombre || 'No asignada';
+  const displayOficina = formData.idRol === '4' 
+    ? 'N/A (Estudiante)' 
+    : (user?.oficinaNombre && user.oficinaNombre !== 'No asignada' 
+        ? user.oficinaNombre 
+        : offices.find(o => o.id?.toString() === formData.idOficina)?.nombre || 'No asignada');
 
   const fetchOffices = async () => {
     try {
@@ -97,6 +99,9 @@ const UserDetailDrawer = ({ isOpen, onClose, user, initialMode = 'VIEW', onRefre
     if (name === 'idRol' && value === '2') {
       const commOffice = offices.find(o => (o.nombre || '').toLowerCase().includes('comunicaciones'));
       if (commOffice) nextData.idOficina = (commOffice.id || 1).toString();
+    }
+    if (name === 'idRol' && value === '4') {
+      nextData.idOficina = '';
     }
     setFormData(nextData);
   };
@@ -316,15 +321,25 @@ const UserDetailDrawer = ({ isOpen, onClose, user, initialMode = 'VIEW', onRefre
                           <option value="4">Usuario Autenticado</option>
                        </select>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                       <label className={modalStyles.fieldLabel}><Building size={14} style={{ marginRight: '4px' }}/> Oficina</label>
-                        <select name="idOficina" value={formData.idOficina || ''} onChange={handleChange} className={modalStyles.inputField}>
-                           {!formData.idOficina && <option value="">Seleccione una oficina...</option>}
-                           {offices.map((oficina) => (
-                              <option key={oficina.id} value={oficina.id.toString()}>{oficina.nombre || 'Oficina'}</option>
-                           ))}
-                        </select>
-                    </div>
+                     {formData.idRol !== '4' && (
+                       <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <label className={modalStyles.fieldLabel}><Building size={14} style={{ marginRight: '4px' }}/> Oficina</label>
+                           <select name="idOficina" value={formData.idOficina || ''} onChange={handleChange} className={modalStyles.inputField} required={formData.idRol !== '4'}>
+                              <option value="">Seleccione una oficina...</option>
+                              {offices.map((oficina) => (
+                                 <option key={oficina.id} value={oficina.id.toString()}>{oficina.nombre || 'Oficina'}</option>
+                              ))}
+                           </select>
+                       </div>
+                     )}
+                     {formData.idRol === '4' && (
+                       <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                          <div style={{ backgroundColor: '#f8fafc', padding: '8px 12px', borderRadius: '10px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '8px', height: '40px' }}>
+                             <Info size={14} color="#64748b" />
+                             <span style={{ fontSize: '11px', color: '#64748b' }}>Los estudiantes no requieren oficina.</span>
+                          </div>
+                       </div>
+                     )}
                  </div>
               </div>
             </div>

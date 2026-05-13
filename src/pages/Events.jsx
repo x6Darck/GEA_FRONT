@@ -10,6 +10,7 @@ import PublishEventModal from '../components/ui/PublishEventModal';
 import { AuthContext } from '../context/AuthContext';
 import { resolveImageUrl } from '../utils/url';
 import notification from '../utils/notification';
+import { parseLocalDate, getTodayStr, isSameDay } from '../utils/dateUtils';
 
 const resolveImg = (url) => resolveImageUrl(url);
 
@@ -84,58 +85,46 @@ const Events = () => {
       console.warn("No se pudo cargar el mapa de nombres de usuarios (posible falta de permisos)");
     }
   };
-
   const matchesDateFilter = (event, filter) => {
     if (filter === 'all') return true;
-    // BLINDAJE V16: Filtrar por FECHA DE REGISTRO (Creación) no por FECHA DEL EVENTO
+    
+    // BLINDAJE V16: Usar fecha de registro/creación para el histórico de gestión
     const dateStr = event.fechaRegistro || event.createdAt || event.fecha;
-    if (!dateStr) return true; // Si no hay fecha de registro, mostrar por defecto o usar la de evento como fallback
+    if (!dateStr) return true;
     
+    const eDate = parseLocalDate(dateStr);
+    if (!eDate || isNaN(eDate.getTime())) return true;
+    
+    // Normalizar a medianoche local para comparaciones de rango
+    const eventMidnight = new Date(eDate.getFullYear(), eDate.getMonth(), eDate.getDate());
     const now = new Date();
-    
-    // BLINDAJE V15: Comparación por componentes locales (Año, Mes, Día) para evitar saltos de zona horaria (UTC vs Local)
-    // BLINDAJE V15: Comparación por componentes locales para evitar saltos de zona horaria
-    const isSameDay = (d1, d2) => {
-      if (!d1 || !d2) return false;
-      const date1 = typeof d1 === 'string' ? new Date(d1.includes('T') ? d1 : d1 + 'T00:00:00') : d1;
-      const date2 = d2;
-      
-      // Usamos toLocaleDateString para comparar SOLO la parte de la fecha en el entorno local del usuario
-      return date1.toLocaleDateString() === date2.toLocaleDateString();
-    };
+    const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     if (filter === 'today') {
-      return isSameDay(dateStr, now);
+      return isSameDay(eDate, now);
     }
 
-    
-    // Para otros filtros, normalizamos a medianoche local
-    const eDate = new Date(dateStr.includes('T') ? dateStr : dateStr + 'T00:00:00');
-    eDate.setHours(0, 0, 0, 0);
-    const todayStart = new Date(now);
-    todayStart.setHours(0, 0, 0, 0);
-    
     if (filter === 'thisWeek') {
-      const first = now.getDate() - now.getDay();
+      const first = todayMidnight.getDate() - todayMidnight.getDay();
       const last = first + 6;
-      const firstDay = new Date(now.getFullYear(), now.getMonth(), first);
-      const lastDay = new Date(now.getFullYear(), now.getMonth(), last);
-      return eDate >= firstDay && eDate <= lastDay;
+      const firstDay = new Date(todayMidnight.getFullYear(), todayMidnight.getMonth(), first);
+      const lastDay = new Date(todayMidnight.getFullYear(), todayMidnight.getMonth(), last);
+      return eventMidnight >= firstDay && eventMidnight <= lastDay;
     }
     
     if (filter === 'last30') {
-      const thirtyDaysAgo = new Date(now);
-      thirtyDaysAgo.setDate(now.getDate() - 30);
-      return eDate >= thirtyDaysAgo && eDate <= now;
+      const thirtyDaysAgo = new Date(todayMidnight);
+      thirtyDaysAgo.setDate(todayMidnight.getDate() - 30);
+      return eventMidnight >= thirtyDaysAgo && eventMidnight <= todayMidnight;
     }
 
     if (filter === 'thisMonth') {
-      return eDate.getMonth() === now.getMonth() && eDate.getFullYear() === now.getFullYear();
+      return eventMidnight.getMonth() === todayMidnight.getMonth() && eventMidnight.getFullYear() === todayMidnight.getFullYear();
     }
     
     if (filter === 'lastMonth') {
-      const last = new Date(now.getFullYear(), now.getMonth() - 1);
-      return eDate.getMonth() === last.getMonth() && eDate.getFullYear() === last.getFullYear();
+      const last = new Date(todayMidnight.getFullYear(), todayMidnight.getMonth() - 1);
+      return eventMidnight.getMonth() === last.getMonth() && eventMidnight.getFullYear() === last.getFullYear();
     }
     
     return true;

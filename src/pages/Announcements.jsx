@@ -12,6 +12,7 @@ import AnnouncementDetailModal from '../components/ui/AnnouncementDetailModal';
 import { AuthContext } from '../context/AuthContext';
 import { resolveImageUrl } from '../utils/url';
 import notification from '../utils/notification';
+import { parseLocalDate, getTodayStr, isSameDay, formatLocalDate } from '../utils/dateUtils';
 
 const DATE_FILTERS = [
   { label: 'Todos', value: 'all' },
@@ -58,7 +59,7 @@ const AnnouncementCard = ({ announcement, onClick }) => {
         <p style={{ margin: '0 0 12px', fontSize: '12px', color: '#64748b', lineHeight: '1.5', flex: 1 }}>{desc}</p>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: '#94a3b8', borderTop: '1px solid #f1f5f9', paddingTop: '10px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <Calendar size={12} /> {announcement.fechaInicioPublicacion?.split('T')[0] || 'N/A'}
+            <Calendar size={12} /> {announcement.fechaInicioPublicacion ? formatLocalDate(announcement.fechaInicioPublicacion) : 'N/A'}
           </div>
           <div style={{ fontWeight: '600', color: '#ce1126' }}>Ver más →</div>
         </div>
@@ -248,48 +249,43 @@ const Announcements = () => {
 
   const matchesDateFilter = (item, filter) => {
     if (filter === 'all') return true;
-    // Sincronizado con requerimiento: Filtrar por FECHA DE REGISTRO
+    
+    // BLINDAJE V16: Filtrar por FECHA DE REGISTRO
     const dateStr = item.fechaCreacion || item.fechaInicioPublicacion || item.fechaPublicacion;
     if (!dateStr) return false;
     
-    const now = new Date();
+    const eDate = parseLocalDate(dateStr);
+    if (!eDate || isNaN(eDate.getTime())) return false;
     
-    const isSameDay = (d1, d2) => {
-      if (!d1 || !d2) return false;
-      const date1 = typeof d1 === 'string' ? new Date(d1.includes('T') ? d1 : d1 + 'T00:00:00') : d1;
-      const date2 = d2;
-      return date1.toLocaleDateString() === date2.toLocaleDateString();
-    };
+    const eventMidnight = new Date(eDate.getFullYear(), eDate.getMonth(), eDate.getDate());
+    const now = new Date();
+    const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     if (filter === 'today') {
-      return isSameDay(dateStr, now);
+      return isSameDay(eDate, now);
     }
     
-    // Para otros filtros, normalizamos a medianoche local
-    const iDate = new Date(dateStr.includes('T') ? dateStr : dateStr + 'T00:00:00');
-    iDate.setHours(0, 0, 0, 0);
-
     if (filter === 'thisWeek') {
-      const first = now.getDate() - now.getDay();
+      const first = todayMidnight.getDate() - todayMidnight.getDay();
       const last = first + 6;
-      const firstDay = new Date(now.getFullYear(), now.getMonth(), first);
-      const lastDay = new Date(now.getFullYear(), now.getMonth(), last);
-      return iDate >= firstDay && iDate <= lastDay;
+      const firstDay = new Date(todayMidnight.getFullYear(), todayMidnight.getMonth(), first);
+      const lastDay = new Date(todayMidnight.getFullYear(), todayMidnight.getMonth(), last);
+      return eventMidnight >= firstDay && eventMidnight <= lastDay;
     }
     
     if (filter === 'last30') {
-      const thirtyDaysAgo = new Date(now);
-      thirtyDaysAgo.setDate(now.getDate() - 30);
-      return iDate >= thirtyDaysAgo && iDate <= now;
+      const thirtyDaysAgo = new Date(todayMidnight);
+      thirtyDaysAgo.setDate(todayMidnight.getDate() - 30);
+      return eventMidnight >= thirtyDaysAgo && eventMidnight <= todayMidnight;
     }
 
     if (filter === 'thisMonth') {
-      return iDate.getMonth() === now.getMonth() && iDate.getFullYear() === now.getFullYear();
+      return eventMidnight.getMonth() === todayMidnight.getMonth() && eventMidnight.getFullYear() === todayMidnight.getFullYear();
     }
     
     if (filter === 'lastMonth') {
-      const last = new Date(now.getFullYear(), now.getMonth() - 1);
-      return iDate.getMonth() === last.getMonth() && iDate.getFullYear() === last.getFullYear();
+      const last = new Date(todayMidnight.getFullYear(), todayMidnight.getMonth() - 1);
+      return eventMidnight.getMonth() === last.getMonth() && eventMidnight.getFullYear() === last.getFullYear();
     }
     
     return true;
