@@ -40,6 +40,16 @@ const Sidebar = () => {
           <Calendar className={styles.icon} size={20} />
           Calendario
         </NavLink>
+
+        {!user && (
+          <NavLink 
+            to="/galeria-anuncios" 
+            className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}
+          >
+            <Megaphone className={styles.icon} size={20} />
+            Anuncios
+          </NavLink>
+        )}
         
         {user && (
           <>
@@ -83,7 +93,10 @@ const Sidebar = () => {
       <div className={styles.sidebarFooter}>
         {user ? (
           <button 
-            onClick={() => logout()}
+            onClick={() => {
+              logout();
+              navigate('/calendario');
+            }}
             className={styles.logoutBtn}
           >
             <svg style={{ marginRight: '10px' }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

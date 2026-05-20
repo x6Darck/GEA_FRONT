@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import CalendarView from './pages/CalendarView';
 import Events from './pages/Events';
 import Announcements from './pages/Announcements';
+import PublicAnnouncements from './pages/PublicAnnouncements';
 import Reports from './pages/Reports';
 import Users from './pages/Users';
 import { AuthProvider } from './context/AuthContext';
@@ -24,6 +25,7 @@ const App = () => {
             <Route element={<DashboardLayout />}>
               {/* Rutas Públicas / Modo Invitado */}
               <Route path="/calendario" element={<ErrorBoundary><CalendarView /></ErrorBoundary>} />
+              <Route path="/galeria-anuncios" element={<ErrorBoundary><PublicAnnouncements /></ErrorBoundary>} />
               <Route index element={<Navigate to="/calendario" replace />} />
               
               {/* Rutas Protegidas */}

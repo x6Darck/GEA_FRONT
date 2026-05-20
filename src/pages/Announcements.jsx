@@ -68,82 +68,7 @@ const AnnouncementCard = ({ announcement, onClick }) => {
   );
 };
 
-const AnnouncementLightbox = ({ announcement, onClose }) => {
-  if (!announcement) return null;
-  const imgUrl = resolveImageUrl(announcement.piezaGraficaUrl);
-
-  return (
-    <div 
-      className="fade-in"
-      onClick={onClose} 
-      style={{
-        position: 'fixed', inset: 0, zIndex: 9999,
-        padding: '24px', backgroundColor: 'rgba(255, 255, 255, 0.98)',
-        display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center',
-      }}
-    >
-      <p style={{ color: '#64748b', fontSize: '13px', marginBottom: '20px', fontWeight: '500' }}>
-        Haz clic fuera para cerrar
-      </p>
-      <div 
-        className="scale-in"
-        onClick={e => e.stopPropagation()} 
-        style={{
-          background: '#fff', borderRadius: '30px', overflow: 'hidden',
-          maxWidth: '700px', width: '100%',
-          boxShadow: '0 40px 100px rgba(0,0,0,0.15)',
-          border: '1px solid #f1f5f9',
-          position: 'relative', display: 'flex', flexDirection: 'column'
-        }}
-      >
-        <button
-          onClick={onClose}
-          style={{
-            position: 'absolute', top: '20px', right: '20px',
-            width: '40px', height: '40px', borderRadius: '50%',
-            backgroundColor: 'white', border: '1px solid #f1f5f9',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', zIndex: 10, boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
-            color: '#1e293b'
-          }}
-        >
-          <X size={20} />
-        </button>
-
-        <div style={{ flex: 1, backgroundColor: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '300px' }}>
-          {imgUrl ? (
-            <img src={imgUrl} alt={announcement.title}
-              style={{ width: '100%', display: 'block', maxHeight: '60vh', objectFit: 'contain' }} />
-          ) : (
-            <div style={{ padding: '80px', textAlign: 'center' }}>
-               <div style={{ fontSize: '70px', marginBottom: '20px' }}>📢</div>
-               <p style={{ color: '#94a3b8', fontWeight: 'bold', fontSize: '18px' }}>Sin pieza gráfica</p>
-            </div>
-          )}
-        </div>
-
-        <div style={{ padding: '30px', background: 'white' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
-             <div style={{ flex: 1 }}>
-               <h3 style={{ margin: '0 0 5px', fontSize: '24px', fontWeight: '800', color: '#1e293b' }}>{announcement.titulo || announcement.title}</h3>
-             </div>
-             <div style={{ textAlign: 'right', paddingLeft: '20px' }}>
-                <span style={{ display: 'block', fontSize: '14px', color: '#1e293b', fontWeight: 'bold' }}>{announcement.responsableAnuncio}</span>
-                <span style={{ fontSize: '12px', color: '#64748b' }}>{announcement.correoContacto}</span>
-             </div>
-          </div>
-          <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '15px', border: '1px solid #f1f5f9' }}>
-            <p style={{ margin: 0, fontSize: '15px', color: '#334155', lineHeight: '1.7' }}>
-              {announcement.descripcion || announcement.desc}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
+import AnnouncementLightbox from '../components/ui/AnnouncementLightbox';
 const Announcements = () => {
   const { user } = useContext(AuthContext);
   const [announcementsData, setAnnouncementsData] = useState([]);
@@ -157,6 +82,7 @@ const Announcements = () => {
 
   // Detail & Lightbox state
   const [selectedAnuncio, setSelectedAnuncio] = useState(null);
+  const [selectedPublicAnuncio, setSelectedPublicAnuncio] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isPublishedModalOpen, setIsPublishedModalOpen] = useState(false);
   const [publicAnnouncements, setPublicAnnouncements] = useState([]);
@@ -624,7 +550,7 @@ const Announcements = () => {
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px', padding: '10px' }}>
             {(publicAnnouncements || []).map(a => (
-              <AnnouncementCard key={a.id} announcement={a} onClick={() => { handleOpenDetail(a, true); setIsPublishedModalOpen(false); }} />
+              <AnnouncementCard key={a.id} announcement={a} onClick={() => { setSelectedPublicAnuncio(a); }} />
             ))}
             {publicAnnouncements.length === 0 && (
               <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px', color: '#94a3b8' }}>
@@ -644,6 +570,11 @@ const Announcements = () => {
           isReadOnly={isReadOnlyView}
         />
       )}
+
+      <AnnouncementLightbox 
+        announcement={selectedPublicAnuncio}
+        onClose={() => setSelectedPublicAnuncio(null)}
+      />
     </div>
   );
 };

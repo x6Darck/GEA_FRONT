@@ -384,7 +384,7 @@ const Lightbox = ({ evt, onClose }) => {
       backgroundColor: 'rgba(255,255,255,0.88)',
       display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center',
-      padding: '24px', backdropFilter: 'blur(4px)',
+      padding: '24px', backdropFilter: 'blur(4px)'
     }}>
       <p style={{ color: 'rgba(0,0,0,0.3)', fontSize: '12px', marginBottom: '12px' }}>
         Clic fuera para cerrar
@@ -394,7 +394,10 @@ const Lightbox = ({ evt, onClose }) => {
         maxWidth: '560px', width: '100%',
         boxShadow: '0 20px 60px rgba(0,0,0,0.18)',
         border: '1px solid rgba(0,0,0,0.07)',
-        position: 'relative'
+        position: 'relative',
+        maxHeight: '85vh',
+        display: 'flex',
+        flexDirection: 'column'
       }}>
         {/* Close Button UI inside the card (consistent with DayEventsModal) */}
         <button
@@ -413,32 +416,35 @@ const Lightbox = ({ evt, onClose }) => {
           <X size={18} />
         </button>
 
-        {imgUrl ? (
-          <img src={imgUrl} alt={evt.nombre}
-            style={{ width: '100%', display: 'block', maxHeight: '70vh', objectFit: 'contain', backgroundColor: '#f8fafc' }} />
-        ) : (
-          <div style={{ height: '200px', background: 'linear-gradient(135deg,#cc0000 0%,#8b0000 100%)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '40px' }}>📅</span>
-            <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1px' }}>Sin pieza gráfica</span>
-          </div>
-        )}
-        <div style={{ padding: '18px 22px' }}>
-          <h3 style={{ margin: '0 0 8px', fontSize: '16px', fontWeight: '700', color: '#1e293b' }}>{evt.nombre}</h3>
-          
-          {/* Enhanced details with description and end time */}
-          <div style={{ marginBottom: '16px', fontSize: '13px', color: '#475569', lineHeight: '1.6', background: '#f8fafc', padding: '12px', borderRadius: '10px', border: '1px solid #f1f5f9' }}>
-             <p style={{ margin: 0 }}>{evt.desc || 'Sin descripción disponible.'}</p>
-          </div>
+        {/* Contenedor scrolleable interno */}
+        <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column' }}>
+          {imgUrl ? (
+            <img src={imgUrl} alt={evt.nombre}
+              style={{ width: '100%', display: 'block', maxHeight: '70vh', objectFit: 'contain', backgroundColor: '#f8fafc', flexShrink: 0 }} />
+          ) : (
+            <div style={{ height: '200px', background: 'linear-gradient(135deg,#cc0000 0%,#8b0000 100%)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', flexShrink: 0 }}>
+              <span style={{ fontSize: '40px' }}>📅</span>
+              <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1px' }}>Sin pieza gráfica</span>
+            </div>
+          )}
+          <div style={{ padding: '18px 22px', flexShrink: 0 }}>
+            <h3 style={{ margin: '0 0 8px', fontSize: '16px', fontWeight: '700', color: '#1e293b' }}>{evt.nombre}</h3>
+            
+            {/* Enhanced details with description and end time */}
+            <div style={{ marginBottom: '16px', fontSize: '13px', color: '#475569', lineHeight: '1.6', background: '#f8fafc', padding: '12px', borderRadius: '10px', border: '1px solid #f1f5f9' }}>
+               <p style={{ margin: 0 }}>{evt.desc || 'Sin descripción disponible.'}</p>
+            </div>
 
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', fontSize: '12px', color: '#64748b' }}>
-            <span>📆 {evt.fecha ? formatLocalDate(evt.fecha, { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}</span>
-            <span>🕐 {formatTime12h(evt.horaInicio)} {evt.horaFin ? ` a ${formatTime12h(evt.horaFin)}` : ''}</span>
-            {evt.lugar && <span>📍 {evt.lugar}</span>}
-            {evt.linkConexion && (
-              <a href={evt.linkConexion} target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                🔗 Unirse a reunión
-              </a>
-            )}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', fontSize: '12px', color: '#64748b' }}>
+              <span>📆 {evt.fecha ? formatLocalDate(evt.fecha, { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}</span>
+              <span>🕐 {formatTime12h(evt.horaInicio)} {evt.horaFin ? ` a ${formatTime12h(evt.horaFin)}` : ''}</span>
+              {evt.lugar && <span>📍 {evt.lugar}</span>}
+              {evt.linkConexion && (
+                <a href={evt.linkConexion} target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  🔗 Unirse a reunión
+                </a>
+              )}
+            </div>
           </div>
         </div>
       </div>

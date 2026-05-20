@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import Drawer from './Drawer';
-import { User, Mail, Phone, Lock, Shield, Building, Camera, X } from 'lucide-react';
+import { User, Mail, Phone, Lock, Shield, Building, Camera, X, Info } from 'lucide-react';
 import modalStyles from './DetailModal.module.css';
 import { AuthContext } from '../../context/AuthContext';
 import { updateUsuario, deleteUsuario } from '../../services/usuarios.service';

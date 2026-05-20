@@ -6,6 +6,8 @@ export const mapAnuncioDTO = (item) => ({
   descripcion: item.descripcion || item.desc || item.descripcionVisible || '',
   categoria: item.categoria || item.category || item.type || '',
   lugar: item.lugar || '',
+  lugares: item.lugares || [],
+  idsLugaresFisicos: item.idsLugaresFisicos || [],
   correoContacto: item.correoContacto || '',
   responsableAnuncio: item.responsableAnuncio || '',
   fechaInicioPublicacion: item.fechaInicioPublicacion || null,
