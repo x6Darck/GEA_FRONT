@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useContext } from 'react';
-import { FileText, Download, Plus, Search, Calendar, Info } from 'lucide-react';
+import { FileText, Download, Plus, Search, Calendar, Info, BarChart3, CheckCircle2, Clock, XCircle, TrendingUp, Building2, CalendarRange, Layers } from 'lucide-react';
 import styles from './Reports.module.css';
 import { getReportes, exportReporte, getDashboardStats } from '../services/reportes.service';
 import { getOficinas } from '../services/oficinas.service';
@@ -53,7 +53,13 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-const StatsDashboard = ({ stats, loading }) => {
+const TIPO_OPTIONS = [
+  { val: 'GLOBAL', label: 'Todo' },
+  { val: 'EVENTOS', label: 'Eventos' },
+  { val: 'ANUNCIOS', label: 'Anuncios' },
+];
+
+const StatsDashboard = ({ stats, loading, tipoFilter, onTipoChange, oficinaLabel, desde, hasta }) => {
   // Solo retornamos nulo si no hay datos NI estamos cargando (error crítico)
   if (!stats && !loading) return null;
 
@@ -63,31 +69,71 @@ const StatsDashboard = ({ stats, loading }) => {
     eventosPorTipo: [], solicitudesPorOficina: [], tendenciaEstado: [], solicitudesPorMes: []
   };
 
-  const kpis = [
-    { label: 'Total Solicitudes', value: safeStats.totalSolicitudes, icon: '📊', color: '#3b82f6' },
-    { label: 'Aprobaciones', value: safeStats.totalAprobados, icon: '✅', color: '#16a34a' },
-    { label: 'Pendientes', value: safeStats.totalPendientes, icon: '⏳', color: '#f59e0b' },
-    { label: 'Tasa Aprobación', value: `${safeStats.tasaAprobacion}%`, icon: '📈', color: '#ce1126' },
-  ];
-
   const meses = safeStats.solicitudesPorMes || [];
   const porOficina = safeStats.solicitudesPorOficina || [];
   const estados = safeStats.tendenciaEstado || [];
   const categorias = safeStats.eventosPorTipo || [];
 
+  const publicadas = (estados.find(e => (e.etiqueta || '').toUpperCase() === 'PUBLICADA')?.valor) || 0;
+  const esAnuncios = tipoFilter === 'ANUNCIOS';
+
+  const fmt = (n) => new Intl.NumberFormat('es-CO').format(n ?? 0);
+
+  const kpis = [
+    { label: 'Total Solicitudes', value: fmt(safeStats.totalSolicitudes), Icon: BarChart3, color: '#3b82f6' },
+    { label: 'Aprobadas', value: fmt(safeStats.totalAprobados), Icon: CheckCircle2, color: '#16a34a' },
+    { label: 'Pendientes', value: fmt(safeStats.totalPendientes), Icon: Clock, color: '#f59e0b' },
+    { label: 'Rechazadas', value: fmt(safeStats.totalRechazados), Icon: XCircle, color: '#ce1126' },
+    { label: 'Tasa Aprobación', value: `${safeStats.tasaAprobacion ?? 0}%`, Icon: TrendingUp, color: '#8b5cf6' },
+  ];
+
   // recharts 3.x con React 19 necesita height numérico explícito en el contenedor
   // NO usar height="100%" en el div wrapper — dar valor fijo en px
   const CHART_HEIGHT = 250;
 
+  const tipoLabel = TIPO_OPTIONS.find(t => t.val === tipoFilter)?.label || 'Todo';
+
   return (
     <div className={styles.dashboard} style={{ position: 'relative' }}>
+      {/* Cabecera del panel: título + selector segmentado */}
+      <div className={styles.statsHeader}>
+        <div>
+          <h2 className={styles.statsTitle}>Panel de Estadísticas</h2>
+          <p className={styles.statsSubtitle}>Análisis de solicitudes según los filtros seleccionados</p>
+        </div>
+        <div className={styles.tabs} role="tablist" aria-label="Filtrar estadísticas por tipo">
+          {TIPO_OPTIONS.map(opt => (
+            <button
+              key={opt.val}
+              role="tab"
+              aria-selected={tipoFilter === opt.val}
+              className={`${styles.tabBtn} ${tipoFilter === opt.val ? styles.active : ''}`}
+              onClick={() => onTipoChange(opt.val)}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Chips de filtros activos */}
+      <div className={styles.filterChips}>
+        <span className={styles.chip}><Layers size={12} /> {tipoLabel}</span>
+        {oficinaLabel && <span className={styles.chip}><Building2 size={12} /> {oficinaLabel}</span>}
+        {(desde || hasta) && (
+          <span className={styles.chip}>
+            <CalendarRange size={12} /> {desde || '...'} → {hasta || '...'}
+          </span>
+        )}
+      </div>
+
       {/* Overlay de carga elegante */}
       {loading && (
-        <div style={{ 
-          position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, 
-          zIndex: 50, background: 'rgba(255,255,255,0.7)', 
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+          zIndex: 50, background: 'rgba(255,255,255,0.7)',
           backdropFilter: 'blur(3px)', borderRadius: '16px',
-          display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' 
+          display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'
         }}>
           <div style={{ width: '40px', height: '40px', border: '4px solid #f3f3f3', borderTop: '4px solid #ce1126', borderRadius: '50%', marginBottom: '12px', animation: 'spin 1s linear infinite' }}></div>
           <p style={{ color: '#1e293b', fontSize: '14px', fontWeight: '800' }}>Actualizando Analíticas...</p>
@@ -97,7 +143,9 @@ const StatsDashboard = ({ stats, loading }) => {
       <div className={styles.statsGrid}>
         {kpis.map((kpi, idx) => (
           <div key={idx} className={styles.statCard}>
-            <div className={styles.statIcon} style={{ background: `${kpi.color}15`, color: kpi.color }}>{kpi.icon}</div>
+            <div className={styles.statIcon} style={{ background: `${kpi.color}15`, color: kpi.color }}>
+              <kpi.Icon size={24} />
+            </div>
             <div className={styles.statInfo}>
               <div className={styles.statValue}>{kpi.value}</div>
               <div className={styles.statLabel}>{kpi.label}</div>
@@ -189,27 +237,29 @@ const StatsDashboard = ({ stats, loading }) => {
           </div>
         </div>
 
-        {/* Categorías más frecuentes (lista) */}
-        <div className={styles.chartContainer}>
-          <div className={styles.chartTitle}>Categorías más frecuentes</div>
-          <div style={{ height: CHART_HEIGHT, width: '100%', marginTop: '10px', overflowY: 'auto' }}>
-            {categorias.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {categorias.slice(0, 6).map((item, idx) => (
-                  <div key={idx} style={{ padding: '8px 12px', background: '#f8fafc', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: item.color || STAT_COLORS[idx % STAT_COLORS.length], flexShrink: 0 }} />
-                      <span style={{ fontSize: '12px', fontWeight: '600', color: '#475569' }}>{item.etiqueta}</span>
+        {/* Eventos por tipo (solo aplica a eventos) */}
+        {!esAnuncios && (
+          <div className={styles.chartContainer}>
+            <div className={styles.chartTitle}>Eventos por tipo</div>
+            <div style={{ height: CHART_HEIGHT, width: '100%', marginTop: '10px', overflowY: 'auto' }}>
+              {categorias.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {categorias.slice(0, 6).map((item, idx) => (
+                    <div key={idx} style={{ padding: '8px 12px', background: '#f8fafc', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: item.color || STAT_COLORS[idx % STAT_COLORS.length], flexShrink: 0 }} />
+                        <span style={{ fontSize: '12px', fontWeight: '600', color: '#475569' }}>{item.etiqueta}</span>
+                      </div>
+                      <span style={{ fontSize: '13px', fontWeight: '800', color: '#1e293b' }}>{item.valor}</span>
                     </div>
-                    <span style={{ fontSize: '13px', fontWeight: '800', color: '#1e293b' }}>{item.valor}</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className={styles.noDataPlaceholder}>No hay categorías registradas</div>
-            )}
+                  ))}
+                </div>
+              ) : (
+                <div className={styles.noDataPlaceholder}>No hay tipos de evento registrados</div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
@@ -230,6 +280,7 @@ const Reports = () => {
   const [oficinaFilter, setOficinaFilter] = useState('');
   const [desdeFilter, setDesdeFilter] = useState('');
   const [hastaFilter, setHastaFilter] = useState('');
+  const [tipoFilter, setTipoFilter] = useState('GLOBAL');
   const [stats, setStats] = useState({
     totalSolicitudes: 0,
     totalAprobados: 0,
@@ -275,13 +326,13 @@ const Reports = () => {
         desde: desdeFilter,
         hasta: hastaFilter
       };
-      
+
       fetchData(filters);
       if (canViewStats) {
-        fetchDashboardStats(filters);
+        fetchDashboardStats({ ...filters, tipo: tipoFilter });
       }
     }
-  }, [user, oficinaFilter, desdeFilter, hastaFilter, canViewStats]);
+  }, [user, oficinaFilter, desdeFilter, hastaFilter, tipoFilter, canViewStats]);
 
   const fetchDashboardStats = async (filters) => {
     try {
@@ -485,6 +536,7 @@ const Reports = () => {
               setHastaFilter('');
               setSearchTerm('');
               setDateFilter('all');
+              setTipoFilter('GLOBAL');
             }}
           >
             Limpiar Filtros
@@ -576,9 +628,15 @@ const Reports = () => {
       {canViewStats && (
         <div style={{ marginTop: '32px' }}>
           <ErrorBoundary resetOnPropsChange={stats}>
-            <div key={JSON.stringify(stats?.totalSolicitudes || 'loading')}>
-              <StatsDashboard stats={stats} loading={statsLoading} />
-            </div>
+            <StatsDashboard
+              stats={stats}
+              loading={statsLoading}
+              tipoFilter={tipoFilter}
+              onTipoChange={setTipoFilter}
+              oficinaLabel={oficinaFilter ? (oficinas.find(o => String(o.id) === String(oficinaFilter))?.nombre || null) : null}
+              desde={desdeFilter}
+              hasta={hastaFilter}
+            />
           </ErrorBoundary>
         </div>
       )}

@@ -242,7 +242,7 @@ const GenerateReportModal = ({ isOpen, onClose, onSuccess }) => {
                   <Download size={16} color="#ce1126" /> Formato de Salida
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {[{ val: 'PDF', label: 'PDF Document', color: '#ce1126' }, { val: 'CSV', label: 'CSV Spreadsheet', color: '#16a34a' }].map(f => (
+                  {[{ val: 'PDF', label: 'PDF Document', color: '#ce1126' }, { val: 'XLSX', label: 'Excel (XLSX)', color: '#16a34a' }].map(f => (
                     <label key={f.val} style={{
                       display: 'flex', alignItems: 'center', gap: '10px', padding: '10px',
                       borderRadius: '8px', border: '1px solid #e2e8f0',

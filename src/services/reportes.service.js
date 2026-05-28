@@ -41,6 +41,7 @@ export const getDashboardStats = async (filters = {}) => {
   if (filters.idOficina) params.append('idOficina', filters.idOficina);
   if (filters.desde) params.append('desde', filters.desde);
   if (filters.hasta) params.append('hasta', filters.hasta);
-  
+  if (filters.tipo && filters.tipo !== 'GLOBAL') params.append('tipo', filters.tipo);
+
   return await api.get(`/reportes/dashboard?${params.toString()}`);
 };
