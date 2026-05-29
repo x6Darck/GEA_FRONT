@@ -142,6 +142,7 @@ const UserDetailDrawer = ({ isOpen, onClose, user, initialMode = 'VIEW', onRefre
     try {
       await updateUsuario(user?.id || user?.idUsuario, {
         ...formData,
+        password: formData.password || null,
         idRol: parseInt(formData.idRol) || 4,
         idOficina: formData.idOficina ? parseInt(formData.idOficina) : null,
         estado: isActivo ? 'INACTIVO' : 'ACTIVO'
@@ -162,6 +163,7 @@ const UserDetailDrawer = ({ isOpen, onClose, user, initialMode = 'VIEW', onRefre
     setFormError(null);
     const updatePayload = {
       ...formData,
+      password: formData.password || null,
       idRol: parseInt(formData.idRol) || 4,
       idOficina: (formData.idOficina && formData.idOficina !== '0') ? parseInt(formData.idOficina) : null,
       estado: user?.estado || 'ACTIVO'
