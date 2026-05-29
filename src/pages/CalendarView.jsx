@@ -737,14 +737,6 @@ const CalendarView = () => {
             <div className={styles.controls}>
               <button className={styles.iconBtn} onClick={handlePrevMonth} aria-label="Mes anterior"><ChevronDown size={18} style={{ transform:'rotate(90deg)' }}/></button>
               <button className={styles.iconBtn} onClick={handleNextMonth} aria-label="Mes siguiente"><ChevronUp size={18} style={{ transform:'rotate(90deg)' }}/></button>
-              <button
-                className={styles.iconBtn}
-                onClick={() => setIsAgendaModalOpen(true)}
-                title="Exportar agenda PDF"
-                style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 12px', fontSize: '12px', fontWeight: '700', color: '#CE1126', borderColor: '#fecaca' }}
-              >
-                <FileText size={15} /> Agenda
-              </button>
               {user && (
                 <button className={styles.primaryBtn} onClick={() => setIsEventModalOpen(true)}>
                   <Plus size={16} strokeWidth={2.5} /> Nuevo Evento
@@ -861,6 +853,42 @@ const CalendarView = () => {
             </div>
           )}
 
+          {/* ── Botón flotante Exportar Agenda ─────────────── */}
+          <button
+            onClick={() => setIsAgendaModalOpen(true)}
+            title="Exportar agenda PDF"
+            style={{
+              position: 'absolute',
+              bottom: '16px',
+              right: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 16px',
+              borderRadius: '20px',
+              border: '1.5px solid #fecaca',
+              backgroundColor: '#fff',
+              color: '#CE1126',
+              fontWeight: '700',
+              fontSize: '12px',
+              cursor: 'pointer',
+              boxShadow: '0 2px 10px rgba(206,17,38,0.15)',
+              transition: 'all 0.2s',
+              zIndex: 10,
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.backgroundColor = '#CE1126';
+              e.currentTarget.style.color = '#fff';
+              e.currentTarget.style.boxShadow = '0 4px 16px rgba(206,17,38,0.35)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.backgroundColor = '#fff';
+              e.currentTarget.style.color = '#CE1126';
+              e.currentTarget.style.boxShadow = '0 2px 10px rgba(206,17,38,0.15)';
+            }}
+          >
+            <FileText size={14} /> Agenda
+          </button>
         </div>
 
           {/* Right - Upcoming */}
