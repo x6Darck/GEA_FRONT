@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { ChevronDown, ChevronUp, Search, Plus, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, Search, Plus, X, FileText } from 'lucide-react';
 import styles from './CalendarView.module.css';
 import { getEventosPublicados } from '../services/eventos.service';
 import Spinner from '../components/ui/Spinner';
 import EventModal from '../components/ui/EventModal';
+import ExportAgendaModal from '../components/ui/ExportAgendaModal';
 import { resolveImageUrl } from '../utils/url';
 import { formatLocalDate, getTodayStr } from '../utils/dateUtils';
 
@@ -570,6 +571,7 @@ const CalendarView = () => {
 
   // Modals
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+  const [isAgendaModalOpen, setIsAgendaModalOpen] = useState(false);
   const [lightboxEvt, setLightboxEvt] = useState(null);
   const [dayModalDate, setDayModalDate] = useState(null);
 
@@ -735,6 +737,14 @@ const CalendarView = () => {
             <div className={styles.controls}>
               <button className={styles.iconBtn} onClick={handlePrevMonth} aria-label="Mes anterior"><ChevronDown size={18} style={{ transform:'rotate(90deg)' }}/></button>
               <button className={styles.iconBtn} onClick={handleNextMonth} aria-label="Mes siguiente"><ChevronUp size={18} style={{ transform:'rotate(90deg)' }}/></button>
+              <button
+                className={styles.iconBtn}
+                onClick={() => setIsAgendaModalOpen(true)}
+                title="Exportar agenda PDF"
+                style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 12px', fontSize: '12px', fontWeight: '700', color: '#CE1126', borderColor: '#fecaca' }}
+              >
+                <FileText size={15} /> Agenda
+              </button>
               {user && (
                 <button className={styles.primaryBtn} onClick={() => setIsEventModalOpen(true)}>
                   <Plus size={16} strokeWidth={2.5} /> Nuevo Evento
@@ -915,6 +925,13 @@ const CalendarView = () => {
 
       {/* Lightbox */}
       <Lightbox evt={lightboxEvt} onClose={() => setLightboxEvt(null)} />
+
+      {/* Export Agenda Modal */}
+      <ExportAgendaModal
+        isOpen={isAgendaModalOpen}
+        onClose={() => setIsAgendaModalOpen(false)}
+        currentDate={currentDate}
+      />
     </div>
   );
 };

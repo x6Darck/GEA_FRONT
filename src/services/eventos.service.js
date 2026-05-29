@@ -185,3 +185,9 @@ export const eliminarSerie = async (idGrupo, role = '') => {
   const endpoint = isOficina ? `/oficina/solicitudes-evento/serie/${idGrupo}` : `/comunicaciones/solicitudes-evento/serie/${idGrupo}`;
   return await api.delete(endpoint);
 };
+
+export const exportarAgendaPdf = async (desde, hasta) => {
+  return await api.get(`/app/eventos/agenda/export/pdf?desde=${desde}&hasta=${hasta}`, {
+    responseType: 'blob'
+  });
+};
