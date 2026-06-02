@@ -29,6 +29,21 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  // Escuchar el evento global 'auth-error' emitido por el interceptor de api.js
+  // cuando el backend devuelve 401 en rutas no silenciosas (token expirado / inválido).
+  // AuthProvider vive fuera de BrowserRouter, por eso usamos window.location.href
+  // en lugar de useNavigate para redirigir a /login.
+  useEffect(() => {
+    const handleAuthError = () => {
+      authLogout();
+      setUser(null);
+      window.location.href = '/login';
+    };
+
+    window.addEventListener('auth-error', handleAuthError);
+    return () => window.removeEventListener('auth-error', handleAuthError);
+  }, []);
+
   return (
     <AuthContext.Provider value={{ user, login: loginContext, logout: logoutContext, updateUser, loading }}>
       {!loading && children}
