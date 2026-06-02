@@ -1,20 +1,7 @@
 import axios from 'axios';
 import notification from '../utils/notification';
 
-const getBaseURL = () => {
-  const hostname = window.location.hostname;
-  const protocol = window.location.protocol;
-  
-  // Si estamos en red local (IP o localhost)
-  if (hostname === 'localhost' || hostname.startsWith('192.168.') || hostname.startsWith('172.')) {
-    return `${protocol}//${hostname}:8083`;
-  }
-  
-  // Si no, usar la URL del túnel definida en .env
-  return import.meta.env.VITE_API_URL || 'http://localhost:8083';
-};
-
-const API_URL = getBaseURL();
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8083';
 
 const api = axios.create({
   baseURL: `${API_URL}/api`,
