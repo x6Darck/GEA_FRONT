@@ -24,7 +24,7 @@
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(206, 17, 38, 0.3);
+  box-shadow: var(--shadow-md);
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -178,30 +178,59 @@
   display: table-cell;
 }
 
+.tableScrollHint {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .hideMobile {
     display: none;
   }
+
   .header {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
-    padding: 1rem 0;
+    padding: 3.5rem 0 1rem; /* top padding for hamburger button */
   }
-  
+
+  .header > div {
+    flex-wrap: wrap;
+  }
+
   .tabs {
     overflow-x: auto;
     width: 100%;
     padding-bottom: 8px;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
-  
+
+  .tabs::-webkit-scrollbar {
+    display: none;
+  }
+
   .table th, .table td {
-    padding: 0.75rem 1rem;
-    white-space: nowrap; /* Evita que las columnas se amontonen */
+    padding: 0.75rem 0.6rem;
+    white-space: nowrap;
   }
 
   .monthSelect {
     width: 100% !important;
+  }
+
+  .tableScrollHint {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #94a3b8;
+    padding: 6px 12px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .createBtn, .secondaryBtn {
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
   }
 }

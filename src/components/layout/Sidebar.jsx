@@ -1,12 +1,13 @@
 import React, { useContext } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Calendar, CalendarDays, Megaphone, FileText, Users } from 'lucide-react';
+import { Calendar, CalendarDays, Megaphone, FileText, Users, X } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
 import { resolveImageUrl } from '../../utils/url';
 import geaLogo from '../../assets/gea-logo.png';
+import geaLogoText from '../../assets/gea-logo-text.png';
 import styles from './Sidebar.module.css';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen = false, onClose }) => {
   const { user, logout } = useContext(AuthContext);
 
   const navigate = useNavigate();
@@ -15,8 +16,20 @@ const Sidebar = () => {
   const displayEmail = user ? (user.correo || user.email || '') : 'Modo de solo lectura';
   const profileImg = user ? resolveImageUrl(user.fotoUrl) : null;
 
+  const handleNavClick = () => {
+    if (onClose) onClose();
+  };
+
   return (
-    <aside className={styles.sidebar}>
+    <aside className={`${styles.sidebar} ${isOpen ? styles.sidebarOpen : ''}`}>
+      <button
+        className={styles.closeBtn}
+        onClick={onClose}
+        aria-label="Cerrar menú"
+      >
+        <X size={20} />
+      </button>
+
       <div className={styles.profileSection}>
         <div className={styles.avatar}>
           {profileImg ? (
@@ -33,8 +46,9 @@ const Sidebar = () => {
       </div>
 
       <nav className={styles.navMenu}>
-        <NavLink 
-          to="/calendario" 
+        <NavLink
+          to="/calendario"
+          onClick={handleNavClick}
           className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}
         >
           <Calendar className={styles.icon} size={20} />
@@ -42,44 +56,49 @@ const Sidebar = () => {
         </NavLink>
 
         {!user && (
-          <NavLink 
-            to="/galeria-anuncios" 
+          <NavLink
+            to="/galeria-anuncios"
+            onClick={handleNavClick}
             className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}
           >
             <Megaphone className={styles.icon} size={20} />
             Anuncios
           </NavLink>
         )}
-        
+
         {user && (
           <>
-            <NavLink 
+            <NavLink
               to="/eventos"
+              onClick={handleNavClick}
               className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}
             >
               <CalendarDays className={styles.icon} size={20} />
               Eventos
             </NavLink>
-            
-            <NavLink 
+
+            <NavLink
               to="/anuncios"
+              onClick={handleNavClick}
               className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}
             >
               <Megaphone className={styles.icon} size={20} />
               Anuncios
             </NavLink>
-            
-            <NavLink 
+
+            <NavLink
               to="/reportes"
+              onClick={handleNavClick}
               className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}
             >
               <FileText className={styles.icon} size={20} />
               Reportes
             </NavLink>
-            
+
             {['SUPER_ADMIN', 'ADMIN'].includes(user?.rol?.toString().toUpperCase()) && (
-              <NavLink 
+              <NavLink
                 to="/usuarios"
+                onClick={handleNavClick}
                 className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}
               >
                 <Users className={styles.icon} size={20} />
@@ -92,10 +111,11 @@ const Sidebar = () => {
 
       <div className={styles.sidebarFooter}>
         {user ? (
-          <button 
+          <button
             onClick={() => {
               logout();
               navigate('/calendario');
+              if (onClose) onClose();
             }}
             className={styles.logoutBtn}
           >
@@ -107,8 +127,8 @@ const Sidebar = () => {
             <span>Cerrar sesión</span>
           </button>
         ) : (
-          <button 
-            onClick={() => navigate('/login')}
+          <button
+            onClick={() => { navigate('/login'); if (onClose) onClose(); }}
             className={styles.loginBtn}
           >
             <svg style={{ marginRight: '8px' }} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -121,10 +141,9 @@ const Sidebar = () => {
         )}
 
         <div className={styles.footerBrand}>
-          <div className={styles.brandLogo} style={{ overflow: 'hidden' }}>
+          <div className={styles.brandLogo}>
              <img src={geaLogo} alt="GEA Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
-          <div className={styles.brandName}>GEA</div>
         </div>
       </div>
     </aside>

@@ -461,8 +461,9 @@ const Announcements = () => {
                 <input type="text" name="titulo" value={formData.titulo} onChange={handleInputChange} required style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1' }} placeholder="Título..." />
                 <textarea name="descripcion" value={formData.descripcion} onChange={handleInputChange} rows="3" required style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1' }} placeholder="Descripción..." />
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: 'bold' }}>Lugares Físicos (Opcional)</label>
-                    <select 
+                    <label htmlFor="ann-lugares" style={{ fontSize: '12px', fontWeight: 'bold' }}>Lugares Físicos (Opcional)</label>
+                    <select
+                      id="ann-lugares"
                       style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
                       onChange={(e) => {
                         const id = parseInt(e.target.value);
@@ -507,10 +508,10 @@ const Announcements = () => {
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <label style={{ fontSize: '12px', fontWeight: 'bold' }}>Fecha Inicio Publicación</label>
-                  <input type="date" name="fechaInicioPublicacion" value={formData.fechaInicioPublicacion} onChange={handleInputChange} required style={{ padding: '10px', borderRadius: '8px' }} />
-                  <label style={{ fontSize: '12px', fontWeight: 'bold' }}>Fecha Fin Publicación</label>
-                  <input type="date" name="fechaFinPublicacion" value={formData.fechaFinPublicacion} onChange={handleInputChange} required style={{ padding: '10px', borderRadius: '8px' }} />
+                  <label htmlFor="ann-fecha-inicio" style={{ fontSize: '12px', fontWeight: 'bold' }}>Fecha Inicio Publicación *</label>
+                  <input id="ann-fecha-inicio" type="date" name="fechaInicioPublicacion" value={formData.fechaInicioPublicacion} onChange={handleInputChange} required min={getTodayStr()} style={{ padding: '10px', borderRadius: '8px' }} />
+                  <label htmlFor="ann-fecha-fin" style={{ fontSize: '12px', fontWeight: 'bold' }}>Fecha Fin Publicación *</label>
+                  <input id="ann-fecha-fin" type="date" name="fechaFinPublicacion" value={formData.fechaFinPublicacion} onChange={handleInputChange} required min={formData.fechaInicioPublicacion || getTodayStr()} style={{ padding: '10px', borderRadius: '8px' }} />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <label style={{ fontSize: '12px', fontWeight: 'bold' }}>Hora Inicio Publicación</label>
@@ -537,8 +538,11 @@ const Announcements = () => {
               </label>
             </div>
 
-            <button type="submit" disabled={formLoading} style={{ padding: '16px', borderRadius: '12px', background: '#ce1126', color: 'white', fontWeight: 'bold', fontSize: '16px' }}>
-              {formLoading ? 'Procesando...' : 'Enviar Solicitud'}
+            <button type="submit" disabled={formLoading} style={{ padding: '16px', borderRadius: '12px', background: '#ce1126', color: 'white', fontWeight: 'bold', fontSize: '16px', opacity: formLoading ? 0.7 : 1, cursor: formLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+              {formLoading && <Spinner size="sm" />}
+              {formLoading
+                ? (publishStep === 1 ? 'Subiendo imagen...' : publishStep === 2 ? 'Procesando...' : publishStep === 3 ? 'Creando anuncio...' : publishStep === 4 ? '¡Listo!' : 'Procesando...')
+                : 'Enviar Solicitud'}
             </button>
           </form>
         </div>

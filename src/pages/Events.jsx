@@ -22,6 +22,9 @@ const Events = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedGroups, setExpandedGroups] = useState(new Set());
   const [activeTab, setActiveTab] = useState('todos');
+  const [sortConfig, setSortConfig] = useState({ key: null, dir: 'asc' });
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 25;
   const [dateFilter, setDateFilter] = useState('all');
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -50,13 +53,16 @@ const Events = () => {
   const fetchEvents = async () => {
     if (!user) return;
     setLoading(true);
+    setError(null);
     try {
       const data = await getEventosSolicitudes(user?.rol);
       setEventsData(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
+      const msg = err.response?.data?.message || err.message || 'Error desconocido';
+      setError(`No se pudieron cargar los eventos. ${err.response ? `(${err.response.status})` : 'Verifica tu conexión.'}`);
       if (!err.handledByInterceptor) {
-        notification.error('Error al cargar eventos: ' + (err.response?.data?.message || err.message));
+        notification.error('Error al cargar eventos: ' + msg);
       }
     } finally {
       setLoading(false);
@@ -130,6 +136,9 @@ const Events = () => {
     return true;
   };
 
+  // Reset to page 1 whenever filters change
+  React.useEffect(() => { setCurrentPage(1); }, [activeTab, dateFilter, searchTerm]);
+
   const filteredData = useMemo(() => {
     if (!Array.isArray(eventsData)) return [];
     return eventsData.filter(item => {
@@ -154,12 +163,51 @@ const Events = () => {
     });
   }, [eventsData, activeTab, dateFilter, searchTerm]);
 
+  const handleSort = (key) => {
+    setSortConfig(prev =>
+      prev.key === key
+        ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' }
+        : { key, dir: 'asc' }
+    );
+    setCurrentPage(1);
+  };
+
+  const sortedData = useMemo(() => {
+    if (!sortConfig.key) return filteredData;
+    const sorted = [...filteredData].sort((a, b) => {
+      let aVal = '', bVal = '';
+      if (sortConfig.key === 'nombre') {
+        aVal = (a.nombreEvento || a.nombre || '').toLowerCase();
+        bVal = (b.nombreEvento || b.nombre || '').toLowerCase();
+      } else if (sortConfig.key === 'fecha') {
+        aVal = a.fechaEvento || a.fecha || '';
+        bVal = b.fechaEvento || b.fecha || '';
+      } else if (sortConfig.key === 'estado') {
+        aVal = (a.estado || a.status || '').toLowerCase();
+        bVal = (b.estado || b.status || '').toLowerCase();
+      } else if (sortConfig.key === 'oficina') {
+        aVal = (a.oficinaNombre || a.office || '').toLowerCase();
+        bVal = (b.oficinaNombre || b.office || '').toLowerCase();
+      }
+      if (aVal < bVal) return sortConfig.dir === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortConfig.dir === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return sorted;
+  }, [filteredData, sortConfig]);
+
+  const totalPages = Math.ceil(sortedData.length / PAGE_SIZE);
+  const paginatedData = useMemo(() =>
+    sortedData.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    [sortedData, currentPage]
+  );
+
   const groupedData = useMemo(() => {
     const groups = {};
     const result = [];
 
     // Pre-agrupar todo lo que tiene idGrupoRecurrencia
-    filteredData.forEach(item => {
+    paginatedData.forEach(item => {
       if (item.idGrupoRecurrencia) {
         if (!groups[item.idGrupoRecurrencia]) {
           groups[item.idGrupoRecurrencia] = [];
@@ -170,7 +218,7 @@ const Events = () => {
 
     const processedGroups = new Set();
 
-    filteredData.forEach(item => {
+    paginatedData.forEach(item => {
       const gid = item.idGrupoRecurrencia;
       if (gid) {
         if (!processedGroups.has(gid)) {
@@ -280,19 +328,33 @@ const Events = () => {
           {loading ? (
             <Spinner message="Obteniendo solicitudes..." />
           ) : error ? (
-            <div style={{ padding: '50px', textAlign: 'center', color: '#ef4444' }}>{error}</div>
+            <div style={{ padding: '60px 20px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+              <Calendar size={40} style={{ opacity: 0.2, color: '#ef4444' }} />
+              <p style={{ color: '#ef4444', fontWeight: '600', margin: 0 }}>{error}</p>
+              <button onClick={fetchEvents} style={{ padding: '8px 20px', borderRadius: 'var(--radius-md)', border: '1px solid #ef4444', background: 'white', color: '#ef4444', fontWeight: '600', cursor: 'pointer' }}>
+                Reintentar
+              </button>
+            </div>
           ) : (
             <table className={styles.table}>
               <thead>
                 <tr>
                   <th style={{ width: '30px' }}>#</th>
                   <th style={{ width: '50px' }}>ID</th>
-                  <th style={{ width: '130px' }}>Evento</th>
+                  <th style={{ width: '130px', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('nombre')}>
+                    Evento {sortConfig.key === 'nombre' ? (sortConfig.dir === 'asc' ? '↑' : '↓') : '↕'}
+                  </th>
                   <th className={styles.hideMobile} style={{ width: '100px' }}>Categoría</th>
-                  <th style={{ width: '110px' }}>Oficina</th>
-                  <th style={{ width: '85px' }}>Vigencia</th>
+                  <th style={{ width: '110px', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('oficina')}>
+                    Oficina {sortConfig.key === 'oficina' ? (sortConfig.dir === 'asc' ? '↑' : '↓') : '↕'}
+                  </th>
+                  <th style={{ width: '85px', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('fecha')}>
+                    Vigencia {sortConfig.key === 'fecha' ? (sortConfig.dir === 'asc' ? '↑' : '↓') : '↕'}
+                  </th>
                   <th style={{ width: '35px' }}>Img</th>
-                  <th style={{ width: '90px' }}>Estado</th>
+                  <th style={{ width: '90px', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('estado')}>
+                    Estado {sortConfig.key === 'estado' ? (sortConfig.dir === 'asc' ? '↑' : '↓') : '↕'}
+                  </th>
                   <th style={{ width: '80px' }}>Acción</th>
                 </tr>
               </thead>
@@ -427,18 +489,38 @@ const Events = () => {
                     </React.Fragment>
                   );
                 })}
-                {filteredData.length === 0 && (
+                {paginatedData.length === 0 && (
                   <tr>
                     <td colSpan="9" style={{ textAlign: 'center', padding: '80px 20px', color: '#94a3b8' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
                         <Calendar size={40} style={{ opacity: 0.2 }} />
-                        <span>No se encontraron registros coincidentes.</span>
+                        <span>{searchTerm ? `Sin resultados para "${searchTerm}". Intenta con otros términos o limpia los filtros.` : 'No se encontraron registros coincidentes.'}</span>
                       </div>
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
+          )}
+          {totalPages > 1 && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', borderTop: '1px solid #f1f5f9', flexWrap: 'wrap', gap: '8px' }}>
+              <span style={{ fontSize: '13px', color: '#64748b' }}>
+                Mostrando {Math.min((currentPage - 1) * PAGE_SIZE + 1, sortedData.length)}–{Math.min(currentPage * PAGE_SIZE, sortedData.length)} de {sortedData.length} registros
+              </span>
+              <div style={{ display: 'flex', gap: '4px' }}>
+                <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', opacity: currentPage === 1 ? 0.4 : 1 }}>‹</button>
+                {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                  const page = totalPages <= 7 ? i + 1 : (currentPage <= 4 ? i + 1 : currentPage - 3 + i);
+                  if (page < 1 || page > totalPages) return null;
+                  return (
+                    <button key={page} onClick={() => setCurrentPage(page)} style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid', borderColor: page === currentPage ? '#ce1126' : '#e2e8f0', background: page === currentPage ? '#ce1126' : 'white', color: page === currentPage ? 'white' : '#475569', fontWeight: page === currentPage ? '700' : '400', cursor: 'pointer' }}>
+                      {page}
+                    </button>
+                  );
+                })}
+                <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', opacity: currentPage === totalPages ? 0.4 : 1 }}>›</button>
+              </div>
+            </div>
           )}
         </div>
       </div>

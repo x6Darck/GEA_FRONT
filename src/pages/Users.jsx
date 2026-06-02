@@ -121,6 +121,20 @@ const Users = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const MAX_SIZE_MB = 2;
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+      notification.error(`La imagen no puede superar ${MAX_SIZE_MB}MB. El archivo seleccionado pesa ${(file.size / 1024 / 1024).toFixed(1)}MB.`);
+      e.target.value = '';
+      return;
+    }
+
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      notification.error('Formato no permitido. Usa JPG, PNG o WEBP.');
+      e.target.value = '';
+      return;
+    }
+
     try {
       setIsUploadingFoto(true);
       const res = await uploadArchivo(file);
@@ -249,7 +263,7 @@ const Users = () => {
                        <div key={user.id || user.idUsuario || Math.random()} className={styles.userCard}>
                           <div className={styles.userAvatar}>
                             {user.fotoUrl ? (
-                              <img src={resolveImageUrl(user.fotoUrl)} alt={user.nombres} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '14px' }} />
+                              <img src={resolveImageUrl(user.fotoUrl)} alt={user.nombres} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '14px' }} onError={e => { e.currentTarget.style.display = 'none'; }} />
                             ) : (
                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -258,8 +272,8 @@ const Users = () => {
                             )}
                           </div>
                           <div className={styles.userInfo}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                              <h4>{user.nombres || user.nombre || 'Sin Nombre'} {user.apellidos || ''}</h4>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', minWidth: 0 }}>
+                              <h4 style={{ flex: 1, minWidth: 0 }}>{user.nombres || user.nombre || 'Sin Nombre'} {user.apellidos || ''}</h4>
                               <div className={`${styles.badge} ${user.estado === 'ACTIVO' ? styles.activeBadge : styles.inactiveBadge}`}>
                                 <div className={`${styles.statusDot} ${user.estado === 'ACTIVO' ? styles.activeDot : styles.inactiveDot}`}></div>
                                 {user.estado === 'ACTIVO' ? 'Activo' : 'Inactivo'}
@@ -427,7 +441,8 @@ const Users = () => {
                 <button type="button" onClick={() => setIsModalOpen(false)} className={modalStyles.btnSecondary}>
                   Cancelar
                 </button>
-                <button type="submit" disabled={formLoading} className={modalStyles.btnPrimary}>
+                <button type="submit" disabled={formLoading} className={modalStyles.btnPrimary} style={{ opacity: formLoading ? 0.7 : 1, cursor: formLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {formLoading && <Spinner size="sm" />}
                   {formLoading ? 'Guardando...' : 'Crear Usuario'}
                 </button>
               </div>

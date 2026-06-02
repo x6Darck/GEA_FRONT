@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { Calendar } from 'lucide-react';
+import { Calendar, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import styles from './Login.module.css';
 import { useNavigate } from 'react-router-dom';
 import geaLogo from '../assets/gea-logo.png';
@@ -13,9 +13,11 @@ const Login = () => {
   const [credentials, setCredentials] = useState({ correo: '', password: '' });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
+    if (error) setError(null);
   };
 
   const handleLogin = async (e) => {
@@ -23,9 +25,7 @@ const Login = () => {
     setLoading(true);
     setError(null);
     try {
-      // Llama al servicio que guarda token y user en localStorage
       await authLogin(credentials, { skipGlobalError: true });
-      // Leer el user completo desde localStorage
       const savedUser = getCurrentUser();
       login(savedUser);
       notification.success(`¡Bienvenido, ${savedUser.nombre || 'Usuario'}!`);
@@ -54,7 +54,7 @@ const Login = () => {
         </div>
         <span className={styles.brandName}>GEA</span>
       </div>
-      
+
       <div className={styles.loginBox}>
         <div className={styles.header}>
           <div className={styles.userIconWrapper}>
@@ -63,33 +63,62 @@ const Login = () => {
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
           </div>
-          <h1 className={styles.title}>Inicia sesion</h1>
+          <h1 className={styles.title}>Inicia sesión</h1>
         </div>
 
-        <form onSubmit={handleLogin} className={styles.form}>
-          {error && <div style={{ color: 'red', marginBottom: '10px', textAlign: 'center', backgroundColor: '#ffebe6', padding: '10px', borderRadius: '4px', fontSize: '14px' }}>{error}</div>}
+        <form onSubmit={handleLogin} className={styles.form} noValidate>
+          {error && (
+            <div className={styles.errorBox} role="alert">
+              <AlertCircle size={16} />
+              <span>{error}</span>
+            </div>
+          )}
+
           <div className={styles.inputGroup}>
-            <label>Correo</label>
-            <input 
-              type="email" 
+            <label htmlFor="login-correo">Correo</label>
+            <input
+              id="login-correo"
+              type="email"
               name="correo"
               value={credentials.correo}
               onChange={handleChange}
-              required 
+              required
+              className={error ? styles.inputError : ''}
+              autoComplete="email"
             />
           </div>
+
           <div className={styles.inputGroup}>
-            <label>Contraseña</label>
-            <input 
-              type="password" 
-              name="password"
-              value={credentials.password}
-              onChange={handleChange}
-              required 
-            />
+            <label htmlFor="login-password">Contraseña</label>
+            <div className={styles.passwordWrapper}>
+              <input
+                id="login-password"
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                value={credentials.password}
+                onChange={handleChange}
+                required
+                className={error ? styles.inputError : ''}
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                className={styles.eyeBtn}
+                onClick={() => setShowPassword(v => !v)}
+                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
-          <button type="submit" className={styles.submitBtn} disabled={loading}>
-            {loading ? 'Cargando...' : 'LOGIN'}
+
+          <button
+            type="submit"
+            className={styles.submitBtn}
+            disabled={loading}
+            aria-busy={loading}
+          >
+            {loading ? 'Verificando...' : 'LOGIN'}
           </button>
         </form>
       </div>

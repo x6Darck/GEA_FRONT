@@ -21,7 +21,8 @@ export const mapAnuncioDTO = (item) => ({
   fechaCreacion: item.fechaCreacion || null,
   oficina: item.oficinaNombre || item.oficina || '',
   usuarioSolicitanteCorreo: item.usuarioSolicitanteCorreo || '',
-  usuarioSolicitanteNombre: item.usuarioSolicitanteNombre || ''
+  usuarioSolicitanteNombre: item.usuarioSolicitanteNombre || '',
+  requierePiezaGrafica: item.requierePiezaGrafica !== undefined ? item.requierePiezaGrafica : false
 });
 
 export const getAnuncios = async (role = '') => {
