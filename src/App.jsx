@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import DashboardLayout from './components/layout/DashboardLayout';
+import Welcome from './pages/Welcome';
 import Login from './pages/Login';
 import CalendarView from './pages/CalendarView';
 import Events from './pages/Events';
@@ -20,15 +21,14 @@ const App = () => {
       <AuthProvider>
         <BrowserRouter>
           <Routes>
+            <Route path="/bienvenida" element={<Welcome />} />
             <Route path="/login" element={<Login />} />
-            
+
             <Route element={<DashboardLayout />}>
-              {/* Rutas Públicas / Modo Invitado */}
               <Route path="/calendario" element={<ErrorBoundary><CalendarView /></ErrorBoundary>} />
               <Route path="/galeria-anuncios" element={<ErrorBoundary><PublicAnnouncements /></ErrorBoundary>} />
-              <Route index element={<Navigate to="/calendario" replace />} />
-              
-              {/* Rutas Protegidas */}
+              <Route index element={<Navigate to="/bienvenida" replace />} />
+
               <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN', 'ADMIN', 'COMUNICACIONES', 'OFICINA']} />}>
                 <Route path="/eventos" element={<ErrorBoundary><Events /></ErrorBoundary>} />
               </Route>
@@ -46,7 +46,7 @@ const App = () => {
               </Route>
             </Route>
 
-            <Route path="*" element={<Navigate to="/calendario" replace />} />
+            <Route path="*" element={<Navigate to="/bienvenida" replace />} />
           </Routes>
         </BrowserRouter>
         <ToastContainer 
