@@ -21,6 +21,10 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
   const [editingIndex, setEditingIndex] = useState(null);
   const [partInitialData, setPartInitialData] = useState(null);
 
+  // SIAPAC Confirmation State
+  const [siapacDialogOpen, setSiapacDialogOpen] = useState(false);
+  const [pendingLugar, setPendingLugar] = useState(null);
+
   // Form State
   const [tiposEvento, setTiposEvento] = useState([]);
   const [oficinas, setOficinas] = useState([]);
@@ -365,9 +369,95 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
 
   return (
     <>
-      <Modal 
-        isOpen={isOpen} 
-        onClose={onClose} 
+      {/* Diálogo de confirmación SIAPAC */}
+      {siapacDialogOpen && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 9999,
+          backgroundColor: 'rgba(15, 23, 42, 0.55)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '16px'
+        }}>
+          <div style={{
+            backgroundColor: '#fff', borderRadius: '20px', padding: '36px 32px',
+            maxWidth: '460px', width: '100%',
+            boxShadow: '0 25px 60px rgba(0,0,0,0.18)',
+            border: '1px solid #f1f5f9',
+            display: 'flex', flexDirection: 'column', gap: '20px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div style={{
+                width: '48px', height: '48px', borderRadius: '14px',
+                backgroundColor: '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                <Building size={24} color="#ea580c" />
+              </div>
+              <div>
+                <p style={{ margin: 0, fontSize: '11px', fontWeight: '800', color: '#ea580c', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  Confirmación requerida — SIAPAC
+                </p>
+                <p style={{ margin: '4px 0 0', fontSize: '16px', fontWeight: '800', color: '#1e293b' }}>
+                  Préstamo de espacio
+                </p>
+              </div>
+            </div>
+
+            <p style={{ margin: 0, fontSize: '14px', color: '#475569', lineHeight: '1.65' }}>
+              Ha seleccionado el espacio <strong style={{ color: '#1e293b' }}>"{pendingLugar?.nombre}"</strong>.
+            </p>
+            <div style={{
+              backgroundColor: '#fff7ed', border: '1px solid #fed7aa',
+              borderRadius: '12px', padding: '16px 18px',
+              display: 'flex', alignItems: 'flex-start', gap: '12px'
+            }}>
+              <AlertCircle size={20} color="#ea580c" style={{ flexShrink: 0, marginTop: '1px' }} />
+              <p style={{ margin: 0, fontSize: '14px', color: '#9a3412', fontWeight: '600', lineHeight: '1.5' }}>
+                ¿Usted ya realizó el préstamo de este espacio en el sistema <strong>SIAPAC</strong>?
+              </p>
+            </div>
+            <p style={{ margin: 0, fontSize: '12px', color: '#94a3b8', lineHeight: '1.5' }}>
+              Recuerde que el préstamo en SIAPAC debe realizarse <strong>antes</strong> de registrar el lugar en GEA.
+              Si aún no lo ha hecho, cancele y complete el proceso en el sistema de préstamo de aulas y espacios.
+            </p>
+
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '4px' }}>
+              <button
+                type="button"
+                onClick={() => { setSiapacDialogOpen(false); setPendingLugar(null); }}
+                style={{
+                  padding: '11px 24px', borderRadius: '30px', border: '1px solid #e2e8f0',
+                  backgroundColor: '#f8fafc', color: '#64748b', fontWeight: '700',
+                  cursor: 'pointer', fontSize: '14px'
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (pendingLugar) {
+                    setLugaresSeleccionados(prev => [...prev, pendingLugar]);
+                  }
+                  setSiapacDialogOpen(false);
+                  setPendingLugar(null);
+                }}
+                style={{
+                  padding: '11px 28px', borderRadius: '30px', border: 'none',
+                  backgroundColor: '#1e293b', color: '#fff', fontWeight: '800',
+                  cursor: 'pointer', fontSize: '14px',
+                  boxShadow: '0 4px 12px rgba(30,41,59,0.25)'
+                }}
+              >
+                Sí, ya realicé el préstamo en SIAPAC
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
         title="Crear Nueva Solicitud de Evento" 
         style={{ maxWidth: '900px', width: '95%' }}
         bodyStyle={{ padding: '32px', backgroundColor: '#fdfdfe' }}
@@ -463,7 +553,8 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
                           if (!id) return;
                           const selected = lugaresFisicos.find(l => l.id === id);
                           if (selected && !lugaresSeleccionados.find(l => l.id === id)) {
-                            setLugaresSeleccionados([...lugaresSeleccionados, selected]);
+                            setPendingLugar(selected);
+                            setSiapacDialogOpen(true);
                           }
                           e.target.value = "";
                         }}
