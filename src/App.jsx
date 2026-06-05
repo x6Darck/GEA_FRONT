@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import DashboardLayout from './components/layout/DashboardLayout';
-import Welcome from './pages/Welcome';
 import Login from './pages/Login';
 import CalendarView from './pages/CalendarView';
 import Events from './pages/Events';
@@ -21,13 +20,12 @@ const App = () => {
       <AuthProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/bienvenida" element={<Welcome />} />
             <Route path="/login" element={<Login />} />
 
             <Route element={<DashboardLayout />}>
               <Route path="/calendario" element={<ErrorBoundary><CalendarView /></ErrorBoundary>} />
               <Route path="/galeria-anuncios" element={<ErrorBoundary><PublicAnnouncements /></ErrorBoundary>} />
-              <Route index element={<Navigate to="/bienvenida" replace />} />
+              <Route index element={<Navigate to="/calendario" replace />} />
 
               <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN', 'ADMIN', 'COMUNICACIONES', 'OFICINA']} />}>
                 <Route path="/eventos" element={<ErrorBoundary><Events /></ErrorBoundary>} />
@@ -46,10 +44,10 @@ const App = () => {
               </Route>
             </Route>
 
-            <Route path="*" element={<Navigate to="/bienvenida" replace />} />
+            <Route path="*" element={<Navigate to="/calendario" replace />} />
           </Routes>
         </BrowserRouter>
-        <ToastContainer 
+        <ToastContainer
           position="top-right"
           autoClose={4000}
           hideProgressBar={false}
