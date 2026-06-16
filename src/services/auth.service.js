@@ -7,6 +7,7 @@ export const login = async (credentials, config = {}) => {
 
   // Mapeo explícito de todos los campos del usuario
   const user = {
+    id:            raw.id            || raw.idUsuario || null,
     nombre:        raw.nombre        || null,
     correo:        raw.correo        || null,
     rol:           raw.rol           || null,

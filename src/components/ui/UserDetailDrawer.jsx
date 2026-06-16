@@ -112,7 +112,8 @@ const UserDetailDrawer = ({ isOpen, onClose, user, initialMode = 'VIEW', onRefre
     try {
       setUploadingFoto(true);
       const res = await uploadArchivo(file);
-      if (res && res.url) setFormData(prev => ({ ...prev, fotoUrl: res.url }));
+      const url = res?.url || res?.urlAcceso || res?.urlDescarga;
+      if (url) setFormData(prev => ({ ...prev, fotoUrl: url }));
     } catch (err) {
        notification.error(`Error al subir la fotografía`);
     } finally {
@@ -135,23 +136,35 @@ const UserDetailDrawer = ({ isOpen, onClose, user, initialMode = 'VIEW', onRefre
     }
   };
 
+  const formatValidationErrors = (err) => {
+    const data = err.response?.data;
+    if (data?.data && typeof data.data === 'object') {
+      const fields = Object.entries(data.data).map(([f, m]) => `• ${f}: ${m}`).join('\n');
+      return fields || data.message || err.message;
+    }
+    return data?.message || err.message;
+  };
+
   const handleToggleStatus = async () => {
     const isActivo = (user?.estado || 'ACTIVO') === 'ACTIVO';
     if (!window.confirm(`¿Estás seguro de que deseas ${isActivo ? 'desactivar' : 'activar'} esta cuenta?`)) return;
     setLoading(true);
     try {
       await updateUsuario(user?.id || user?.idUsuario, {
-        ...formData,
-        password: formData.password || null,
+        nombre: formData.nombre,
+        correo: formData.correo,
+        telefono: formData.telefono,
+        password: null,
         idRol: parseInt(formData.idRol) || 4,
         idOficina: formData.idOficina ? parseInt(formData.idOficina) : null,
+        fotoUrl: formData.fotoUrl,
         estado: isActivo ? 'INACTIVO' : 'ACTIVO'
       });
       notification.success(isActivo ? 'Cuenta desactivada' : 'Cuenta activada correctamente');
       if (onRefreshData) onRefreshData();
       onClose();
     } catch(err) {
-      notification.error(err.response?.data?.message || err.message);
+      notification.error(formatValidationErrors(err));
     } finally {
       setLoading(false);
     }
@@ -161,21 +174,37 @@ const UserDetailDrawer = ({ isOpen, onClose, user, initialMode = 'VIEW', onRefre
     e.preventDefault();
     setLoading(true);
     setFormError(null);
+
+    // Validación de contraseña en el frontend
+    if (formData.password && formData.password.length < 6) {
+      notification.error('La contraseña debe tener al menos 6 caracteres, o déjala en blanco para no cambiarla.');
+      setLoading(false);
+      return;
+    }
+
     const updatePayload = {
-      ...formData,
+      nombre: formData.nombre,
+      correo: formData.correo,
+      telefono: formData.telefono,
       password: formData.password || null,
       idRol: parseInt(formData.idRol) || 4,
       idOficina: (formData.idOficina && formData.idOficina !== '0') ? parseInt(formData.idOficina) : null,
+      fotoUrl: formData.fotoUrl,
       estado: user?.estado || 'ACTIVO'
     };
     try {
       await updateUsuario(user?.id || user?.idUsuario, updatePayload);
-      
+
       // Sincronizar sesión si el usuario editado es el mismo que está logueado
       const loggedUserId = currentUserSession?.id || currentUserSession?.idUsuario;
       const editedUserId = user?.id || user?.idUsuario;
-      
-      if (loggedUserId && editedUserId && loggedUserId.toString() === editedUserId.toString()) {
+      const loggedEmail = (currentUserSession?.correo || '').toLowerCase();
+      const editedEmail = (formData.correo || '').toLowerCase();
+
+      const isSameUser = (loggedUserId && editedUserId && loggedUserId.toString() === editedUserId.toString())
+                      || (loggedEmail && editedEmail && loggedEmail === editedEmail);
+
+      if (isSameUser) {
         updateUser({
           nombre: formData.nombre,
           correo: formData.correo,
@@ -187,7 +216,7 @@ const UserDetailDrawer = ({ isOpen, onClose, user, initialMode = 'VIEW', onRefre
       if (onRefreshData) onRefreshData();
       onClose();
     } catch(err) {
-      notification.error(err.response?.data?.message || err.message);
+      notification.error(formatValidationErrors(err));
     } finally {
       setLoading(false);
     }
@@ -311,7 +340,7 @@ const UserDetailDrawer = ({ isOpen, onClose, user, initialMode = 'VIEW', onRefre
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                  <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <label className={modalStyles.fieldLabel}>Contraseña (Dejar en blanco para no cambiar)</label>
-                    <input type="password" name="password" value={formData.password} onChange={handleChange} className={modalStyles.inputField} placeholder="********" />
+                    <input type="password" name="password" value={formData.password} onChange={handleChange} className={modalStyles.inputField} placeholder="Mínimo 6 caracteres" autoComplete="new-password" />
                  </div>
                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
