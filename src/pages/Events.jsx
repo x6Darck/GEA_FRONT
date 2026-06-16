@@ -419,7 +419,7 @@ const Events = () => {
                               </span>
                             )}
                           </div>
-                          <div className={styles.truncate} style={{ fontSize: '10px', color: '#64748b', maxWidth: '130px' }}>{item.descripcionEvento || item.desc}</div>
+                          <div className={styles.truncate} style={{ fontSize: '10px', color: '#64748b', maxWidth: '200px' }} title={item.descripcionEvento || item.desc}>{item.descripcionEvento || item.desc}</div>
                         </td>
                         <td className={styles.hideMobile}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

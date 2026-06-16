@@ -465,7 +465,7 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
                         {displayFoto ? (
                           <img src={getImageUrl(displayFoto)} alt="org" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
                         ) : (
-                          <span style={{fontSize: '11px'}}>{p.nombre?.charAt(0)}</span>
+                          <UserIcon size={14} />
                         )}
                      </div>
                      <div style={{ display: 'flex', flexDirection: 'column' }}><span className={styles.participantName}>{p.nombre}</span><span className={styles.participantRole} style={{ color: '#dc2626' }}>{p.cargo || 'Organizador'}</span></div>

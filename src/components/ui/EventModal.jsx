@@ -6,7 +6,7 @@ import { getTiposEvento } from '../../services/tipoEvento.service';
 import { getOficinas } from '../../services/oficinas.service';
 import lugarFisicoService from '../../services/lugarFisico.service';
 import { resolveImageUrl } from '../../utils/url';
-import { Plus, Edit2, Trash2, X, Info, MapPin, Users, Calendar, AlertCircle, Clock, ShieldCheck, Building } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Info, MapPin, Users, Calendar, AlertCircle, Clock, ShieldCheck, Building, User } from 'lucide-react';
 import AmPmTimePicker from './AmPmTimePicker';
 import { AuthContext } from '../../context/AuthContext';
 import notification from '../../utils/notification';
@@ -342,7 +342,7 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
           boxShadow: '0 4px 10px rgba(0,0,0,0.03)', transition: 'transform 0.2s ease'
         }} className="participant-card">
           <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: mode === 'organizador' ? '#ce1126' : '#3b82f6', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxShadow: '0 2px 5px rgba(0,0,0,0.1)' }}>
-             {item.fotoUrl ? <img src={getImageUrl(item.fotoUrl)} alt="perfil" style={{width: '100%', height:'100%', objectFit: 'cover'}} /> : <span style={{fontSize: '12px', fontWeight:'bold'}}>{(item.nombre || '?').charAt(0).toUpperCase()}</span>}
+             {item.fotoUrl ? <img src={getImageUrl(item.fotoUrl)} alt="perfil" style={{width: '100%', height:'100%', objectFit: 'cover'}} /> : <User size={16} />}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#1e293b', lineHeight: '1.1' }}>{item.nombre}</span>
