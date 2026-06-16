@@ -146,6 +146,18 @@ export const useEventManagement = (event, onSuccess, onClose) => {
       const status = (event.status || '').toUpperCase();
       
       if (status === 'PUBLICADA') {
+        const participantesPayload = (formData.participantes || [])
+          .filter(p => !p.virtual)
+          .map(p => ({
+            nombre: p.nombre,
+            cargo: p.cargo || '',
+            descripcion: p.descripcion || '',
+            fotoUrl: p.fotoUrl || null,
+            telefono: p.telefono || null,
+            correo: p.correo || null,
+            tipo: (p.tipo || 'INVITADO').toString().toUpperCase()
+          }));
+
         const pubPayload = {
           tituloVisible: formData.nombreEvento,
           descripcionVisible: formData.descripcionEvento,
@@ -164,9 +176,15 @@ export const useEventManagement = (event, onSuccess, onClose) => {
           requiereCubrimiento: formData.requiereCubrimiento,
           observaciones: formData.observaciones,
           esImportante: formData.esImportante,
-          requierePiezaGrafica: formData.requierePiezaGrafica
+          requierePiezaGrafica: formData.requierePiezaGrafica,
+          participantes: participantesPayload
         };
         await updatePublicacionEvento(event.id, pubPayload);
+
+        // Actualizar caché local para que el modal refleje los datos correctos al reabrir
+        try {
+          localStorage.setItem(`event_hydra_${event.id}`, JSON.stringify({ participantes: participantesPayload, cacheTime: Date.now() }));
+        } catch (_) { /* no crítico */ }
       } else {
         const cleanPayload = {
             ...payload,
@@ -175,8 +193,14 @@ export const useEventManagement = (event, onSuccess, onClose) => {
             horaFin: formData.horaFin && formData.horaFin !== '-' ? formData.horaFin : null
         };
         await updateEvento(event.id, cleanPayload);
+
+        // Actualizar caché local
+        try {
+          const cached = (formData.participantes || []).filter(p => !p.virtual);
+          localStorage.setItem(`event_hydra_${event.id}`, JSON.stringify({ participantes: cached, cacheTime: Date.now() }));
+        } catch (_) { /* no crítico */ }
       }
-      
+
       notification.success('Cambios guardados correctamente');
       setIsEditing(false);
       if (onSuccess) onSuccess();
