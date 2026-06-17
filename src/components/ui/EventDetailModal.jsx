@@ -585,7 +585,7 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
               </div>
 
               {/* ACCIONES DE SERIE RECURRENTE */}
-              {event.idGrupoRecurrencia && !isEditing && (
+              {event.idGrupoRecurrencia && event.esPrincipal && !isEditing && (
                 <div style={{ marginBottom: '20px', padding: '15px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', color: '#64748b', fontSize: '12px', fontWeight: 'bold' }}>
                     <Calendar size={14} /> ACCIONES DE TODA LA SERIE
