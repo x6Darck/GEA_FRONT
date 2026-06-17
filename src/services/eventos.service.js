@@ -136,6 +136,10 @@ export const updateEvento = async (id, evento) => {
   return await api.put(`/oficina/solicitudes-evento/${id}`, evento);
 };
 
+export const updateEventoSerie = async (idGrupo, payload) => {
+  return await api.put(`/oficina/solicitudes-evento/serie/${idGrupo}`, payload);
+};
+
 export const publicarEvento = async (id, publicacionPayload) => {
   return await api.post(`/comunicaciones/solicitudes-evento/${id}/publicar`, publicacionPayload);
 };

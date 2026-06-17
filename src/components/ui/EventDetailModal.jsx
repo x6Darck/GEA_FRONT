@@ -51,6 +51,7 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
     loadingAction, manageLoading, publishing,
     rejecting, setRejecting, rejectReason, setRejectReason,
     publishFile, setPublishFile, publishFilePreview, setPublishFilePreview, localVisible,
+    aplicarASerie, setAplicarASerie,
     handleStatusUpdate, handleSaveEdition, handleToggleVisibility, handleDelete, handlePublish,
     handleSerieAction, handlePublishSerie
   } = useEventManagement(event, onSuccess, onClose);
@@ -663,8 +664,45 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
                       setPublishFilePreview(event.piezaGraficaUrl || null);
                       setPublishFile(null);
                   }} className={styles.btnSecondary} style={{ flex: 1, padding: '14px' }}>Descartar cambios</button>
-                  <button onClick={handleSaveEdition} disabled={manageLoading} className={styles.btnDanger} style={{ flex: 1, padding: '14px' }}>Guardar Cambios</button>
+                  <button
+                    onClick={handleSaveEdition}
+                    disabled={manageLoading}
+                    className={styles.btnDanger}
+                    style={{ flex: 1, padding: '14px' }}
+                  >
+                    {manageLoading ? 'Guardando...' : aplicarASerie ? 'Guardar en toda la serie' : 'Guardar solo este evento'}
+                  </button>
                 </div>
+                {event.esPrincipal && event.idGrupoRecurrencia && (
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+                    <button
+                      onClick={() => setAplicarASerie(false)}
+                      style={{
+                        flex: 1, padding: '10px', borderRadius: '10px', fontSize: '12px', fontWeight: 'bold',
+                        cursor: 'pointer', border: '2px solid',
+                        borderColor: !aplicarASerie ? '#ce1126' : '#e2e8f0',
+                        background: !aplicarASerie ? '#fff1f2' : '#f8fafc',
+                        color: !aplicarASerie ? '#ce1126' : '#64748b',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      Solo este evento
+                    </button>
+                    <button
+                      onClick={() => setAplicarASerie(true)}
+                      style={{
+                        flex: 1, padding: '10px', borderRadius: '10px', fontSize: '12px', fontWeight: 'bold',
+                        cursor: 'pointer', border: '2px solid',
+                        borderColor: aplicarASerie ? '#ce1126' : '#e2e8f0',
+                        background: aplicarASerie ? '#fff1f2' : '#f8fafc',
+                        color: aplicarASerie ? '#ce1126' : '#64748b',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      Aplicar a toda la serie
+                    </button>
+                  </div>
+                )}
               )}
             </div>
           )}

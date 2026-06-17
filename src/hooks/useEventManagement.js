@@ -1,10 +1,11 @@
 import { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { 
-  publicarEvento, 
-  toggleVisibilidadEvento, 
-  deleteEvento, 
+import {
+  publicarEvento,
+  toggleVisibilidadEvento,
+  deleteEvento,
   updateEvento,
+  updateEventoSerie,
   updatePublicacionEvento,
   aprobarSerie,
   publicarSerie,
@@ -43,6 +44,9 @@ export const useEventManagement = (event, onSuccess, onClose) => {
     frecuenciaRecurrencia: 'NINGUNA',
     fechaFinRecurrencia: '',
   });
+
+  // Serie recurrente: aplicar cambios a toda la serie o solo a esta iteración
+  const [aplicarASerie, setAplicarASerie] = useState(false);
 
   // Media states
   const [publishFile, setPublishFile] = useState(null);
@@ -192,7 +196,11 @@ export const useEventManagement = (event, onSuccess, onClose) => {
             horaInicio: formData.horaInicio && formData.horaInicio !== '-' ? formData.horaInicio : null,
             horaFin: formData.horaFin && formData.horaFin !== '-' ? formData.horaFin : null
         };
-        await updateEvento(event.id, cleanPayload);
+        if (aplicarASerie && event.esPrincipal && event.idGrupoRecurrencia) {
+          await updateEventoSerie(event.idGrupoRecurrencia, cleanPayload);
+        } else {
+          await updateEvento(event.id, cleanPayload);
+        }
 
         // Actualizar caché local
         try {
@@ -320,6 +328,7 @@ export const useEventManagement = (event, onSuccess, onClose) => {
     loadingAction, manageLoading, publishing,
     rejecting, setRejecting, rejectReason, setRejectReason,
     publishFile, setPublishFile, publishFilePreview, setPublishFilePreview, localVisible,
+    aplicarASerie, setAplicarASerie,
     handleStatusUpdate, handleSaveEdition, handleToggleVisibility,
     handleDelete, handlePublish,
     handleSerieAction, handlePublishSerie
