@@ -35,7 +35,7 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
 
       const [tipos, ofis, lugs] = await Promise.allSettled([
         getTiposEvento(),
-        isPrivileged ? getOficinas() : Promise.resolve([]),
+        isPrivileged ? getOficinas({ skipGlobalError: true }) : Promise.resolve([]),
         lugarFisicoService.getLugaresFisicos()
       ]);
       if (tipos.status === 'fulfilled') setTiposEvento(Array.isArray(tipos.value) ? tipos.value : []);
@@ -628,6 +628,7 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
                   <Edit2 size={18} /> Actualizar Información Pública
                 </button>
               ) : (
+                <>
                 <div style={{ display: 'flex', gap: '12px' }}>
                   <button onClick={() => {
                       setIsEditing(false);
@@ -647,6 +648,8 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
                         horaInicio: event.horaInicio || '',
                         horaFin: event.horaFin || '',
                         lugar: event.lugar || '',
+                        lugares: event.lugares || [],
+                        idsLugaresFisicos: event.idsLugaresFisicos || [],
                         linkConexion: event.linkConexion || '',
                         tipoEvento: event.tipoEvento || '',
                         office: event.oficinaNombre || event.office || '',
@@ -670,7 +673,12 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
                     className={styles.btnDanger}
                     style={{ flex: 1, padding: '14px' }}
                   >
-                    {manageLoading ? 'Guardando...' : aplicarASerie ? 'Guardar en toda la serie' : 'Guardar solo este evento'}
+                    {manageLoading
+                      ? 'Guardando...'
+                      : (event.esPrincipal && event.idGrupoRecurrencia)
+                        ? (aplicarASerie ? 'Guardar en toda la serie' : 'Guardar solo este evento')
+                        : 'Guardar Cambios'
+                    }
                   </button>
                 </div>
                 {event.esPrincipal && event.idGrupoRecurrencia && (
@@ -703,6 +711,7 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
                     </button>
                   </div>
                 )}
+                </>
               )}
             </div>
           )}
