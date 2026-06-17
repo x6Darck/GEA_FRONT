@@ -81,7 +81,7 @@ const Events = () => {
 
     try {
       // Usar skipGlobalError para evitar que el interceptor muestre errores si falla esta carga secundaria
-      const users = await getUsuarios({ skipGlobalError: true });
+      const users = await getUsuarios({}, { skipGlobalError: true });
       const map = {};
       users.forEach(u => {
         map[u.email] = `${u.nombres} ${u.apellidos || ''}`.trim();
