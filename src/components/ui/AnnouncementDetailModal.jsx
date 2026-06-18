@@ -78,6 +78,7 @@ const AnnouncementDetailModal = ({ isOpen, onClose, announcement, onSuccess, isR
   const canReview = isAdmin && status === 'PENDIENTE';
   const canPublish = isAdmin && status === 'APROBADA';
   const canManage = isAdmin && (status === 'PUBLICADA' || status === 'APROBADA');
+  const canEditOwn = !isAdmin && !isReadOnly && ['PENDIENTE', 'RECHAZADA', 'EN_REVISION'].includes(status);
 
   const formatTime12h = (time) => {
     if (!time) return '—';
@@ -599,6 +600,42 @@ const AnnouncementDetailModal = ({ isOpen, onClose, announcement, onSuccess, isR
                   className={styles.btnDanger} style={{ flex: 1, padding: '14px', boxShadow: '0 8px 20px rgba(30,41,59,0.2)' }}
                 >
                   {manageLoading ? 'Guardando...' : 'Guardar Cambios'}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Panel de edición para oficina (PENDIENTE / RECHAZADA / EN_REVISION) */}
+        {canEditOwn && (
+          <div style={{ padding: '20px', border: '1px solid #e2e8f0', borderRadius: '12px', background: 'white' }}>
+            <h4 style={{ margin: '0 0 16px', fontSize: '14px', fontWeight: '700', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Edit2 size={16} color="#ce1126" /> Mi solicitud
+            </h4>
+            {!isEditing ? (
+              <button
+                onClick={() => setIsEditing(true)}
+                className={styles.btnSecondary}
+                style={{ width: '100%', padding: '14px', color: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
+              >
+                <Edit2 size={16} /> Editar y reenviar solicitud
+              </button>
+            ) : (
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className={styles.btnSecondary}
+                  style={{ flex: 1, padding: '14px' }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleSaveEdition}
+                  disabled={manageLoading}
+                  className={styles.btnPrimary}
+                  style={{ flex: 1, padding: '14px', background: 'linear-gradient(135deg, #ce1126 0%, #a50e1f 100%)' }}
+                >
+                  {manageLoading ? 'Guardando...' : 'Guardar y reenviar'}
                 </button>
               </div>
             )}

@@ -449,7 +449,7 @@ const Events = () => {
                         </td>
                         <td>
                           <span style={statusBadgeStyle(item)}>
-                            {(item.estado || item.status || '').toUpperCase().includes('PUBLICAD') && item.visible === false ? 'OCULTO' : (item.estado || item.status || 'PENDIENTE').toUpperCase()}
+                            {(() => { const s = (item.estado || item.status || 'PENDIENTE').toUpperCase(); if (s.includes('PUBLICAD') && item.visible === false) return 'OCULTO'; if (s === 'EN_REVISION') return 'En revisión'; return s; })()}
                           </span>
                         </td>
                         <td>
@@ -480,7 +480,7 @@ const Events = () => {
                           <td>-</td>
                           <td>
                             <span style={statusBadgeStyle(sub)}>
-                              {(sub.estado || sub.status || 'PENDIENTE').toUpperCase()}
+                              {(() => { const s = (sub.estado || sub.status || 'PENDIENTE').toUpperCase(); if (s === 'EN_REVISION') return 'En revisión'; return s; })()}
                             </span>
                           </td>
                           <td>

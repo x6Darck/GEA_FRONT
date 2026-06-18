@@ -430,7 +430,7 @@ const Announcements = () => {
                       </td>
                       <td>
                         <span style={statusBadgeStyle(item)}>
-                          {(item.estado || item.status || '').toUpperCase().includes('PUBLICAD') && item.visible === false ? 'OCULTO' : (item.estado || item.status || 'PENDIENTE').toUpperCase()}
+                          {(() => { const s = (item.estado || item.status || 'PENDIENTE').toUpperCase(); if (s.includes('PUBLICAD') && item.visible === false) return 'OCULTO'; if (s === 'EN_REVISION') return 'En revisión'; return s; })()}
                         </span>
                       </td>
                       <td><button className={styles.actionBtn}>Detalles</button></td>
