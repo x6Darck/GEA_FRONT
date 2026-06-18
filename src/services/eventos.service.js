@@ -80,6 +80,7 @@ export const mapEventoDTO = (evt) => {
     lugar: evt.lugar || '',
     responsable: evt.responsableEvento || evt.responsable || '',
     motivoRechazo: evt.motivoRechazo || null,
+    observacionesRevision: evt.observacionesRevision || null,
     participantes: normParticipantes,
     tipoEvento: evt.tipoEvento || '',
     tipoEventoColorHex: evt.tipoEventoColorHex || null,
@@ -166,6 +167,10 @@ export const aprobarEvento = async (id) => {
 
 export const rechazarEvento = async (id, payload) => {
   return await api.post(`/comunicaciones/solicitudes-evento/${id}/rechazar`, payload);
+};
+
+export const devolverEvento = async (id, payload) => {
+  return await api.post(`/comunicaciones/solicitudes-evento/${id}/devolver`, payload);
 };
 
 export const addParticipante = async (eventoId, participante) => {

@@ -17,6 +17,7 @@ export const mapAnuncioDTO = (item) => ({
   piezaGraficaUrl: item.piezaGraficaUrl || null,
   status: item.estado || item.status || 'PENDIENTE',
   motivoRechazo: item.motivoRechazo || null,
+  observacionesRevision: item.observacionesRevision || null,
   visible: item.visible,
   fechaCreacion: item.fechaCreacion || null,
   oficina: item.oficinaNombre || item.oficina || '',
@@ -55,6 +56,10 @@ export const aprobarAnuncio = async (id) => {
 
 export const rechazarAnuncio = async (id, payload) => {
   return await api.post(`/comunicaciones/solicitudes-anuncio/${id}/rechazar`, payload);
+};
+
+export const devolverAnuncio = async (id, payload) => {
+  return await api.post(`/comunicaciones/solicitudes-anuncio/${id}/devolver`, payload);
 };
 
 export const publicarAnuncio = async (id, payload) => {
