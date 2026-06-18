@@ -27,15 +27,15 @@ const App = () => {
               <Route path="/galeria-anuncios" element={<ErrorBoundary><PublicAnnouncements /></ErrorBoundary>} />
               <Route index element={<Navigate to="/calendario" replace />} />
 
-              <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN', 'ADMIN', 'COMUNICACIONES', 'OFICINA']} />}>
+              <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN', 'ADMIN', 'COMUNICACIONES', 'OFICINA', 'CONSULTORIA']} />}>
                 <Route path="/eventos" element={<ErrorBoundary><Events /></ErrorBoundary>} />
               </Route>
 
-              <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN', 'ADMIN', 'COMUNICACIONES', 'OFICINA', 'USUARIO_AUTENTICADO_APP']} />}>
+              <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN', 'ADMIN', 'COMUNICACIONES', 'OFICINA', 'USUARIO_AUTENTICADO_APP', 'CONSULTORIA']} />}>
                 <Route path="/anuncios" element={<ErrorBoundary><Announcements /></ErrorBoundary>} />
               </Route>
 
-              <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN', 'ADMIN', 'COMUNICACIONES', 'OFICINA']} />}>
+              <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN', 'ADMIN', 'COMUNICACIONES', 'OFICINA', 'CONSULTORIA']} />}>
                 <Route path="/reportes" element={<ErrorBoundary><Reports /></ErrorBoundary>} />
               </Route>
 

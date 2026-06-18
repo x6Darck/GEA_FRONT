@@ -2,8 +2,9 @@ export const ROLE_ORDER = {
   'Super Administrador': 1,
   'SuperAdmin': 1,
   'Comunicaciones': 2,
-  'Usuario Autenticado': 3,
-  'Oficina': 4,
+  'Consultoria': 3,
+  'Usuario Autenticado': 4,
+  'Oficina': 5,
   'Otros': 99
 };
 

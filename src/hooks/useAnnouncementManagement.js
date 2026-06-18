@@ -1,11 +1,12 @@
 import { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { 
-  publicarAnuncio, 
-  toggleVisibilidadAnuncio, 
-  deleteAnuncio, 
+import {
+  publicarAnuncio,
+  toggleVisibilidadAnuncio,
+  deleteAnuncio,
   updateAnuncio,
-  updatePublicacionAnuncio
+  updatePublicacionAnuncio,
+  devolverAnuncio
 } from '../services/anuncios.service';
 import { uploadArchivo } from '../services/archivos.service';
 import api from '../services/api';
@@ -21,6 +22,8 @@ export const useAnnouncementManagement = (announcement, onSuccess, onClose) => {
   const [publishing, setPublishing] = useState(false);
   const [rejecting, setRejecting] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
+  const [reviewing, setReviewing] = useState(false);
+  const [reviewObservations, setReviewObservations] = useState('');
 
   // Form fields
   const [formData, setFormData] = useState({
@@ -90,11 +93,20 @@ export const useAnnouncementManagement = (announcement, onSuccess, onClose) => {
     if (type === 'Rechazar' && (!rejectReason || rejectReason.trim() === '')) {
       alert('Por favor, ingrese un motivo de rechazo.'); return;
     }
+    if (type === 'Devolver' && !reviewing) { setReviewing(true); return; }
+    if (type === 'Devolver' && (!reviewObservations || reviewObservations.trim() === '')) {
+      alert('Por favor, ingrese las observaciones para la oficina.'); return;
+    }
     setLoadingAction(true);
     try {
       if (type === 'Aprobar') {
         await api.post(`/comunicaciones/solicitudes-anuncio/${announcement.id}/aprobar`);
         notification.success('Anuncio aprobado correctamente');
+      } else if (type === 'Devolver') {
+        await devolverAnuncio(announcement.id, { observaciones: reviewObservations });
+        setReviewing(false);
+        setReviewObservations('');
+        notification.success('Solicitud devuelta para revisión');
       } else {
         await api.post(`/comunicaciones/solicitudes-anuncio/${announcement.id}/rechazar`, { motivo: rejectReason });
         notification.success('Anuncio rechazado');
@@ -232,6 +244,7 @@ export const useAnnouncementManagement = (announcement, onSuccess, onClose) => {
     isEditing, setIsEditing, formData, setFormData, handleInputChange,
     loadingAction, manageLoading, publishing,
     rejecting, setRejecting, rejectReason, setRejectReason,
+    reviewing, setReviewing, reviewObservations, setReviewObservations,
     publishFile, setPublishFile, publishFilePreview, setPublishFilePreview, localVisible,
     handleStatusUpdate, handleSaveEdition, handleToggleVisibility, handleDelete, handlePublish
   };

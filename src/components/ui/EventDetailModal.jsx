@@ -50,6 +50,7 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
     isEditing, setIsEditing, formData, setFormData, handleInputChange,
     loadingAction, manageLoading, publishing,
     rejecting, setRejecting, rejectReason, setRejectReason,
+    reviewing, setReviewing, reviewObservations, setReviewObservations,
     publishFile, setPublishFile, publishFilePreview, setPublishFilePreview, localVisible,
     aplicarASerie, setAplicarASerie,
     handleStatusUpdate, handleSaveEdition, handleToggleVisibility, handleDelete, handlePublish,
@@ -121,7 +122,8 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
     PENDIENTE: { label: 'En Revisión', color: '#f59e0b', bg: '#fffbeb', border: '#fef3c7', text: '#d97706' },
     APROBADA: { label: 'Aprobada', color: '#10b981', bg: '#f0fdf4', border: '#dcfce7', text: '#059669' },
     RECHAZADA: { label: 'Rechazada', color: '#ef4444', bg: '#fef2f2', border: '#fee2e2', text: '#dc2626' },
-    PUBLICADA: { label: 'Evento Publicado', color: '#0ea5e9', bg: '#f0f9ff', border: '#e0f2fe', text: '#0284c7' }
+    PUBLICADA: { label: 'Evento Publicado', color: '#0ea5e9', bg: '#f0f9ff', border: '#e0f2fe', text: '#0284c7' },
+    EN_REVISION: { label: 'Devuelto para corrección', color: '#8b5cf6', bg: '#faf5ff', border: '#ede9fe', text: '#7c3aed' }
   }[status] || { label: status, color: '#64748b', bg: '#f8fafc', border: '#e2e8f0', text: '#475569' };
 
   const renderField = (label, value, isEditingLocal, fieldName, type = 'text', icon = null, forceReadOnly = false) => {
@@ -229,6 +231,16 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
             </div>
           )}
         </div>
+
+        {/* Banner observaciones de revisión */}
+        {event.observacionesRevision && (
+          <div style={{ margin: '16px 0 0', padding: '14px 18px', borderRadius: '12px', background: '#faf5ff', border: '1px solid #ede9fe' }}>
+            <div style={{ fontSize: '12px', fontWeight: '700', color: '#7c3aed', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <AlertCircle size={14} /> Observaciones del moderador
+            </div>
+            <p style={{ margin: 0, fontSize: '14px', color: '#1e293b', lineHeight: '1.6' }}>{event.observacionesRevision}</p>
+          </div>
+        )}
 
         {/* ── SECCIÓN HERO: PIEZA GRÁFICA / INVITACIÓN ── */}
         {status === 'PUBLICADA' && (
@@ -516,19 +528,48 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
               {rejecting && (
                 <div style={{ marginBottom: '16px' }}>
                   <label className={styles.fieldLabel}>Motivo del Rechazo</label>
-                  <textarea 
-                    value={rejectReason} 
-                    onChange={e => setRejectReason(e.target.value)} 
-                    placeholder="Indique las razones..." 
-                    className={styles.inputField} 
-                    style={{ minHeight: '80px' }} 
+                  <textarea
+                    value={rejectReason}
+                    onChange={e => setRejectReason(e.target.value)}
+                    placeholder="Indique las razones..."
+                    className={styles.inputField}
+                    style={{ minHeight: '80px' }}
+                  />
+                </div>
+              )}
+              {reviewing && (
+                <div style={{ marginBottom: '16px' }}>
+                  <label className={styles.fieldLabel}>Observaciones para la oficina</label>
+                  <textarea
+                    value={reviewObservations}
+                    onChange={e => setReviewObservations(e.target.value)}
+                    placeholder="Describa qué debe corregir la oficina antes de reenviar..."
+                    className={styles.inputField}
+                    style={{ minHeight: '80px' }}
                   />
                 </div>
               )}
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-                <button onClick={() => setRejecting(false)} style={{ display: rejecting ? 'block' : 'none' }} className={styles.btnSecondary}>Volver</button>
-                <button onClick={() => handleStatusUpdate('Rechazar')} disabled={loadingAction} className={styles.btnDanger}>{rejecting ? 'Confirmar Rechazo' : 'Rechazar Solicitud'}</button>
-                {!rejecting && <button onClick={() => handleStatusUpdate('Aprobar')} disabled={loadingAction} className={styles.btnPrimary} style={{ background: 'linear-gradient(135deg, #ce1126 0%, #a50e1f 100%)' }}>Aprobar Solicitud</button>}
+                {(rejecting || reviewing) && (
+                  <button onClick={() => { setRejecting(false); setReviewing(false); }} className={styles.btnSecondary}>Volver</button>
+                )}
+                {!reviewing && (
+                  <button onClick={() => handleStatusUpdate('Rechazar')} disabled={loadingAction} className={styles.btnDanger}>
+                    {rejecting ? 'Confirmar Rechazo' : 'Rechazar Solicitud'}
+                  </button>
+                )}
+                {!rejecting && (
+                  <button
+                    onClick={() => handleStatusUpdate('Devolver')}
+                    disabled={loadingAction}
+                    style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)', color: 'white', border: 'none', borderRadius: '8px', padding: '10px 20px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}
+                  >
+                    {reviewing ? 'Confirmar Devolución' : 'En revisión'}
+                  </button>
+                )}
+                {!rejecting && !reviewing && (
+                  <button onClick={() => handleStatusUpdate('Aprobar')} disabled={loadingAction} className={styles.btnPrimary} style={{ background: 'linear-gradient(135deg, #ce1126 0%, #a50e1f 100%)' }}>Aprobar Solicitud</button>
+                )}
               </div>
             </div>
           )}

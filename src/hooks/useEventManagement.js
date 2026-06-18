@@ -9,7 +9,8 @@ import {
   updatePublicacionEvento,
   aprobarSerie,
   publicarSerie,
-  eliminarSerie
+  eliminarSerie,
+  devolverEvento
 } from '../services/eventos.service';
 import { uploadArchivo } from '../services/archivos.service';
 import api from '../services/api';
@@ -25,6 +26,8 @@ export const useEventManagement = (event, onSuccess, onClose) => {
   const [publishing, setPublishing] = useState(false);
   const [rejecting, setRejecting] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
+  const [reviewing, setReviewing] = useState(false);
+  const [reviewObservations, setReviewObservations] = useState('');
 
   // Form fields
   const [formData, setFormData] = useState({
@@ -103,11 +106,20 @@ export const useEventManagement = (event, onSuccess, onClose) => {
     if (type === 'Rechazar' && (!rejectReason || rejectReason.trim() === '')) {
       alert('Por favor, ingrese un motivo de rechazo.'); return;
     }
+    if (type === 'Devolver' && !reviewing) { setReviewing(true); return; }
+    if (type === 'Devolver' && (!reviewObservations || reviewObservations.trim() === '')) {
+      alert('Por favor, ingrese las observaciones para la oficina.'); return;
+    }
     setLoadingAction(true);
     try {
       if (type === 'Aprobar') {
         await api.post(`/comunicaciones/solicitudes-evento/${event.id}/aprobar`);
         notification.success('Evento aprobado correctamente');
+      } else if (type === 'Devolver') {
+        await devolverEvento(event.id, { observaciones: reviewObservations });
+        setReviewing(false);
+        setReviewObservations('');
+        notification.success('Solicitud devuelta para revisión');
       } else {
         await api.post(`/comunicaciones/solicitudes-evento/${event.id}/rechazar`, { motivo: rejectReason });
         notification.success('Evento rechazado');
@@ -327,6 +339,7 @@ export const useEventManagement = (event, onSuccess, onClose) => {
     isEditing, setIsEditing, formData, setFormData, handleInputChange,
     loadingAction, manageLoading, publishing,
     rejecting, setRejecting, rejectReason, setRejectReason,
+    reviewing, setReviewing, reviewObservations, setReviewObservations,
     publishFile, setPublishFile, publishFilePreview, setPublishFilePreview, localVisible,
     aplicarASerie, setAplicarASerie,
     handleStatusUpdate, handleSaveEdition, handleToggleVisibility,

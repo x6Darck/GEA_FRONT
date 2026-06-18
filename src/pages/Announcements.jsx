@@ -294,6 +294,7 @@ const Announcements = () => {
     if (status.includes('PUBLICAD')) return { ...base, backgroundColor: '#dcfce7', color: '#16a34a' };
     if (status.includes('APROBAD')) return { ...base, backgroundColor: '#dbeafe', color: '#1d4ed8' };
     if (status.includes('RECHAZAD')) return { ...base, backgroundColor: '#fee2e2', color: '#dc2626' };
+    if (status === 'EN_REVISION') return { ...base, backgroundColor: '#ede9fe', color: '#7c3aed' };
     return { ...base, backgroundColor: '#fef9c3', color: '#814e07' };
   };
 
@@ -306,6 +307,7 @@ const Announcements = () => {
     { key: 'APROBADA',          label: 'Aprobados' },
     { key: 'PENDIENTE',         label: 'Pendientes' },
     { key: 'RECHAZADA',         label: 'Rechazados' },
+    { key: 'EN_REVISION',       label: 'En revisión' },
   ];
 
   const filteredData = useMemo(() => {
