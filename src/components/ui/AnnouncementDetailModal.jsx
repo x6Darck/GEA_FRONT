@@ -78,7 +78,7 @@ const AnnouncementDetailModal = ({ isOpen, onClose, announcement, onSuccess, isR
   const canReview = isAdmin && status === 'PENDIENTE';
   const canPublish = isAdmin && status === 'APROBADA';
   const canManage = isAdmin && (status === 'PUBLICADA' || status === 'APROBADA');
-  const canEditOwn = !isAdmin && !isReadOnly && ['PENDIENTE', 'RECHAZADA', 'EN_REVISION'].includes(status);
+  const canEditOwn = !isAdmin && !isReadOnly && ['RECHAZADA', 'EN_REVISION'].includes(status);
 
   const formatTime12h = (time) => {
     if (!time) return '—';
