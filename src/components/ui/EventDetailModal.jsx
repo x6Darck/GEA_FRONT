@@ -109,7 +109,7 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
   const canReview = isAdmin && status === 'PENDIENTE';
   const canPublish = isAdmin && status === 'APROBADA';
   const canManage = isAdmin && (status === 'PUBLICADA' || status === 'APROBADA');
-  const canEditOwn = !isAdmin && ['RECHAZADA', 'EN_REVISION'].includes(status);
+  const canEditOwn = !isAdmin && status === 'EN_REVISION';
 
   const handlePublishFileChange = (e) => {
     const file = e.target.files?.[0];
