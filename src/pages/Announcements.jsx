@@ -353,22 +353,22 @@ const Announcements = () => {
       </div>
       
       <div className="card">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '20px' }}>
-          <div className={styles.searchBar} style={{ width: '100%', position: 'relative' }}>
-            <input type="text" placeholder="Buscar anuncios por título, categoría o responsable..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} style={{ width: '100%', padding: '12px 14px 12px 42px', borderRadius: '10px' }} />
-            <Search size={20} className={styles.searchIcon} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}/>
+        <div className={styles.filterToolbar}>
+          <div style={{ position: 'relative' }}>
+            <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
+            <input type="text" placeholder="Buscar anuncios por título, categoría o responsable..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className={styles.searchInput} />
           </div>
-          
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center' }}>
-            <select className={styles.monthSelect} value={dateFilter} onChange={e => setDateFilter(e.target.value)} style={{ minWidth: '180px', height: '40px', borderRadius: '8px' }}>
+          <div className={styles.filterRow}>
+            <select className={styles.filterSelect} value={dateFilter} onChange={e => setDateFilter(e.target.value)}>
               {DATE_FILTERS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
             </select>
-            <div className={styles.tabs} style={{ flex: 1, justifyContent: 'flex-start' }}>
-               {TABS.map(tab => (
-                 <button key={tab.key} className={`${styles.tabBtn} ${activeTab === tab.key ? styles.active : ''}`} onClick={() => setActiveTab(tab.key)}>
-                   {tab.label}
-                 </button>
-               ))}
+            <div className={styles.filterDivider} />
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+              {TABS.map(tab => (
+                <button key={tab.key} className={`${styles.tabBtn} ${activeTab === tab.key ? styles.active : ''}`} onClick={() => setActiveTab(tab.key)}>
+                  {tab.label}
+                </button>
+              ))}
             </div>
           </div>
         </div>
@@ -452,100 +452,174 @@ const Announcements = () => {
         </div>
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Crear Solicitud de Anuncio" style={{ maxWidth: '750px', width: '95%' }} bodyStyle={{ padding: '24px 32px' }}>
-        <div style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', transform: 'translateZ(0)' }}>
-          <form onSubmit={handleCreateSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <div style={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px' }}>
-              <h3 style={{ margin: '0 0 16px 0', fontSize: '15px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
-                <Info size={16} color="#ce1126" /> Información General
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Crear Nueva Solicitud de Anuncio" style={{ maxWidth: '860px', width: '95%' }} bodyStyle={{ padding: '32px', backgroundColor: '#fdfdfe' }}>
+        <div style={{ paddingRight: '12px', WebkitOverflowScrolling: 'touch', transform: 'translateZ(0)' }}>
+          <form onSubmit={handleCreateSubmit} style={{ display: 'flex', flexDirection: 'column' }}>
+
+            {/* SECCIÓN 1: INFO GENERAL */}
+            <div style={{ background: '#fff', border: '1px solid #f1f5f9', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', marginBottom: '20px' }}>
+              <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', fontWeight: '800', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
+                <div style={{ padding: '8px', borderRadius: '10px', background: '#fff1f2', display: 'flex' }}><Info size={20} color="#ce1126" /></div>
+                Información del Anuncio
               </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <input type="text" name="titulo" value={formData.titulo} onChange={handleInputChange} required style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1' }} placeholder="Título..." />
-                <textarea name="descripcion" value={formData.descripcion} onChange={handleInputChange} rows="3" required style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1' }} placeholder="Descripción..." />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <label style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Título del Anuncio <span style={{ color: '#ce1126' }}>*</span>
+                  </label>
+                  <input type="text" name="titulo" value={formData.titulo} onChange={handleInputChange} required style={{ padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '14px', width: '100%', backgroundColor: '#fff', color: '#1e293b', outline: 'none', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }} placeholder="Ej: Bienvenida a nuevos estudiantes..." />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <label style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Descripción Detallada <span style={{ color: '#ce1126' }}>*</span>
+                  </label>
+                  <textarea name="descripcion" value={formData.descripcion} onChange={handleInputChange} rows="3" required style={{ padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '14px', width: '100%', backgroundColor: '#fff', color: '#1e293b', outline: 'none', boxShadow: '0 1px 2px rgba(0,0,0,0.02)', resize: 'vertical' }} placeholder="Describe el contenido y propósito del anuncio..." />
+                </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <label htmlFor="ann-lugares" style={{ fontSize: '12px', fontWeight: 'bold' }}>Lugares Físicos (Opcional)</label>
-                    <select
-                      id="ann-lugares"
-                      style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
-                      onChange={(e) => {
-                        const id = parseInt(e.target.value);
-                        if (!id) return;
-                        if (!formData.idsLugaresFisicos.includes(id)) {
-                          setFormData({...formData, idsLugaresFisicos: [...formData.idsLugaresFisicos, id]});
-                        }
-                        e.target.value = "";
-                      }}
-                    >
-                      <option value="">Añadir lugar...</option>
-                      {lugaresFisicos.map(l => (
-                        <option key={l.id} value={l.id} disabled={formData.idsLugaresFisicos.includes(l.id)}>
-                          {l.nombre}
-                        </option>
-                      ))}
-                    </select>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                      {formData.idsLugaresFisicos.map(id => {
-                        const lug = lugaresFisicos.find(l => l.id === id);
-                        return (
-                          <div key={id} style={{ background: '#f1f5f9', padding: '4px 10px', borderRadius: '16px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px', border: '1px solid #e2e8f0' }}>
-                            <MapPin size={12}/> {lug?.nombre || 'Cargando...'}
-                            <button type="button" onClick={() => setFormData({...formData, idsLugaresFisicos: formData.idsLugaresFisicos.filter(iid => iid !== id)})} style={{ border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex' }}>
-                              <X size={12} color="#ce1126" />
-                            </button>
-                          </div>
-                        );
-                      })}
+                  <label style={{ fontSize: '12px', color: '#64748b', marginBottom: '0', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    <MapPin size={14} /> Lugares Físicos (Opcional)
+                  </label>
+                  <select
+                    id="ann-lugares"
+                    style={{ padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '14px', backgroundColor: '#fff', color: '#1e293b', outline: 'none' }}
+                    onChange={(e) => {
+                      const id = parseInt(e.target.value);
+                      if (!id) return;
+                      if (!formData.idsLugaresFisicos.includes(id)) {
+                        setFormData({...formData, idsLugaresFisicos: [...formData.idsLugaresFisicos, id]});
+                      }
+                      e.target.value = "";
+                    }}
+                  >
+                    <option value="">Añadir un lugar...</option>
+                    {lugaresFisicos.map(l => (
+                      <option key={l.id} value={l.id} disabled={formData.idsLugaresFisicos.includes(l.id)}>
+                        {l.nombre}
+                      </option>
+                    ))}
+                  </select>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', minHeight: '32px' }}>
+                    {formData.idsLugaresFisicos.length === 0 && (
+                      <span style={{ fontSize: '12px', color: '#94a3b8', fontStyle: 'italic' }}>Ningún lugar seleccionado</span>
+                    )}
+                    {formData.idsLugaresFisicos.map(id => {
+                      const lug = lugaresFisicos.find(l => l.id === id);
+                      return (
+                        <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#f1f5f9', padding: '4px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: '600', border: '1px solid #e2e8f0' }}>
+                          <MapPin size={12} /> {lug?.nombre || 'Cargando...'}
+                          <button type="button" onClick={() => setFormData({...formData, idsLugaresFisicos: formData.idsLugaresFisicos.filter(iid => iid !== id)})} style={{ border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', padding: '2px' }}>
+                            <X size={12} color="#ce1126" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <label style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      <Mail size={14} /> Correo de Contacto
+                    </label>
+                    <div style={{ padding: '12px 16px', borderRadius: '12px', border: '1px solid #f1f5f9', fontSize: '14px', backgroundColor: '#f8fafc', color: '#64748b', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <Mail size={16} /> {formData.correoContacto || 'Sin correo registrado'}
                     </div>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                    <input type="email" name="correoContacto" value={formData.correoContacto} readOnly placeholder="Correo de Contacto..." style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', backgroundColor: '#f8fafc', color: '#64748b' }} title="Tu correo institucional" />
-                    <input type="text" name="responsableAnuncio" value={formData.responsableAnuncio} onChange={handleInputChange} required placeholder="Nombre del Responsable..." style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1' }} />
-                </div>
-              </div>
-            </div>
-            
-            <div style={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px' }}>
-              <h3 style={{ margin: '0 0 16px 0', fontSize: '15px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
-                <Calendar size={16} color="#ce1126" /> Logística
-              </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <label htmlFor="ann-fecha-inicio" style={{ fontSize: '12px', fontWeight: 'bold' }}>Fecha Inicio Publicación *</label>
-                  <input id="ann-fecha-inicio" type="date" name="fechaInicioPublicacion" value={formData.fechaInicioPublicacion} onChange={handleInputChange} required min={getTodayStr()} style={{ padding: '10px', borderRadius: '8px' }} />
-                  <label htmlFor="ann-fecha-fin" style={{ fontSize: '12px', fontWeight: 'bold' }}>Fecha Fin Publicación *</label>
-                  <input id="ann-fecha-fin" type="date" name="fechaFinPublicacion" value={formData.fechaFinPublicacion} onChange={handleInputChange} required min={formData.fechaInicioPublicacion || getTodayStr()} style={{ padding: '10px', borderRadius: '8px' }} />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <label style={{ fontSize: '12px', fontWeight: 'bold' }}>Hora Inicio Publicación</label>
-                  <AmPmTimePicker value={formData.horaInicio} onChange={(e) => setFormData({...formData, horaInicio: e.target.value})} />
-                  <label style={{ fontSize: '12px', fontWeight: 'bold' }}>Hora Fin Publicación</label>
-                  <AmPmTimePicker value={formData.horaFin} onChange={(e) => setFormData({...formData, horaFin: e.target.value})} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <label style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      <User size={14} /> Responsable <span style={{ color: '#ce1126' }}>*</span>
+                    </label>
+                    <input type="text" name="responsableAnuncio" value={formData.responsableAnuncio} onChange={handleInputChange} required style={{ padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '14px', backgroundColor: '#fff', color: '#1e293b', outline: 'none', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }} placeholder="Nombre del responsable del anuncio..." />
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div style={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px' }}>
-              <div onClick={() => document.getElementById('new-file').click()} style={{ border: '2px dashed #cbd5e1', borderRadius: '12px', padding: '40px', textAlign: 'center', cursor: 'pointer', opacity: formData.requierePiezaGrafica ? 0.5 : 1 }}>
-                {filePreview ? <img src={filePreview} style={{ maxHeight: '200px' }} /> : <div>{formData.requierePiezaGrafica ? 'Opcional: Subir referencia' : 'Haz clic para subir imagen'}</div>}
+            {/* SECCIÓN 2: VIGENCIA */}
+            <div style={{ background: '#fff', border: '1px solid #f1f5f9', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', marginBottom: '20px' }}>
+              <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', fontWeight: '800', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
+                <div style={{ padding: '8px', borderRadius: '10px', background: '#f0fdf4', display: 'flex' }}><Calendar size={20} color="#16a34a" /></div>
+                Vigencia de Publicación
+              </h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '32px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <label style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      Fecha de Inicio <span style={{ color: '#ce1126' }}>*</span>
+                    </label>
+                    <input id="ann-fecha-inicio" type="date" name="fechaInicioPublicacion" value={formData.fechaInicioPublicacion} onChange={handleInputChange} required min={getTodayStr()} style={{ padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '14px', backgroundColor: '#fff', color: '#1e293b', outline: 'none', width: 'fit-content' }} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <label style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      Fecha de Fin <span style={{ color: '#ce1126' }}>*</span>
+                    </label>
+                    <input id="ann-fecha-fin" type="date" name="fechaFinPublicacion" value={formData.fechaFinPublicacion} onChange={handleInputChange} required min={formData.fechaInicioPublicacion || getTodayStr()} style={{ padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '14px', backgroundColor: '#fff', color: '#1e293b', outline: 'none', width: 'fit-content' }} />
+                  </div>
+                </div>
+                <div style={{ backgroundColor: '#f8fafc', padding: '24px', borderRadius: '16px', border: '1px solid #f1f5f9' }}>
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      <Clock size={14} /> Hora Inicio <span style={{ color: '#ce1126' }}>*</span>
+                    </label>
+                    <AmPmTimePicker value={formData.horaInicio} onChange={(e) => setFormData({...formData, horaInicio: e.target.value})} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      <Clock size={14} /> Hora Fin <span style={{ color: '#ce1126' }}>*</span>
+                    </label>
+                    <AmPmTimePicker value={formData.horaFin} onChange={(e) => setFormData({...formData, horaFin: e.target.value})} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* SECCIÓN 3: MATERIAL GRÁFICO */}
+            <div style={{ background: '#fff', border: '1px solid #f1f5f9', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', marginBottom: '20px' }}>
+              <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', fontWeight: '800', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
+                <div style={{ padding: '8px', borderRadius: '10px', background: '#f0f9ff', display: 'flex' }}><Upload size={20} color="#0284c7" /></div>
+                Material Gráfico
+              </h3>
+              <div
+                onClick={() => !formData.requierePiezaGrafica && document.getElementById('new-file').click()}
+                style={{ border: '2px dashed #e2e8f0', borderRadius: '12px', padding: '40px', textAlign: 'center', cursor: formData.requierePiezaGrafica ? 'default' : 'pointer', opacity: formData.requierePiezaGrafica ? 0.5 : 1, transition: 'border-color 0.2s' }}
+              >
+                {filePreview ? (
+                  <img src={filePreview} style={{ maxHeight: '200px', borderRadius: '8px' }} alt="Preview" />
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', color: '#94a3b8' }}>
+                    <Upload size={32} />
+                    <div>
+                      <p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: '#64748b' }}>
+                        {formData.requierePiezaGrafica ? 'Opcional: Subir referencia visual' : 'Haz clic para subir imagen'}
+                      </p>
+                      <p style={{ margin: '4px 0 0', fontSize: '12px' }}>PNG, JPG, GIF — máx. 5MB</p>
+                    </div>
+                  </div>
+                )}
                 <input id="new-file" type="file" hidden onChange={handleFileChange} />
               </div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '12px', cursor: 'pointer', padding: '10px', backgroundColor: formData.requierePiezaGrafica ? '#fff1f2' : 'transparent', borderRadius: '8px', border: formData.requierePiezaGrafica ? '1px solid #fecaca' : '1px solid transparent' }}>
-                <input 
-                  type="checkbox" 
-                  checked={formData.requierePiezaGrafica} 
-                  onChange={e => setFormData({...formData, requierePiezaGrafica: e.target.checked})}
-                  style={{ width: '18px', height: '18px' }}
-                />
-                <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#1e293b' }}>Solicitar creación de pieza gráfica a Comunicaciones</span>
+              <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginTop: '16px', cursor: 'pointer', padding: '9px 14px', background: formData.requierePiezaGrafica ? '#fff1f2' : '#f8fafc', borderRadius: '10px', border: `1px solid ${formData.requierePiezaGrafica ? '#fecaca' : '#e2e8f0'}`, fontSize: '12px', fontWeight: '600', color: formData.requierePiezaGrafica ? '#ce1126' : '#64748b', transition: 'all 0.15s' }}>
+                <input type="checkbox" style={{ accentColor: '#ce1126' }} checked={formData.requierePiezaGrafica} onChange={e => setFormData({...formData, requierePiezaGrafica: e.target.checked})} />
+                Solicitar pieza gráfica a Comunicaciones
               </label>
             </div>
 
-            <button type="submit" disabled={formLoading} style={{ padding: '16px', borderRadius: '12px', background: '#ce1126', color: 'white', fontWeight: 'bold', fontSize: '16px', opacity: formLoading ? 0.7 : 1, cursor: formLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-              {formLoading && <Spinner size="sm" />}
-              {formLoading
-                ? (publishStep === 1 ? 'Subiendo imagen...' : publishStep === 2 ? 'Procesando...' : publishStep === 3 ? 'Creando anuncio...' : publishStep === 4 ? '¡Listo!' : 'Procesando...')
-                : 'Enviar Solicitud'}
-            </button>
+            {/* FOOTER */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px', padding: '20px', backgroundColor: '#fff', borderRadius: '16px', border: '1px solid #f1f5f9' }}>
+              <div style={{ fontSize: '13px', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '500' }}>
+                <AlertCircle size={18} color="#ce1126" /> Verifica las fechas de vigencia antes de enviar.
+              </div>
+              <div style={{ display: 'flex', gap: '16px' }}>
+                <button type="button" onClick={() => setIsModalOpen(false)} style={{ padding: '12px 28px', borderRadius: '30px', backgroundColor: '#f1f5f9', color: '#475569', border: 'none', fontWeight: '800', cursor: 'pointer', fontSize: '14px' }}>
+                  Descartar
+                </button>
+                <button type="submit" disabled={formLoading} style={{ padding: '14px 40px', borderRadius: '30px', backgroundColor: '#1e293b', color: 'white', border: 'none', fontWeight: '800', cursor: formLoading ? 'not-allowed' : 'pointer', fontSize: '14px', boxShadow: '0 10px 20px rgba(30,41,59,0.2)' }}>
+                  {formLoading
+                    ? (publishStep === 1 ? 'Subiendo imagen...' : publishStep === 2 ? 'Procesando...' : publishStep === 3 ? 'Creando anuncio...' : publishStep === 4 ? '¡Listo!' : 'Procesando...')
+                    : 'Enviar Solicitud de Anuncio'}
+                </button>
+              </div>
+            </div>
+
           </form>
         </div>
       </Modal>

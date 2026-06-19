@@ -7,8 +7,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
-  padding: 1.5rem 0;
+  margin-bottom: 1rem;
+  padding: 0.5rem 0;
   border-bottom: 2px solid #f1f5f9;
 }
 
@@ -164,12 +164,88 @@
   box-shadow: 0 6px 15px rgba(206, 17, 38, 0.3);
 }
 
+.filterToolbar {
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 16px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 11px 16px 11px 44px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  font-size: 14px;
+  background: #fff;
+  color: #1e293b;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.searchInput:focus {
+  border-color: #ce1126;
+  box-shadow: 0 0 0 3px rgba(206, 17, 38, 0.08);
+}
+
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.filterSelect {
+  padding: 0 14px;
+  height: 36px;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #475569;
+  background: white;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.filterSelect:hover {
+  border-color: #cbd5e1;
+}
+
+.filterSelect:focus {
+  border-color: #1e293b;
+}
+
+.filterDivider {
+  width: 1px;
+  height: 20px;
+  background: #e2e8f0;
+  flex-shrink: 0;
+}
+
+.filterLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+/* Legacy */
 .controlsBar {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 12px;
+  margin-bottom: 0;
 }
 
 .searchBar {
@@ -178,21 +254,20 @@
   align-items: center;
   flex: 1;
   min-width: 280px;
-  background: #f8fafc;
+  background: white;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  transition: all 0.3s;
+  transition: all 0.2s;
 }
 
 .searchBar:focus-within {
   border-color: #ce1126;
-  background: white;
-  box-shadow: 0 0 0 4px rgba(206, 17, 38, 0.1);
+  box-shadow: 0 0 0 3px rgba(206, 17, 38, 0.08);
 }
 
 .searchBar input {
   width: 100%;
-  padding: 12px 14px 12px 42px;
+  padding: 11px 14px 11px 44px;
   border: none;
   background: transparent;
   font-size: 0.9rem;
@@ -209,19 +284,18 @@
   background: white;
   border: 1px solid #e2e8f0;
   color: #64748b;
-  padding: 0.6rem 1.2rem;
-  border-radius: 10px;
+  padding: 0 14px;
+  height: 36px;
+  border-radius: 20px;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  transition: border-color 0.15s;
   outline: none;
 }
 
 .monthSelect:hover {
-  border-color: #ce1126;
-  color: #ce1126;
-  background-color: #fff1f2;
+  border-color: #cbd5e1;
 }
 
 .tabs {
@@ -232,44 +306,50 @@
 }
 
 .tabBtn {
-  padding: 8px 18px;
+  padding: 0 14px;
+  height: 36px;
   border-radius: 20px;
   border: 1px solid #e2e8f0;
   color: #64748b;
   font-weight: 600;
   background: white;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   white-space: nowrap;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.15s ease;
 }
 
 .tabBtn.active {
-  background-color: var(--primary);
+  background-color: #1e293b;
   color: white;
-  border-color: var(--primary);
-  box-shadow: 0 2px 8px rgba(206,17,38,0.2);
+  border-color: #1e293b;
+  box-shadow: 0 4px 10px rgba(30, 41, 59, 0.18);
 }
 
 .tabBtn:hover:not(.active) {
-  border-color: var(--primary);
-  color: var(--primary);
+  border-color: #cbd5e1;
+  color: #1e293b;
+  background-color: #f8fafc;
 }
 
 .tableContainer {
+  background: white;
+  border-radius: 20px;
+  border: 1px solid #f1f5f9;
   overflow-x: auto;
-  margin-top: 10px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
 .table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 .table th {
   background: #f8fafc;
   text-align: left;
-  padding: 10px 14px;
+  padding: 0.75rem 1rem;
   font-weight: 700;
   color: #64748b;
   font-size: 0.7rem;
@@ -279,15 +359,32 @@
 }
 
 .table td {
-  padding: 10px 14px;
-  border-bottom: 1px solid #f8fafc;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #f1f5f9;
   vertical-align: middle;
   font-size: 0.82rem;
   color: #334155;
+  transition: background-color 0.2s;
+}
+
+.table tr {
+  animation: rowFadeIn 0.3s ease-out backwards;
+}
+
+.table tr:nth-child(1) { animation-delay: 0.03s; }
+.table tr:nth-child(2) { animation-delay: 0.07s; }
+.table tr:nth-child(3) { animation-delay: 0.11s; }
+.table tr:nth-child(4) { animation-delay: 0.15s; }
+.table tr:nth-child(5) { animation-delay: 0.19s; }
+.table tr:nth-child(n+6) { animation-delay: 0.22s; }
+
+@keyframes rowFadeIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
 .table tr:hover td {
-  background-color: #fcfcfc;
+  background-color: #f8fafc;
 }
 
 .truncate {
@@ -298,37 +395,42 @@
 }
 
 .actionBtn {
-  background-color: #f1f5f9;
-  color: #475569;
-  padding: 4px 12px;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: 0.75rem;
-  border: none;
+  background: white;
+  border: 1px solid #e2e8f0;
+  color: #1e293b;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.2s;
 }
 
 .actionBtn:hover {
-  background-color: #e2e8f0;
-  color: #0f172a;
+  background: #1e293b;
+  color: white;
+  border-color: #1e293b;
+  transform: translateY(-1px);
 }
 
 .exportBtn {
-  background-color: #dcfce7;
+  background: white;
+  border: 1px solid #bbf7d0;
   color: #16a34a;
-  padding: 4px 12px;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: 0.75rem;
-  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   cursor: pointer;
   margin-left: 8px;
-  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
 }
 
 .exportBtn:hover {
-  background-color: #bbf7d0;
+  background: #dcfce7;
+  border-color: #86efac;
   transform: translateY(-1px);
 }
 
@@ -349,6 +451,24 @@
   .createBtn {
     width: 100%;
     justify-content: center;
+  }
+
+  .filterToolbar {
+    padding: 12px 14px;
+  }
+
+  .filterRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filterSelect, .filterDivider {
+    width: 100%;
+  }
+
+  .filterDivider {
+    width: 100%;
+    height: 1px;
   }
 
   .controlsBar {

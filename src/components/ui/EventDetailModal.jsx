@@ -7,10 +7,11 @@ import ParticipantModal from './ParticipantModal';
 import { useEventManagement } from '../../hooks/useEventManagement';
 import { getTiposEvento } from '../../services/tipoEvento.service';
 import { getOficinas } from '../../services/oficinas.service';
-import { 
-  Eye, EyeOff, Trash2, Calendar, Clock, MapPin, Tag, 
-  User as UserIcon, Plus, Send, CheckCircle, AlertCircle, 
-  Edit2, ShieldCheck, Info, Users, Link, Image as ImageIcon, Upload, Download, Map, X
+import {
+  Eye, EyeOff, Trash2, Calendar, Clock, MapPin, Tag,
+  User as UserIcon, Plus, Send, CheckCircle, AlertCircle,
+  Edit2, ShieldCheck, Info, Users, Link, Image as ImageIcon, Upload, Download, Map, X,
+  Video, Camera, Star, RefreshCw
 } from 'lucide-react';
 import lugarFisicoService from '../../services/lugarFisico.service';
 import styles from './DetailModal.module.css';
@@ -56,6 +57,13 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
     handleStatusUpdate, handleSaveEdition, handleToggleVisibility, handleDelete, handlePublish,
     handleSerieAction, handlePublishSerie
   } = useEventManagement(event, onSuccess, onClose);
+
+  React.useEffect(() => {
+    if (!isOpen) {
+      setIsEditing(false);
+      setAplicarASerie(false);
+    }
+  }, [isOpen]);
 
   const handleDownloadImage = async (url, title) => {
     if (!url) return;
@@ -120,12 +128,12 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
   };
 
   const statusConfig = {
-    PENDIENTE: { label: 'En Revisión', color: '#f59e0b', bg: '#fffbeb', border: '#fef3c7', text: '#d97706' },
-    APROBADA: { label: 'Aprobada', color: '#10b981', bg: '#f0fdf4', border: '#dcfce7', text: '#059669' },
-    RECHAZADA: { label: 'Rechazada', color: '#ef4444', bg: '#fef2f2', border: '#fee2e2', text: '#dc2626' },
-    PUBLICADA: { label: 'Evento Publicado', color: '#0ea5e9', bg: '#f0f9ff', border: '#e0f2fe', text: '#0284c7' },
-    EN_REVISION: { label: 'Devuelto para corrección', color: '#8b5cf6', bg: '#faf5ff', border: '#ede9fe', text: '#7c3aed' }
-  }[status] || { label: status, color: '#64748b', bg: '#f8fafc', border: '#e2e8f0', text: '#475569' };
+    PENDIENTE:   { label: 'Pendiente',    subtitle: 'En espera de revisión',       color: '#f59e0b', bg: '#fffbeb', border: '#fef3c7', text: '#d97706' },
+    APROBADA:    { label: 'Aprobada',     subtitle: 'Lista para ser publicada',     color: '#10b981', bg: '#f0fdf4', border: '#dcfce7', text: '#059669' },
+    RECHAZADA:   { label: 'Rechazada',    subtitle: 'Revisa el motivo del rechazo', color: '#ef4444', bg: '#fef2f2', border: '#fee2e2', text: '#dc2626' },
+    PUBLICADA:   { label: 'Publicada',    subtitle: 'Visible en la plataforma',     color: '#0ea5e9', bg: '#f0f9ff', border: '#e0f2fe', text: '#0284c7' },
+    EN_REVISION: { label: 'En revisión',  subtitle: 'Correcciones solicitadas',     color: '#8b5cf6', bg: '#faf5ff', border: '#ede9fe', text: '#7c3aed' }
+  }[status] || { label: status, subtitle: '', color: '#64748b', bg: '#f8fafc', border: '#e2e8f0', text: '#475569' };
 
   const renderField = (label, value, isEditingLocal, fieldName, type = 'text', icon = null, forceReadOnly = false) => {
     if (isEditingLocal && !forceReadOnly) {
@@ -220,7 +228,7 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
              </div>
              <div>
                <div className={styles.statusLabel} style={{ color: statusConfig.text }}>{statusConfig.label}</div>
-               <div className={styles.statusValue}>{event.status}</div>
+               <div className={styles.statusValue}>{statusConfig.subtitle}</div>
              </div>
           </div>
           {event.status === 'PUBLICADA' && (
@@ -410,47 +418,56 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
               <div style={{ marginTop: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '15px' }}>
                  {isEditing ? (
                    <>
-                    <label style={{ padding: '10px', borderRadius: '10px', background: formData.requiereTransmision ? '#f0f9ff' : '#fff', border: '1px solid #e2e8f0', fontSize: '11px', fontWeight: 'bold', color: formData.requiereTransmision ? '#0284c7' : '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                       <input type="checkbox" checked={formData.requiereTransmision} onChange={e => setFormData({...formData, requiereTransmision: e.target.checked})} />
-                       Transmisión
+                    <label style={{ padding: '9px 14px', borderRadius: '10px', background: formData.requiereTransmision ? '#eff6ff' : '#f8fafc', border: `1px solid ${formData.requiereTransmision ? '#bfdbfe' : '#e2e8f0'}`, fontSize: '12px', fontWeight: '600', color: formData.requiereTransmision ? '#1d4ed8' : '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.15s' }}>
+                      <input type="checkbox" style={{ accentColor: '#1d4ed8' }} checked={formData.requiereTransmision} onChange={e => setFormData({...formData, requiereTransmision: e.target.checked})} />
+                      Transmisión
                     </label>
-                    <label style={{ padding: '10px', borderRadius: '10px', background: formData.requiereCubrimiento ? '#f0f9ff' : '#fff', border: '1px solid #e2e8f0', fontSize: '11px', fontWeight: 'bold', color: formData.requiereCubrimiento ? '#0284c7' : '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                       <input type="checkbox" checked={formData.requiereCubrimiento} onChange={e => setFormData({...formData, requiereCubrimiento: e.target.checked})} />
-                       Cubrimiento
+                    <label style={{ padding: '9px 14px', borderRadius: '10px', background: formData.requiereCubrimiento ? '#f0fdf4' : '#f8fafc', border: `1px solid ${formData.requiereCubrimiento ? '#bbf7d0' : '#e2e8f0'}`, fontSize: '12px', fontWeight: '600', color: formData.requiereCubrimiento ? '#16a34a' : '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.15s' }}>
+                      <input type="checkbox" style={{ accentColor: '#16a34a' }} checked={formData.requiereCubrimiento} onChange={e => setFormData({...formData, requiereCubrimiento: e.target.checked})} />
+                      Cubrimiento
                     </label>
-                    <label style={{ padding: '10px', borderRadius: '10px', background: formData.requierePiezaGrafica ? '#fff1f2' : '#fff', border: '1px solid #fecaca', fontSize: '11px', fontWeight: '900', color: formData.requierePiezaGrafica ? '#ce1126' : '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                       <input type="checkbox" checked={formData.requierePiezaGrafica} onChange={e => setFormData({...formData, requierePiezaGrafica: e.target.checked})} />
-                       PIEZA GRÁFICA
+                    <label style={{ padding: '9px 14px', borderRadius: '10px', background: formData.requierePiezaGrafica ? '#fff1f2' : '#f8fafc', border: `1px solid ${formData.requierePiezaGrafica ? '#fecaca' : '#e2e8f0'}`, fontSize: '12px', fontWeight: '600', color: formData.requierePiezaGrafica ? '#ce1126' : '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.15s' }}>
+                      <input type="checkbox" style={{ accentColor: '#ce1126' }} checked={formData.requierePiezaGrafica} onChange={e => setFormData({...formData, requierePiezaGrafica: e.target.checked})} />
+                      Pieza gráfica
                     </label>
                     {isAdmin && (
-                      <label style={{ padding: '10px', borderRadius: '10px', background: formData.esImportante ? '#fff1f2' : '#fff', border: '1px solid #fecaca', fontSize: '11px', fontWeight: '900', color: formData.esImportante ? '#ce1126' : '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                         <input type="checkbox" checked={formData.esImportante} onChange={e => setFormData({...formData, esImportante: e.target.checked})} />
-                         IMPORTANTE
+                      <label style={{ padding: '9px 14px', borderRadius: '10px', background: formData.esImportante ? '#fffbeb' : '#f8fafc', border: `1px solid ${formData.esImportante ? '#fde68a' : '#e2e8f0'}`, fontSize: '12px', fontWeight: '600', color: formData.esImportante ? '#b45309' : '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.15s' }}>
+                        <input type="checkbox" style={{ accentColor: '#b45309' }} checked={formData.esImportante} onChange={e => setFormData({...formData, esImportante: e.target.checked})} />
+                        Importante
                       </label>
                     )}
                    </>
                  ) : (
-                   <>
-                     <div style={{ padding: '10px', borderRadius: '10px', background: formData.requierePiezaGrafica ? '#fff1f2' : '#f8fafc', border: '1px solid #e2e8f0', fontSize: '12px', fontWeight: 'bold', color: formData.requierePiezaGrafica ? '#ce1126' : '#94a3b8' }}>
-                        {formData.requierePiezaGrafica ? '✅ Requiere Pieza Gráfica' : '❌ No Pieza Gráfica'}
-                     </div>
-                    <div style={{ padding: '10px', borderRadius: '10px', background: formData.requiereTransmision ? '#f0f9ff' : '#f8fafc', border: '1px solid #e2e8f0', fontSize: '12px', fontWeight: 'bold', color: formData.requiereTransmision ? '#0284c7' : '#94a3b8' }}>
-                       {formData.requiereTransmision ? '✅ Requiere Transmisión' : '❌ No Transmisión'}
-                    </div>
-                    <div style={{ padding: '10px', borderRadius: '10px', background: formData.requiereCubrimiento ? '#f0f9ff' : '#f8fafc', border: '1px solid #e2e8f0', fontSize: '12px', fontWeight: 'bold', color: formData.requiereCubrimiento ? '#0284c7' : '#94a3b8' }}>
-                       {formData.requiereCubrimiento ? '✅ Requiere Cubrimiento' : '❌ No Cubrimiento'}
-                    </div>
-                    {formData.esImportante && (
-                      <div style={{ padding: '10px', borderRadius: '10px', background: '#fff1f2', border: '1px solid #fecaca', fontSize: '12px', fontWeight: '900', color: '#ce1126' }}>
-                         ★ EVENTO IMPORTANTE
-                      </div>
-                    )}
-                    {formData.frecuenciaRecurrencia && formData.frecuenciaRecurrencia !== 'NINGUNA' && (
-                      <div style={{ padding: '10px', borderRadius: '10px', background: '#f0f9ff', border: '1px solid #bae6fd', fontSize: '11px', fontWeight: '800', color: '#0369a1', gridColumn: '1 / -1' }}>
-                         🔄 EVENTO RECURRENTE: {formData.frecuenciaRecurrencia} (Hasta {formData.fechaFinRecurrencia?.split('T')[0]})
-                      </div>
-                    )}
-                   </>
+                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', gridColumn: '1 / -1' }}>
+                     {formData.requierePiezaGrafica && (
+                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '5px 12px', borderRadius: '100px', background: '#fff1f2', border: '1px solid #fecaca', fontSize: '12px', fontWeight: '600', color: '#ce1126' }}>
+                         <ImageIcon size={13} /> Pieza gráfica
+                       </span>
+                     )}
+                     {formData.requiereTransmision && (
+                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '5px 12px', borderRadius: '100px', background: '#f0f9ff', border: '1px solid #bae6fd', fontSize: '12px', fontWeight: '600', color: '#0284c7' }}>
+                         <Video size={13} /> Transmisión
+                       </span>
+                     )}
+                     {formData.requiereCubrimiento && (
+                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '5px 12px', borderRadius: '100px', background: '#f0fdf4', border: '1px solid #bbf7d0', fontSize: '12px', fontWeight: '600', color: '#16a34a' }}>
+                         <Camera size={13} /> Cubrimiento
+                       </span>
+                     )}
+                     {formData.esImportante && (
+                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '5px 12px', borderRadius: '100px', background: '#fffbeb', border: '1px solid #fde68a', fontSize: '12px', fontWeight: '600', color: '#b45309' }}>
+                         <Star size={13} /> Evento importante
+                       </span>
+                     )}
+                     {formData.frecuenciaRecurrencia && formData.frecuenciaRecurrencia !== 'NINGUNA' && (
+                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '5px 12px', borderRadius: '100px', background: '#f5f3ff', border: '1px solid #ddd6fe', fontSize: '12px', fontWeight: '600', color: '#7c3aed' }}>
+                         <RefreshCw size={13} /> Recurrente {formData.frecuenciaRecurrencia.toLowerCase()} — hasta {formData.fechaFinRecurrencia?.split('T')[0]}
+                       </span>
+                     )}
+                     {!formData.requierePiezaGrafica && !formData.requiereTransmision && !formData.requiereCubrimiento && !formData.esImportante && !(formData.frecuenciaRecurrencia && formData.frecuenciaRecurrencia !== 'NINGUNA') && (
+                       <span style={{ fontSize: '12px', color: '#94a3b8', fontStyle: 'italic' }}>Sin requerimientos adicionales</span>
+                     )}
+                   </div>
                  )}
               </div>
           </div>
@@ -563,7 +580,7 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
                   <button
                     onClick={() => handleStatusUpdate('Devolver')}
                     disabled={loadingAction}
-                    style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)', color: 'white', border: 'none', borderRadius: '8px', padding: '10px 20px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}
+                    style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)', color: 'white', border: 'none', borderRadius: '30px', padding: '10px 20px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}
                   >
                     {reviewing ? 'Confirmar Devolución' : 'En revisión'}
                   </button>
@@ -622,137 +639,107 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
                       {localVisible ? <><EyeOff size={14}/> Ocultar Evento</> : <><Eye size={14}/> Mostrar Evento</>}
                     </button>
                   )}
-                  <button onClick={handleDelete} disabled={manageLoading} style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#fff1f2', color: '#ef4444', border: '1px solid #fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><Trash2 size={18}/></button>
+                  <button onClick={handleDelete} disabled={manageLoading} style={{ width: '40px', height: '40px', borderRadius: '30px', background: '#fff1f2', color: '#ef4444', border: '1px solid #fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><Trash2 size={18}/></button>
                 </div>
               </div>
 
               {/* ACCIONES DE SERIE RECURRENTE */}
               {event.idGrupoRecurrencia && event.esPrincipal && !isEditing && (
-                <div style={{ marginBottom: '20px', padding: '15px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', color: '#64748b', fontSize: '12px', fontWeight: 'bold' }}>
-                    <Calendar size={14} /> ACCIONES DE TODA LA SERIE
+                <div style={{ marginBottom: '16px', padding: '15px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', color: '#64748b', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                    <Calendar size={13} /> Acciones de toda la serie
                   </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                     {(event.status === 'PENDIENTE' || event.status === 'RECHAZADA') && isAdmin && (
-                      <button 
-                        onClick={() => handleSerieAction('aprobar')} 
-                        disabled={loadingAction}
-                        className={styles.btnSuccess} 
-                        style={{ flex: 1, padding: '10px', fontSize: '12px', background: '#10b981' }}
-                      >
-                        <CheckCircle size={14} /> Aprobar Toda la Serie
+                      <button onClick={() => handleSerieAction('aprobar')} disabled={loadingAction} className={styles.btnPrimary} style={{ flex: 1, padding: '10px', fontSize: '12px', background: '#10b981' }}>
+                        <CheckCircle size={14} /> Aprobar toda la serie
                       </button>
                     )}
                     {event.status === 'APROBADA' && isAdmin && (
-                      <button 
-                        onClick={handlePublishSerie} 
-                        disabled={publishing}
-                        className={styles.btnDanger} 
-                        style={{ flex: 1, padding: '10px', fontSize: '12px', background: '#ef4444' }}
-                      >
-                        <Send size={14} /> Publicar Toda la Serie
+                      <button onClick={handlePublishSerie} disabled={publishing} className={styles.btnDanger} style={{ flex: 1, padding: '10px', fontSize: '12px', background: '#ef4444' }}>
+                        <Send size={14} /> Publicar toda la serie
                       </button>
                     )}
-                    <button 
-                      onClick={() => handleSerieAction('eliminar')} 
-                      disabled={loadingAction}
-                      className={styles.btnSecondary} 
-                      style={{ flex: 1, padding: '10px', fontSize: '12px', color: '#ef4444', borderColor: '#fecaca' }}
+                    <button
+                      onClick={() => { setAplicarASerie(true); setIsEditing(true); }}
+                      className={styles.btnSecondary}
+                      style={{ flex: 1, padding: '10px', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                     >
-                      <Trash2 size={14} /> Eliminar Toda la Serie
+                      <Edit2 size={13} /> Editar toda la serie
+                    </button>
+                    <button onClick={() => handleSerieAction('eliminar')} disabled={loadingAction} className={styles.btnSecondary} style={{ flex: 1, padding: '10px', fontSize: '12px', color: '#ef4444', borderColor: '#fecaca', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                      <Trash2 size={13} /> Eliminar toda la serie
                     </button>
                   </div>
                 </div>
               )}
 
               {!isEditing ? (
-                <button onClick={() => setIsEditing(true)} className={styles.btnSecondary} style={{ width: '100%', padding: '16px', color: '#1e293b', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                <button
+                  onClick={() => { setAplicarASerie(false); setIsEditing(true); }}
+                  className={styles.btnSecondary}
+                  style={{ width: '100%', padding: '16px', color: '#1e293b', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
+                >
                   <Edit2 size={18} /> Actualizar Información Pública
                 </button>
               ) : (
                 <>
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  <button onClick={() => {
-                      setIsEditing(false);
-                      // Revert formData fully to what server sent
-                      let formattedFecha = '';
-                      if (event.fecha) {
-                        if (typeof event.fecha === 'string') {
-                          formattedFecha = event.fecha.split('T')[0];
-                        } else if (Array.isArray(event.fecha)) {
-                          formattedFecha = `${event.fecha[0]}-${String(event.fecha[1]).padStart(2, '0')}-${String(event.fecha[2]).padStart(2, '0')}`;
+                  {/* Read-only scope indicator */}
+                  {event.esPrincipal && event.idGrupoRecurrencia && (
+                    <div style={{ marginBottom: '14px', padding: '10px 14px', borderRadius: '10px', background: aplicarASerie ? '#eff6ff' : '#f8fafc', border: `1px solid ${aplicarASerie ? '#bfdbfe' : '#e2e8f0'}`, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Edit2 size={13} color={aplicarASerie ? '#1d4ed8' : '#64748b'} />
+                      <span style={{ fontSize: '12px', fontWeight: '600', color: aplicarASerie ? '#1d4ed8' : '#475569' }}>
+                        Editando: {aplicarASerie ? 'toda la serie' : 'solo este evento'}
+                      </span>
+                    </div>
+                  )}
+                  {/* Action buttons */}
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <button onClick={() => {
+                        setIsEditing(false);
+                        let formattedFecha = '';
+                        if (event.fecha) {
+                          if (typeof event.fecha === 'string') {
+                            formattedFecha = event.fecha.split('T')[0];
+                          } else if (Array.isArray(event.fecha)) {
+                            formattedFecha = `${event.fecha[0]}-${String(event.fecha[1]).padStart(2, '0')}-${String(event.fecha[2]).padStart(2, '0')}`;
+                          }
                         }
-                      }
-                      setFormData({
-                        nombreEvento: event.nombreEvento || event.nombre || '',
-                        descripcionEvento: event.descripcionEvento || event.desc || '',
-                        fechaEvento: formattedFecha,
-                        horaInicio: event.horaInicio || '',
-                        horaFin: event.horaFin || '',
-                        lugar: event.lugar || '',
-                        lugares: event.lugares || [],
-                        idsLugaresFisicos: event.idsLugaresFisicos || [],
-                        linkConexion: event.linkConexion || '',
-                        tipoEvento: event.tipoEvento || '',
-                        office: event.oficinaNombre || event.office || '',
-                        idOficina: event.oficinaId || event.idOficina || '',
-                        responsable: event.responsableEvento || event.responsable || '',
-                        participantes: Array.isArray(event.participantes) ? event.participantes : [],
-                        requiereTransmision: event.requiereTransmision || false,
-                        requiereCubrimiento: event.requiereCubrimiento || false,
-                        observaciones: event.observaciones || '',
-                        esImportante: event.esImportante || false,
-                        requierePiezaGrafica: event.requierePiezaGrafica || false,
-                        frecuenciaRecurrencia: event.frecuenciaRecurrencia || 'NINGUNA',
-                        fechaFinRecurrencia: event.fechaFinRecurrencia ? (typeof event.fechaFinRecurrencia === 'string' ? event.fechaFinRecurrencia.split('T')[0] : event.fechaFinRecurrencia) : '',
-                      });
-                      setPublishFilePreview(event.piezaGraficaUrl || null);
-                      setPublishFile(null);
-                  }} className={styles.btnSecondary} style={{ flex: 1, padding: '14px' }}>Descartar cambios</button>
-                  <button
-                    onClick={handleSaveEdition}
-                    disabled={manageLoading}
-                    className={styles.btnDanger}
-                    style={{ flex: 1, padding: '14px' }}
-                  >
-                    {manageLoading
-                      ? 'Guardando...'
-                      : (event.esPrincipal && event.idGrupoRecurrencia)
-                        ? (aplicarASerie ? 'Guardar en toda la serie' : 'Guardar solo este evento')
-                        : 'Guardar Cambios'
-                    }
-                  </button>
-                </div>
-                {event.esPrincipal && event.idGrupoRecurrencia && (
-                  <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+                        setFormData({
+                          nombreEvento: event.nombreEvento || event.nombre || '',
+                          descripcionEvento: event.descripcionEvento || event.desc || '',
+                          fechaEvento: formattedFecha,
+                          horaInicio: event.horaInicio || '',
+                          horaFin: event.horaFin || '',
+                          lugar: event.lugar || '',
+                          lugares: event.lugares || [],
+                          idsLugaresFisicos: event.idsLugaresFisicos || [],
+                          linkConexion: event.linkConexion || '',
+                          tipoEvento: event.tipoEvento || '',
+                          office: event.oficinaNombre || event.office || '',
+                          idOficina: event.oficinaId || event.idOficina || '',
+                          responsable: event.responsableEvento || event.responsable || '',
+                          participantes: Array.isArray(event.participantes) ? event.participantes : [],
+                          requiereTransmision: event.requiereTransmision || false,
+                          requiereCubrimiento: event.requiereCubrimiento || false,
+                          observaciones: event.observaciones || '',
+                          esImportante: event.esImportante || false,
+                          requierePiezaGrafica: event.requierePiezaGrafica || false,
+                          frecuenciaRecurrencia: event.frecuenciaRecurrencia || 'NINGUNA',
+                          fechaFinRecurrencia: event.fechaFinRecurrencia ? (typeof event.fechaFinRecurrencia === 'string' ? event.fechaFinRecurrencia.split('T')[0] : event.fechaFinRecurrencia) : '',
+                        });
+                        setPublishFilePreview(event.piezaGraficaUrl || null);
+                        setPublishFile(null);
+                    }} className={styles.btnSecondary} style={{ flex: 1, padding: '14px' }}>Descartar</button>
                     <button
-                      onClick={() => setAplicarASerie(false)}
-                      style={{
-                        flex: 1, padding: '10px', borderRadius: '10px', fontSize: '12px', fontWeight: 'bold',
-                        cursor: 'pointer', border: '2px solid',
-                        borderColor: !aplicarASerie ? '#ce1126' : '#e2e8f0',
-                        background: !aplicarASerie ? '#fff1f2' : '#f8fafc',
-                        color: !aplicarASerie ? '#ce1126' : '#64748b',
-                        transition: 'all 0.2s'
-                      }}
+                      onClick={handleSaveEdition}
+                      disabled={manageLoading}
+                      className={styles.btnDanger}
+                      style={{ flex: 2, padding: '14px', opacity: manageLoading ? 0.6 : 1, cursor: manageLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                     >
-                      Solo este evento
-                    </button>
-                    <button
-                      onClick={() => setAplicarASerie(true)}
-                      style={{
-                        flex: 1, padding: '10px', borderRadius: '10px', fontSize: '12px', fontWeight: 'bold',
-                        cursor: 'pointer', border: '2px solid',
-                        borderColor: aplicarASerie ? '#ce1126' : '#e2e8f0',
-                        background: aplicarASerie ? '#fff1f2' : '#f8fafc',
-                        color: aplicarASerie ? '#ce1126' : '#64748b',
-                        transition: 'all 0.2s'
-                      }}
-                    >
-                      Aplicar a toda la serie
+                      {manageLoading ? 'Guardando...' : 'Guardar cambios'}
                     </button>
                   </div>
-                )}
                 </>
               )}
             </div>

@@ -1,5 +1,10 @@
 .header {
-  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 0.5rem 0;
+  border-bottom: 2px solid #f1f5f9;
 }
 
 .controlsBar {
@@ -245,33 +250,128 @@
 .activeDot { background-color: #22c55e; }
 .inactiveDot { background-color: #ef4444; }
 
-.tabs {
-  display: flex;
-  gap: 12px;
+/* ─── Filter Toolbar ─────────────────────────────────────── */
+.filterToolbar {
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 16px;
+  padding: 16px 20px;
   margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 11px 16px 11px 44px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  font-size: 14px;
+  background: #fff;
+  color: #1e293b;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.searchInput:focus {
+  border-color: #ce1126;
+  box-shadow: 0 0 0 3px rgba(206, 17, 38, 0.08);
+}
+
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.filterSelect {
+  padding: 0 14px;
+  height: 36px;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #475569;
+  background: white;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.filterSelect:hover {
+  border-color: #cbd5e1;
+}
+
+.filterSelect:focus {
+  border-color: #1e293b;
+}
+
+.filterDivider {
+  width: 1px;
+  height: 20px;
+  background: #e2e8f0;
+  flex-shrink: 0;
 }
 
 .tabBtn {
   background: white;
   border: 1px solid #e2e8f0;
   color: #64748b;
-  padding: 8px 18px;
-  border-radius: 10px;
+  padding: 0 14px;
+  height: 36px;
+  border-radius: 20px;
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
+  white-space: nowrap;
 }
 
 .tabBtn:hover {
-  border-color: #ce1126;
-  color: #ce1126;
-  background-color: #fff1f2;
+  border-color: #cbd5e1;
+  color: #1e293b;
+  background-color: #f8fafc;
 }
 
 .tabBtn.active {
-  background-color: #ce1126;
+  background-color: #1e293b;
   color: white;
-  border-color: #ce1126;
-  box-shadow: 0 4px 10px rgba(206, 17, 38, 0.2);
+  border-color: #1e293b;
+  box-shadow: 0 4px 10px rgba(30, 41, 59, 0.18);
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    padding-top: 3.5rem;
+  }
+
+  .createBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .filterToolbar {
+    padding: 12px 14px;
+  }
+
+  .filterRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filterSelect {
+    width: 100%;
+    border-radius: 10px;
+  }
+
+  .filterDivider {
+    display: none;
+  }
 }

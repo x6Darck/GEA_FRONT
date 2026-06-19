@@ -301,7 +301,7 @@ export const useEventManagement = (event, onSuccess, onClose) => {
       onClose();
     } catch (e) {
       console.error(e);
-      alert('Error al procesar la serie');
+      notification.error('Error al procesar la serie: ' + (e.response?.data?.message || e.message || 'Intenta de nuevo'));
     } finally {
       setLoadingAction(false);
     }
@@ -329,7 +329,7 @@ export const useEventManagement = (event, onSuccess, onClose) => {
       onClose();
     } catch (e) {
       console.error(e);
-      alert('Error al publicar la serie');
+      notification.error('Error al publicar la serie: ' + (e.response?.data?.message || e.message || 'Intenta de nuevo'));
     } finally {
       setPublishing(false);
     }

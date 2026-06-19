@@ -429,60 +429,55 @@ const Reports = () => {
 
 
       <div className="card">
-        <div className={styles.controlsBar}>
-          <div className={styles.searchBar}>
-            <Search size={20} className={styles.searchIcon}/>
-            <input 
-              type="text" 
-              placeholder="Buscar reporte por título o descripción..." 
+        <div className={styles.filterToolbar}>
+          {/* Búsqueda */}
+          <div style={{ position: 'relative' }}>
+            <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
+            <input
+              type="text"
+              placeholder="Buscar reporte por título o descripción..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
+              className={styles.searchInput}
             />
           </div>
-          
-          <select
-            className={styles.monthSelect}
-            value={dateFilter}
-            onChange={e => {
-              const val = e.target.value;
-              setDateFilter(val);
-              
-              if (val === 'all') {
-                setDesdeFilter('');
-                setHastaFilter('');
-              } else {
-                const now = new Date();
-                let start = new Date(now);
-                let end = new Date(now);
-                
-                if (val === 'today') {
-                  // Ya están en now
-                } else if (val === 'week') {
-                  start.setDate(now.getDate() - now.getDay());
-                  end.setDate(now.getDate() + (6 - now.getDay()));
-                } else if (val === 'month') {
-                  start = new Date(now.getFullYear(), now.getMonth(), 1);
-                  end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-                }
-                
-                setDesdeFilter(toYMD(start));
-                setHastaFilter(toYMD(end));
-              }
-            }}
-          >
-            {DATE_FILTERS.map(f => (
-              <option key={f.value} value={f.value}>{f.label}</option>
-            ))}
-          </select>
-        </div>
 
-        <div className={styles.controlsBar} style={{ borderTop: '1px solid #f1f5f9', paddingTop: '20px', gap: '12px', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ fontSize: '12px', fontWeight: '800', color: '#ce1126', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Oficina:</span>
-            <select 
-              className={styles.monthSelect}
-              style={{ 
-                minWidth: '180px', height: '38px', padding: '0 12px',
+          {/* Filtros */}
+          <div className={styles.filterRow}>
+            <select
+              className={styles.filterSelect}
+              value={dateFilter}
+              onChange={e => {
+                const val = e.target.value;
+                setDateFilter(val);
+                if (val === 'all') {
+                  setDesdeFilter('');
+                  setHastaFilter('');
+                } else {
+                  const now = new Date();
+                  let start = new Date(now);
+                  let end = new Date(now);
+                  if (val === 'week') {
+                    start.setDate(now.getDate() - now.getDay());
+                    end.setDate(now.getDate() + (6 - now.getDay()));
+                  } else if (val === 'month') {
+                    start = new Date(now.getFullYear(), now.getMonth(), 1);
+                    end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                  }
+                  setDesdeFilter(toYMD(start));
+                  setHastaFilter(toYMD(end));
+                }
+              }}
+            >
+              {DATE_FILTERS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
+            </select>
+
+            <div className={styles.filterDivider} />
+
+            <select
+              className={styles.filterSelect}
+              style={{
+                minWidth: '160px',
                 backgroundColor: (user?.rol === 'OFICINA' || user?.rol === 'USUARIO_AUTENTICADO_APP') ? '#f8fafc' : 'white',
                 cursor: (user?.rol === 'OFICINA' || user?.rol === 'USUARIO_AUTENTICADO_APP') ? 'not-allowed' : 'pointer'
               }}
@@ -491,56 +486,38 @@ const Reports = () => {
               disabled={user?.rol === 'OFICINA' || user?.rol === 'USUARIO_AUTENTICADO_APP'}
             >
               {!(user?.rol === 'OFICINA' || user?.rol === 'USUARIO_AUTENTICADO_APP') && <option value="">Todas las oficinas</option>}
-              
-              {/* BLINDAJE: Si el usuario es de oficina y la lista no ha cargado, asegurar que su opción exista */}
               {(user?.rol === 'OFICINA' || user?.rol === 'USUARIO_AUTENTICADO_APP') && oficinas.length === 0 && user.idOficina && (
                 <option value={user.idOficina}>{user.oficinaNombre || 'Cargando oficina...'}</option>
               )}
-
-              {oficinas.map(o => (
-                <option key={o.id} value={o.id}>{o.nombre}</option>
-              ))}
+              {oficinas.map(o => <option key={o.id} value={o.id}>{o.nombre}</option>)}
             </select>
-          </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ fontSize: '12px', fontWeight: '800', color: '#ce1126', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Desde:</span>
-            <input 
-              type="date" 
-              className={styles.monthSelect}
-              style={{ height: '38px', padding: '0 12px' }}
-              value={desdeFilter}
-              onChange={e => setDesdeFilter(e.target.value)}
-            />
-          </div>
+            <div className={styles.filterDivider} />
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ fontSize: '12px', fontWeight: '800', color: '#ce1126', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Hasta:</span>
-            <input 
-              type="date" 
-              className={styles.monthSelect}
-              style={{ height: '38px', padding: '0 12px' }}
-              value={hastaFilter}
-              onChange={e => setHastaFilter(e.target.value)}
-            />
-          </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span className={styles.filterLabel}>Desde</span>
+              <input type="date" className={styles.filterSelect} style={{ paddingLeft: '10px', paddingRight: '10px' }} value={desdeFilter} onChange={e => setDesdeFilter(e.target.value)} />
+            </div>
 
-          <button 
-            className={styles.actionBtn}
-            style={{ marginLeft: 'auto', background: '#f8fafc', fontWeight: '800', fontSize: '11px', textTransform: 'uppercase' }}
-            onClick={() => {
-              if (!(user?.rol === 'OFICINA' || user?.rol === 'USUARIO_AUTENTICADO_APP')) {
-                setOficinaFilter('');
-              }
-              setDesdeFilter('');
-              setHastaFilter('');
-              setSearchTerm('');
-              setDateFilter('all');
-              setTipoFilter('GLOBAL');
-            }}
-          >
-            Limpiar Filtros
-          </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span className={styles.filterLabel}>Hasta</span>
+              <input type="date" className={styles.filterSelect} style={{ paddingLeft: '10px', paddingRight: '10px' }} value={hastaFilter} onChange={e => setHastaFilter(e.target.value)} />
+            </div>
+
+            <button
+              style={{ marginLeft: 'auto', padding: '0 16px', height: '36px', borderRadius: '20px', border: '1px solid #e2e8f0', background: 'white', color: '#64748b', fontWeight: '600', fontSize: '0.82rem', cursor: 'pointer', whiteSpace: 'nowrap' }}
+              onClick={() => {
+                if (!(user?.rol === 'OFICINA' || user?.rol === 'USUARIO_AUTENTICADO_APP')) setOficinaFilter('');
+                setDesdeFilter('');
+                setHastaFilter('');
+                setSearchTerm('');
+                setDateFilter('all');
+                setTipoFilter('GLOBAL');
+              }}
+            >
+              Limpiar filtros
+            </button>
+          </div>
         </div>
 
         <div className={styles.tableContainer}>
@@ -562,14 +539,14 @@ const Reports = () => {
                   <th>Oficina</th>
                   <th>Usuario</th>
                   <th>Fecha Generación</th>
-                  <th>Estado</th>
+                  <th>Formato</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {(filteredReports || []).map((report, index) => (
                   <tr key={report.id}>
-                    <td style={{ fontSize: '12x', fontWeight: 'bold', color: '#64748b' }}>{index + 1}</td>
+                    <td style={{ fontSize: '12px', fontWeight: 'bold', color: '#64748b' }}>{index + 1}</td>
                     <td style={{ fontSize: '11px', color: '#94a3b8' }}>#{report.id}</td>
                     <td>
                       <div className={styles.truncate} style={{ color: 'var(--primary)', fontWeight: 'bold' }} title={report.titulo}>
@@ -583,12 +560,20 @@ const Reports = () => {
                       {report.fecha !== '-' ? new Date(report.fecha).toLocaleDateString('es-CO') : '-'}
                     </td>
                     <td>
-                      <span style={{ 
-                        padding: '3px 10px', borderRadius: '12px', fontSize: '10px', fontWeight: '800', 
-                        backgroundColor: '#dcfce7', color: '#16a34a', textTransform: 'uppercase', letterSpacing: '0.5px'
-                      }}>
-                        GENERADO
-                      </span>
+                      {(() => {
+                        const fmt = (report.formato || 'PDF').toUpperCase();
+                        const colors = {
+                          PDF:  { bg: '#fff1f2', color: '#ce1126', border: '#fecaca' },
+                          XLSX: { bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0' },
+                          CSV:  { bg: '#f0f9ff', color: '#0284c7', border: '#bae6fd' },
+                        };
+                        const c = colors[fmt] || colors.PDF;
+                        return (
+                          <span style={{ padding: '3px 10px', borderRadius: '12px', fontSize: '10px', fontWeight: '800', backgroundColor: c.bg, color: c.color, border: `1px solid ${c.border}`, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                            {fmt}
+                          </span>
+                        );
+                      })()}
                     </td>
                     <td>
                       <div style={{ display: 'flex' }}>
@@ -603,7 +588,7 @@ const Reports = () => {
                           disabled={exportingId === report.id}
                           onClick={() => handleExport(report)}
                         >
-                          {exportingId === report.id ? '...' : <><Download size={14} style={{ marginRight: '4px' }} /> {report.formato || 'PDF'}</>}
+                          {exportingId === report.id ? '...' : <Download size={14} />}
                         </button>
                       </div>
                     </td>

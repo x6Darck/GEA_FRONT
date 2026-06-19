@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useContext } from 'react';
-import { Search, Plus, Calendar, Filter, Trash2, Eye, EyeOff, MoreHorizontal, ChevronRight, ChevronDown, FileText, CheckCircle, Clock, Layers } from 'lucide-react';
+import { Search, Plus, Calendar, Filter, Trash2, Eye, EyeOff, MoreHorizontal, ChevronRight, FileText, CheckCircle, Clock, Layers } from 'lucide-react';
 import styles from './Events.module.css';
 import { getEventosSolicitudes, getOficinaById, getEventosPublicados, getEventoById } from '../services/eventos.service';
 import { getUsuarios } from '../services/usuarios.service';
@@ -21,6 +21,7 @@ const Events = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedGroups, setExpandedGroups] = useState(new Set());
+  const [closingGroups, setClosingGroups] = useState(new Set());
   const [activeTab, setActiveTab] = useState('todos');
   const [sortConfig, setSortConfig] = useState({ key: null, dir: 'asc' });
   const [currentPage, setCurrentPage] = useState(1);
@@ -242,13 +243,15 @@ const Events = () => {
 
   const toggleGroup = (groupId, e) => {
     e.stopPropagation();
-    const newExpanded = new Set(expandedGroups);
-    if (newExpanded.has(groupId)) {
-      newExpanded.delete(groupId);
+    if (expandedGroups.has(groupId)) {
+      setClosingGroups(prev => new Set(prev).add(groupId));
+      setTimeout(() => {
+        setExpandedGroups(prev => { const n = new Set(prev); n.delete(groupId); return n; });
+        setClosingGroups(prev => { const n = new Set(prev); n.delete(groupId); return n; });
+      }, 200);
     } else {
-      newExpanded.add(groupId);
+      setExpandedGroups(prev => new Set(prev).add(groupId));
     }
-    setExpandedGroups(newExpanded);
   };
 
   const statusBadgeStyle = (item) => {
@@ -290,32 +293,28 @@ const Events = () => {
     <div className="page-container">
       <div className={styles.header}>
         <h1 className="page-title" style={{marginBottom: 0}}>Gestión de Eventos</h1>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button className={styles.secondaryBtn} onClick={() => window.open('/calendario', '_blank')}>
-            <Calendar size={18} /> Ver Calendario Público
-          </button>
-          <button className={styles.createBtn} onClick={() => setIsCreateModalOpen(true)}>
-            <Plus size={18} /> Nuevo Evento
-          </button>
-        </div>
+        <button className={styles.createBtn} onClick={() => setIsCreateModalOpen(true)}>
+          <Plus size={18} /> Nuevo Evento
+        </button>
       </div>
 
       <div className="card">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
-          <div className={styles.searchBar} style={{ width: '100%', position: 'relative' }}>
-            <input type="text" placeholder="Buscar por nombre, descripción o responsable..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} style={{ width: '100%', padding: '12px 14px 12px 42px', borderRadius: '10px' }} />
-            <Search size={20} className={styles.searchIcon} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+        <div className={styles.filterToolbar}>
+          <div style={{ position: 'relative' }}>
+            <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
+            <input type="text" placeholder="Buscar por nombre, descripción o responsable..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className={styles.searchInput} />
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'center' }}>
-            <select className={styles.monthSelect} value={dateFilter} onChange={e => setDateFilter(e.target.value)} style={{ minWidth: '200px', height: '42px', borderRadius: '10px' }}>
+          <div className={styles.filterRow}>
+            <select className={styles.filterSelect} value={dateFilter} onChange={e => setDateFilter(e.target.value)}>
               {DATE_FILTERS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
             </select>
-            <div className={styles.tabs} style={{ flex: 1, justifyContent: 'flex-start' }}>
-               {TABS.map(tab => (
-                 <button key={tab.key} className={`${styles.tabBtn} ${activeTab === tab.key ? styles.active : ''}`} onClick={() => setActiveTab(tab.key)}>
-                   {tab.label}
-                 </button>
-               ))}
+            <div className={styles.filterDivider} />
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+              {TABS.map(tab => (
+                <button key={tab.key} className={`${styles.tabBtn} ${activeTab === tab.key ? styles.active : ''}`} onClick={() => setActiveTab(tab.key)}>
+                  {tab.label}
+                </button>
+              ))}
             </div>
           </div>
         </div>
@@ -343,20 +342,12 @@ const Events = () => {
                 <tr>
                   <th style={{ width: '30px' }}>#</th>
                   <th style={{ width: '50px' }}>ID</th>
-                  <th style={{ width: '130px', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('nombre')}>
-                    Evento {sortConfig.key === 'nombre' ? (sortConfig.dir === 'asc' ? '↑' : '↓') : '↕'}
-                  </th>
+                  <th style={{ width: '130px' }}>Evento</th>
                   <th className={styles.hideMobile} style={{ width: '100px' }}>Categoría</th>
-                  <th style={{ width: '110px', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('oficina')}>
-                    Oficina {sortConfig.key === 'oficina' ? (sortConfig.dir === 'asc' ? '↑' : '↓') : '↕'}
-                  </th>
-                  <th style={{ width: '85px', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('fecha')}>
-                    Vigencia {sortConfig.key === 'fecha' ? (sortConfig.dir === 'asc' ? '↑' : '↓') : '↕'}
-                  </th>
+                  <th style={{ width: '110px' }}>Oficina</th>
+                  <th style={{ width: '85px' }}>Vigencia</th>
                   <th style={{ width: '35px' }}>Img</th>
-                  <th style={{ width: '90px', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('estado')}>
-                    Estado {sortConfig.key === 'estado' ? (sortConfig.dir === 'asc' ? '↑' : '↓') : '↕'}
-                  </th>
+                  <th style={{ width: '90px' }}>Estado</th>
                   <th style={{ width: '80px' }}>Acción</th>
                 </tr>
               </thead>
@@ -365,29 +356,30 @@ const Events = () => {
                   const isGroup = row.isGroup;
                   const item = isGroup ? row.main : row;
                   const isExpanded = isGroup && expandedGroups.has(row.groupId);
+                  const isClosing = isGroup && closingGroups.has(row.groupId);
 
                   return (
                     <React.Fragment key={isGroup ? `group-${row.groupId}` : `item-${item.id}`}>
-                      <tr 
-                        onClick={() => handleOpenDetail(item)} 
-                        style={{ cursor: 'pointer', backgroundColor: isGroup ? '#fcfcfc' : 'inherit' }}
+                      <tr
+                        onClick={isGroup ? (e) => toggleGroup(row.groupId, e) : undefined}
+                        style={{ cursor: isGroup ? 'pointer' : 'default', backgroundColor: isGroup ? '#fffafa' : 'inherit', ...(isGroup && { borderLeft: '3px solid #fecaca' }) }}
                       >
                         <td style={{ fontSize: '12px', fontWeight: 'bold', color: '#64748b' }}>
-                          {isGroup && (
-                            <button 
-                              onClick={(e) => toggleGroup(row.groupId, e)}
-                              style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '0 4px 0 0', display: 'inline-flex', alignItems: 'center' }}
-                            >
-                              {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                            </button>
-                          )}
                           {index + 1}
                         </td>
                         <td style={{ fontSize: '11px', color: '#94a3b8' }}>
-                          #{item.id}
+                          <div>#{item.id}</div>
                           {isGroup && (
-                            <div style={{ fontSize: '8px', color: '#ce1126', fontWeight: '900', marginTop: '2px' }}>
-                              SERIE ({row.subItems.length + 1})
+                            <div style={{
+                              display: 'inline-flex', alignItems: 'center', gap: '3px',
+                              marginTop: '5px',
+                              fontSize: '9px', fontWeight: '700',
+                              color: isExpanded ? '#ce1126' : '#94a3b8',
+                              letterSpacing: '0.2px', textTransform: 'uppercase',
+                              transition: 'color 0.2s ease'
+                            }}>
+                              <ChevronRight size={9} style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }} />
+                              Serie · {row.subItems.length + 1}
                             </div>
                           )}
                         </td>
@@ -453,16 +445,16 @@ const Events = () => {
                           </span>
                         </td>
                         <td>
-                          <button className={styles.actionBtn}>Detalles</button>
+                          <button className={styles.actionBtn} onClick={(e) => { e.stopPropagation(); handleOpenDetail(item); }}>Detalles</button>
                         </td>
                       </tr>
 
                       {/* SUB-ITEMS DESPLEGADOS */}
-                      {isExpanded && row.subItems.map((sub, sIdx) => (
-                        <tr 
-                          key={sub.id} 
-                          onClick={() => handleOpenDetail(sub)}
-                          style={{ cursor: 'pointer', backgroundColor: '#f9fafb', borderLeft: '3px solid #ce1126' }}
+                      {(isExpanded || isClosing) && row.subItems.map((sub, sIdx) => (
+                        <tr
+                          key={sub.id}
+                          className={isClosing ? styles.subRowExit : styles.subRowEnter}
+                          style={{ cursor: 'default', backgroundColor: '#f9fafb', borderLeft: '3px solid #ce1126', animationDelay: `${sIdx * 0.04}s` }}
                         >
                           <td style={{ fontSize: '11px', color: '#94a3b8', textAlign: 'right' }}>{index + 1}.{sIdx + 1}</td>
                           <td style={{ fontSize: '10px', color: '#cbd5e1' }}>#{sub.id}</td>
@@ -484,7 +476,7 @@ const Events = () => {
                             </span>
                           </td>
                           <td>
-                             <button className={styles.actionBtn} style={{ opacity: 0.7, padding: '4px 8px', fontSize: '10px' }}>Detalles</button>
+                             <button className={styles.actionBtn} style={{ opacity: 0.7, padding: '4px 8px', fontSize: '10px' }} onClick={(e) => { e.stopPropagation(); handleOpenDetail(sub); }}>Detalles</button>
                           </td>
                         </tr>
                       ))}

@@ -18,8 +18,11 @@ const AnnouncementDetailModal = ({ isOpen, onClose, announcement, onSuccess, isR
 
   const cargarCatalogos = async () => {
     try {
+      const userRol = user?.rol?.toString().toUpperCase() || '';
+      const isPrivileged = ['SUPER_ADMIN', 'ADMIN', 'COMUNICACIONES'].includes(userRol);
+
       const [ofis, tipos, lugs] = await Promise.allSettled([
-        getOficinas(),
+        isPrivileged ? getOficinas({ skipGlobalError: true }) : Promise.resolve([]),
         getTiposEvento(),
         lugarFisicoService.getLugaresFisicos()
       ]);
@@ -95,12 +98,12 @@ const AnnouncementDetailModal = ({ isOpen, onClose, announcement, onSuccess, isR
   };
 
   const statusConfig = {
-    PENDIENTE: { label: 'En Revisión', color: '#f59e0b', bg: '#fffbeb', border: '#fef3c7', text: '#d97706' },
-    APROBADA: { label: 'Aprobada', color: '#10b981', bg: '#f0fdf4', border: '#dcfce7', text: '#059669' },
-    RECHAZADA: { label: 'Rechazada', color: '#ef4444', bg: '#fef2f2', border: '#fee2e2', text: '#dc2626' },
-    PUBLICADA: { label: 'Anuncio Publicado', color: '#0ea5e9', bg: '#f0f9ff', border: '#e0f2fe', text: '#0284c7' },
-    EN_REVISION: { label: 'Devuelto para corrección', color: '#8b5cf6', bg: '#faf5ff', border: '#ede9fe', text: '#7c3aed' }
-  }[status] || { label: status, color: '#64748b', bg: '#f8fafc', border: '#e2e8f0', text: '#475569' };
+    PENDIENTE:   { label: 'Pendiente',    subtitle: 'En espera de revisión',        color: '#f59e0b', bg: '#fffbeb', border: '#fef3c7', text: '#d97706' },
+    APROBADA:    { label: 'Aprobada',     subtitle: 'Lista para ser publicada',      color: '#10b981', bg: '#f0fdf4', border: '#dcfce7', text: '#059669' },
+    RECHAZADA:   { label: 'Rechazada',    subtitle: 'Revisa el motivo del rechazo',  color: '#ef4444', bg: '#fef2f2', border: '#fee2e2', text: '#dc2626' },
+    PUBLICADA:   { label: 'Publicada',    subtitle: 'Visible en la plataforma',      color: '#0ea5e9', bg: '#f0f9ff', border: '#e0f2fe', text: '#0284c7' },
+    EN_REVISION: { label: 'En revisión',  subtitle: 'Correcciones solicitadas',      color: '#8b5cf6', bg: '#faf5ff', border: '#ede9fe', text: '#7c3aed' }
+  }[status] || { label: status, subtitle: '', color: '#64748b', bg: '#f8fafc', border: '#e2e8f0', text: '#475569' };
 
 
   const handleFileChange = (e) => {
@@ -190,8 +193,8 @@ const AnnouncementDetailModal = ({ isOpen, onClose, announcement, onSuccess, isR
                 <Send size={20} color="white" />
               </div>
               <div>
-                <div className={styles.statusLabel} style={{ color: statusConfig.text }}>Estado del Anuncio</div>
-                <div className={styles.statusValue} style={{ fontSize: '18px' }}>{statusConfig.label}</div>
+                <div className={styles.statusLabel} style={{ color: statusConfig.text }}>{statusConfig.label}</div>
+                <div className={styles.statusValue} style={{ fontSize: '14px' }}>{statusConfig.subtitle}</div>
               </div>
             </div>
             {canManage && (
@@ -352,7 +355,7 @@ const AnnouncementDetailModal = ({ isOpen, onClose, announcement, onSuccess, isR
                   </div>
                 ) : (
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-                    {formData.lugares.length > 0 ? formData.lugares.map((l, i) => (
+                    {(formData.lugares || []).length > 0 ? (formData.lugares || []).map((l, i) => (
                       <span key={i} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '3px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold' }}>{l}</span>
                     )) : <div style={{ fontSize: '15px', color: '#1e293b', fontWeight: 'bold' }}>No definido</div>}
                   </div>
@@ -404,50 +407,50 @@ const AnnouncementDetailModal = ({ isOpen, onClose, announcement, onSuccess, isR
 
         {/* ── Panel de Revisión (PENDIENTE) ── */}
         {(canReview && !isReadOnly) && (
-          <div className={styles.actionPanel} style={{ background: 'linear-gradient(135deg,#fefce8,#fffbeb)', border: '1.5px solid #fde68a' }}>
-            <h4 className={styles.actionPanelTitle} style={{ color: '#92400e' }}>
-              <AlertCircle size={18} /> Revisión de Solicitud
+          <div className={styles.actionPanel} style={{ border: '1px solid #e2e8f0', background: 'linear-gradient(135deg, #fff 0%, #f8fafc 100%)' }}>
+            <h4 className={styles.actionPanelTitle}>
+              <CheckCircle size={18} color="#ce1126" /> Decisión Administrativa
             </h4>
             {rejecting && (
-              <textarea
-                value={rejectReason} onChange={e => setRejectReason(e.target.value)}
-                placeholder="Escribe el motivo del rechazo..."
-                className={styles.inputField} style={{ minHeight: '80px', marginBottom: '12px' }}
-              />
+              <div style={{ marginBottom: '16px' }}>
+                <label className={styles.fieldLabel}>Motivo del Rechazo</label>
+                <textarea
+                  value={rejectReason} onChange={e => setRejectReason(e.target.value)}
+                  placeholder="Indique las razones..."
+                  className={styles.inputField} style={{ minHeight: '80px' }}
+                />
+              </div>
             )}
             {reviewing && (
-              <textarea
-                value={reviewObservations} onChange={e => setReviewObservations(e.target.value)}
-                placeholder="Describa qué debe corregir la oficina antes de reenviar..."
-                className={styles.inputField} style={{ minHeight: '80px', marginBottom: '12px' }}
-              />
+              <div style={{ marginBottom: '16px' }}>
+                <label className={styles.fieldLabel}>Observaciones para la oficina</label>
+                <textarea
+                  value={reviewObservations} onChange={e => setReviewObservations(e.target.value)}
+                  placeholder="Describa qué debe corregir la oficina antes de reenviar..."
+                  className={styles.inputField} style={{ minHeight: '80px' }}
+                />
+              </div>
             )}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
               {(rejecting || reviewing) && (
                 <button onClick={() => { setRejecting(false); setReviewing(false); }} className={styles.btnSecondary}>Volver</button>
               )}
               {!reviewing && (
-                <button
-                  onClick={() => handleStatusUpdate('Rechazar')} disabled={loadingAction}
-                  className={styles.btnDanger} style={{ background: '#fef2f2', color: '#ef4444', border: '1px solid #fca5a5', display: 'flex', alignItems: 'center', gap: '6px' }}
-                >
-                  <X size={14} /> {rejecting ? 'Confirmar Rechazo' : 'Rechazar'}
+                <button onClick={() => handleStatusUpdate('Rechazar')} disabled={loadingAction} className={styles.btnDanger}>
+                  {rejecting ? 'Confirmar Rechazo' : 'Rechazar Solicitud'}
                 </button>
               )}
               {!rejecting && (
                 <button
                   onClick={() => handleStatusUpdate('Devolver')} disabled={loadingAction}
-                  style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)', color: 'white', border: 'none', borderRadius: '8px', padding: '10px 18px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}
+                  style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)', color: 'white', border: 'none', borderRadius: '8px', padding: '10px 20px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}
                 >
                   {reviewing ? 'Confirmar Devolución' : 'En revisión'}
                 </button>
               )}
               {!rejecting && !reviewing && (
-                <button
-                  onClick={() => handleStatusUpdate('Aprobar')} disabled={loadingAction}
-                  className={styles.btnPrimary} style={{ background: '#059669', display: 'flex', alignItems: 'center', gap: '6px' }}
-                >
-                  <CheckCircle size={14} /> Aprobar
+                <button onClick={() => handleStatusUpdate('Aprobar')} disabled={loadingAction} className={styles.btnPrimary} style={{ background: 'linear-gradient(135deg, #ce1126 0%, #a50e1f 100%)' }}>
+                  Aprobar Solicitud
                 </button>
               )}
             </div>
@@ -583,6 +586,8 @@ const AnnouncementDetailModal = ({ isOpen, onClose, announcement, onSuccess, isR
                         horaInicio: announcement.horaInicio || '',
                         horaFin: announcement.horaFin || '',
                         lugar: announcement.lugar || '',
+                        lugares: Array.isArray(announcement.lugares) ? announcement.lugares : [],
+                        idsLugaresFisicos: Array.isArray(announcement.idsLugaresFisicos) ? announcement.idsLugaresFisicos : [],
                         correoContacto: announcement.correoContacto || '',
                         oficina: announcement.oficina || '',
                         idOficina: announcement.idOficina || '',

@@ -116,11 +116,12 @@
   gap: 10px;
   cursor: pointer;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
-  transition: transform 0.2s;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .participantBadge:hover {
   transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
 }
 
 .participantAvatar {
@@ -155,11 +156,12 @@
   gap: 8px;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01);
-  transition: transform 0.2s;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .participantBadgeSmall:hover {
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
 }
 
 .participantAvatarSmall {
@@ -208,13 +210,13 @@
 }
 
 .btnPrimary:disabled {
-  opacity: 0.7;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
 .btnPrimary:not(:disabled):hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 24px rgba(206, 17, 38, 0.35);
 }
 
 .btnSecondary {
@@ -229,14 +231,21 @@
   transition: all 0.2s;
 }
 
-.btnSecondary:hover {
-  background-color: #f8fafc;
+.btnSecondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btnSecondary:not(:disabled):hover {
+  background-color: #f1f5f9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 .btnDanger {
   padding: 12px 28px;
   border-radius: 30px;
-  background: #1e293b;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
   color: white;
   font-weight: 800;
   font-size: 13px;
@@ -245,6 +254,13 @@
   transition: all 0.2s;
 }
 
-.btnDanger:hover {
-  background: #0f172a;
+.btnDanger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btnDanger:not(:disabled):hover {
+  background: linear-gradient(135deg, #0f172a 0%, #020617 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.35);
 }

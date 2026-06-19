@@ -9,9 +9,13 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  animation: fadeIn 0.15s linear forwards;
+  animation: fadeIn 0.2s ease forwards;
   will-change: opacity;
   transform: translateZ(0);
+}
+
+.overlayClosing {
+  animation: fadeOut 0.2s ease forwards;
 }
 
 .modal {
@@ -32,6 +36,10 @@
   transform: translateZ(0);
   backface-visibility: hidden;
   contain: content;
+}
+
+.modalClosing {
+  animation: scaleOut 0.2s cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 
 .header {
@@ -83,14 +91,30 @@
   to { opacity: 1; }
 }
 
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
 @keyframes scaleIn {
-  from { 
+  from {
     opacity: 0;
     transform: scale(0.95) translateY(10px);
   }
-  to { 
+  to {
     opacity: 1;
     transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes scaleOut {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
   }
 }
 

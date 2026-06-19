@@ -191,56 +191,39 @@ const Users = () => {
     <div className="page-container">
       <div className={styles.header}>
         <h1 className="page-title" style={{marginBottom: 0}}>Usuarios</h1>
+        <button className={styles.createBtn} onClick={() => setIsModalOpen(true)}>
+          <Plus size={18}/> Crear usuario
+        </button>
       </div>
 
       <div className="card">
-        <div className={styles.tabs}>
-          <button 
-            className={`${styles.tabBtn} ${statusFilter === '' ? styles.active : ''}`}
-            onClick={() => setStatusFilter('')}
-          >
-            Todos
-          </button>
-          <button 
-            className={`${styles.tabBtn} ${statusFilter === 'ACTIVO' ? styles.active : ''}`}
-            onClick={() => setStatusFilter('ACTIVO')}
-          >
-            Activos
-          </button>
-          <button 
-            className={`${styles.tabBtn} ${statusFilter === 'INACTIVO' ? styles.active : ''}`}
-            onClick={() => setStatusFilter('INACTIVO')}
-          >
-            Inactivos
-          </button>
-        </div>
-
-        <div className={styles.controlsBar}>
-          <div className={styles.searchBar}>
-            <input 
-              type="text" 
-              placeholder="Buscar por nombre, correo..." 
+        <div className={styles.filterToolbar}>
+          <div style={{ position: 'relative' }}>
+            <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
+            <input
+              type="text"
+              placeholder="Buscar por nombre, correo o teléfono..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              className={styles.searchInput}
             />
-            <Search size={18} className={styles.searchIcon}/>
           </div>
-          
-          <select 
-            className={styles.roleSelect} 
-            value={roleFilter} 
-            onChange={(e) => setRoleFilter(e.target.value)}
-          >
-             <option value="">Todos los Roles</option>
-             <option value="SUPER_ADMIN">Super Administrador</option>
-             <option value="COMUNICACIONES">Comunicaciones</option>
-             <option value="OFICINA">Oficina</option>
-             <option value="USUARIO_AUTENTICADO_APP">Usuario Autenticado</option>
-          </select>
-
-          <button className={styles.createBtn} onClick={() => setIsModalOpen(true)}>
-            <Plus size={18}/> Crear usuario
-          </button>
+          <div className={styles.filterRow}>
+            <select className={styles.filterSelect} value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
+              <option value="">Todos los Roles</option>
+              <option value="SUPER_ADMIN">Super Administrador</option>
+              <option value="COMUNICACIONES">Comunicaciones</option>
+              <option value="OFICINA">Oficina</option>
+              <option value="USUARIO_AUTENTICADO_APP">Usuario Autenticado</option>
+              <option value="CONSULTORIA">Consultoría</option>
+            </select>
+            <div className={styles.filterDivider} />
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+              <button className={`${styles.tabBtn} ${statusFilter === '' ? styles.active : ''}`} onClick={() => setStatusFilter('')}>Todos</button>
+              <button className={`${styles.tabBtn} ${statusFilter === 'ACTIVO' ? styles.active : ''}`} onClick={() => setStatusFilter('ACTIVO')}>Activos</button>
+              <button className={`${styles.tabBtn} ${statusFilter === 'INACTIVO' ? styles.active : ''}`} onClick={() => setStatusFilter('INACTIVO')}>Inactivos</button>
+            </div>
+          </div>
         </div>
 
         <div className={styles.rolesGrid}>
@@ -398,9 +381,10 @@ const Users = () => {
                       <option value="2">Comunicaciones</option>
                       <option value="3">Oficina</option>
                       <option value="4">Usuario Autenticado</option>
+                      <option value="5">Consultoría</option>
                     </select>
                   </div>
-                  {formData.idRol !== '4' && (
+                  {formData.idRol !== '4' && formData.idRol !== '5' && (
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                       <label className={modalStyles.fieldLabel}><Building size={14}/> Oficina</label>
                       <select 

@@ -113,7 +113,7 @@
   padding: 14px 24px;
   color: #ffffff;
   font-weight: 500;
-  transition: background-color 0.2s ease, color 0.1s ease, transform 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
   position: relative;
 }
 
