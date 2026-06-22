@@ -115,7 +115,7 @@ const UserDetailDrawer = ({ isOpen, onClose, user, initialMode = 'VIEW', onRefre
       const url = res?.url || res?.urlAcceso || res?.urlDescarga;
       if (url) setFormData(prev => ({ ...prev, fotoUrl: url }));
     } catch (err) {
-       notification.error(`Error al subir la fotografía`);
+       notification.error('Error al subir la fotografía: ' + (err.response?.data?.message || err.message || 'Intenta de nuevo'));
     } finally {
       setUploadingFoto(false);
     }
@@ -350,9 +350,10 @@ const UserDetailDrawer = ({ isOpen, onClose, user, initialMode = 'VIEW', onRefre
                           <option value="2">Comunicaciones</option>
                           <option value="3">Oficina</option>
                           <option value="4">Usuario Autenticado</option>
+                          <option value="5">Consultoría</option>
                        </select>
                     </div>
-                     {formData.idRol !== '4' && (
+                     {formData.idRol !== '4' && formData.idRol !== '5' && (
                        <div style={{ display: 'flex', flexDirection: 'column' }}>
                           <label className={modalStyles.fieldLabel}><Building size={14} style={{ marginRight: '4px' }}/> Oficina</label>
                            <select name="idOficina" value={formData.idOficina || ''} onChange={handleChange} className={modalStyles.inputField} required={formData.idRol !== '4'}>

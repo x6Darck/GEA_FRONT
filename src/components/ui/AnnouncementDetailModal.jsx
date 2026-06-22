@@ -77,11 +77,13 @@ const AnnouncementDetailModal = ({ isOpen, onClose, announcement, onSuccess, isR
   const status = announcement.status?.toUpperCase() || '';
   const isAdmin = user?.rol === 'ADMIN' || user?.rol === 'SUPER_ADMIN' || user?.rol === 'COMUNICACIONES';
   const isSuperAdmin = user?.rol === 'SUPER_ADMIN';
-  
+  // CONSULTORIA es revisor de SOLO LECTURA
+  const isReadOnlyReviewer = user?.rol === 'CONSULTORIA';
+
   const canReview = isAdmin && status === 'PENDIENTE';
   const canPublish = isAdmin && status === 'APROBADA';
   const canManage = isAdmin && (status === 'PUBLICADA' || status === 'APROBADA');
-  const canEditOwn = !isAdmin && !isReadOnly && status === 'EN_REVISION';
+  const canEditOwn = !isAdmin && !isReadOnly && !isReadOnlyReviewer && (status === 'PENDIENTE' || status === 'RECHAZADA' || status === 'EN_REVISION');
 
   const formatTime12h = (time) => {
     if (!time) return '—';

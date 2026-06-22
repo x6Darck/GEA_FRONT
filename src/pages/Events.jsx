@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useContext } from 'react';
+import React, { useState, useEffect, useMemo, useContext, useRef } from 'react';
 import { Search, Plus, Calendar, Filter, Trash2, Eye, EyeOff, MoreHorizontal, ChevronRight, FileText, CheckCircle, Clock, Layers } from 'lucide-react';
 import styles from './Events.module.css';
 import { getEventosSolicitudes, getOficinaById, getEventosPublicados, getEventoById } from '../services/eventos.service';
@@ -74,7 +74,8 @@ const Events = () => {
   useEffect(() => {
     fetchEvents();
     cargarUsuarios();
-  }, [activeTab, user]);
+    // El filtrado por pestaña es client-side (useMemo); no se recarga la API al cambiar de tab
+  }, [user]);
 
   const cargarUsuarios = async () => {
     // Solo admins/comunicaciones pueden ver la lista global de usuarios
@@ -239,7 +240,7 @@ const Events = () => {
     });
 
     return result;
-  }, [filteredData]);
+  }, [paginatedData]);
 
   const toggleGroup = (groupId, e) => {
     e.stopPropagation();
@@ -266,24 +267,27 @@ const Events = () => {
   };
 
   const [detailLoading, setDetailLoading] = useState(false);
+  const detailReqRef = useRef(0);
   const handleOpenDetail = async (ev) => {
     if (!ev?.id) return;
+    const reqId = ++detailReqRef.current;
     setDetailLoading(true);
     try {
       // First set the summary data we already have
       setSelectedEvent(ev);
       setIsDetailModalOpen(true);
-      
+
       // Then fetch the full detail (including participants)
       const fullEvent = await getEventoById(ev.id, user?.rol);
-      if (fullEvent) {
+      // Solo aplicar si esta sigue siendo la petición de detalle más reciente
+      if (fullEvent && detailReqRef.current === reqId) {
         setSelectedEvent(fullEvent);
       }
     } catch (err) {
       console.error("Error cargando detalle completo del evento:", err);
       // Fallback: stay with the summary data
     } finally {
-      setDetailLoading(false);
+      if (detailReqRef.current === reqId) setDetailLoading(false);
     }
   };
 
@@ -483,7 +487,7 @@ const Events = () => {
                     </React.Fragment>
                   );
                 })}
-                {paginatedData.length === 0 && (
+                {groupedData.length === 0 && (
                   <tr>
                     <td colSpan="9" style={{ textAlign: 'center', padding: '80px 20px', color: '#94a3b8' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
@@ -521,7 +525,7 @@ const Events = () => {
 
       {selectedEvent && <EventDetailModal 
         isOpen={isDetailModalOpen} 
-        onClose={() => setIsDetailModalOpen(false)} 
+        onClose={() => { detailReqRef.current++; setIsDetailModalOpen(false); }} 
         event={selectedEvent} 
         onSuccess={fetchEvents} 
         usersNamesMap={usersNamesMap}

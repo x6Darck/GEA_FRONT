@@ -13,6 +13,15 @@ import { formatLocalDate, getTodayStr } from '../utils/dateUtils';
 /* ─── Helper: resolves image URL ─────────────────────────────────── */
 const resolveImg = (url) => resolveImageUrl(url);
 
+/* ─── Helper: estilo/etiqueta del indicador de tipo de ingreso ─────── */
+const ingresoBadge = (tipo) => {
+  switch ((tipo || 'LIBRE').toUpperCase()) {
+    case 'PAGO':    return { label: 'Pago',    icon: '💲', bg: '#f59e0b', color: '#ffffff' };
+    case 'PRIVADO': return { label: 'Privado', icon: '🔒', bg: '#475569', color: '#ffffff' };
+    default:        return { label: 'Libre',   icon: '🎟️', bg: '#16a34a', color: '#ffffff' };
+  }
+};
+
 /* ─── Mini event card (shared between list and day-modal) ─────────── */
 const EventCard = ({ evt, onClick }) => {
   const imgUrl = resolveImg(evt.piezaGraficaUrl);
@@ -76,22 +85,45 @@ const EventCard = ({ evt, onClick }) => {
 
         {/* Top badges */}
         <div style={{ position: 'absolute', top: '8px', left: '12px', right: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', zIndex: 2 }}>
-          {evt.tipoEvento && (
-            <span style={{ 
-              background: `${eventColor}33`, // 20% opacity 
-              backdropFilter: 'blur(10px)', 
-              color: '#fff', 
-              fontSize: '9px', 
-              fontWeight: '800', 
-              textTransform: 'uppercase', 
-              letterSpacing: '0.8px', 
-              padding: '4px 10px', 
-              borderRadius: '20px',
-              border: `1px solid ${eventColor}66` // 40% opacity
-            }}>
-              {evt.tipoEvento}
-            </span>
-          )}
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+            {evt.tipoEvento && (
+              <span style={{
+                background: `${eventColor}33`, // 20% opacity
+                backdropFilter: 'blur(10px)',
+                color: '#fff',
+                fontSize: '9px',
+                fontWeight: '800',
+                textTransform: 'uppercase',
+                letterSpacing: '0.8px',
+                padding: '4px 10px',
+                borderRadius: '20px',
+                border: `1px solid ${eventColor}66` // 40% opacity
+              }}>
+                {evt.tipoEvento}
+              </span>
+            )}
+            {evt.tipoIngreso && (() => {
+              const b = ingresoBadge(evt.tipoIngreso);
+              return (
+                <span style={{
+                  background: b.bg,
+                  color: b.color,
+                  fontSize: '9px',
+                  fontWeight: '800',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.6px',
+                  padding: '4px 10px',
+                  borderRadius: '20px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.28)'
+                }}>
+                  <span style={{ fontSize: '10px' }}>{b.icon}</span> {b.label}
+                </span>
+              );
+            })()}
+          </div>
           {imgUrl && onClick && (
             <span style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', color: '#fff', fontSize: '9px', fontWeight: '700', padding: '3px 9px', borderRadius: '20px', marginLeft: 'auto' }}>
               Ver pieza 🖼
@@ -222,6 +254,14 @@ const CompactEventCard = ({ evt, onClick }) => {
           <div className={styles.typeBadge} style={{ color: eventColor, borderBottom: `2px solid ${eventColor}22` }}>
             <span>{evt.tipoEvento || 'Sin Categoría'}</span>
           </div>
+          {evt.tipoIngreso && (() => {
+            const b = ingresoBadge(evt.tipoIngreso);
+            return (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: b.bg, color: b.color, fontSize: '9px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '3px 9px', borderRadius: '20px', marginBottom: '6px', alignSelf: 'flex-start' }}>
+                <span style={{ fontSize: '10px' }}>{b.icon}</span> {b.label}
+              </span>
+            );
+          })()}
 
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '2px' }}>
             <h4 className={styles.compactTitle} title={evt.nombre} style={{ 
@@ -316,6 +356,14 @@ const GridEventCard = ({ evt, onClick }) => {
          {!imgUrl && <span style={{ fontSize: '32px', opacity: 0.5 }}>📅</span>}
        </div>
        <div className={styles.gridInfo}>
+          {evt.tipoIngreso && (() => {
+            const b = ingresoBadge(evt.tipoIngreso);
+            return (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: b.bg, color: b.color, fontSize: '9px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '3px 9px', borderRadius: '20px', marginBottom: '6px' }}>
+                <span style={{ fontSize: '10px' }}>{b.icon}</span> {b.label}
+              </span>
+            );
+          })()}
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '6px' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', flex: 1, minWidth: 0 }}>
                 <div className={styles.statusDot} style={{ backgroundColor: eventColor, marginTop: '6px' }} />

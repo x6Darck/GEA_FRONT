@@ -87,7 +87,7 @@ const PublishEventModal = ({ isOpen, onClose, onSuccess }) => {
             {approvedEvents.map(evt => (
               <div key={evt.id} style={{ display: 'flex', flexDirection: 'column', padding: '15px', border: '1px solid var(--border)', borderRadius: '8px', background: 'var(--card-bg)' }}>
                  <h4 style={{ margin: '0 0 5px 0', color: 'var(--primary)', fontSize: '16px' }}>{evt.nombre}</h4>
-                 <p style={{ margin: '0 0 10px 0', fontSize: '13px', color: 'var(--text-secondary)' }}>Fecha: {evt.start} | Lugar: {evt.office}</p>
+                 <p style={{ margin: '0 0 10px 0', fontSize: '13px', color: 'var(--text-secondary)' }}>Fecha: {evt.fecha || evt.start} | Lugar: {evt.office}</p>
                  
                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
                    <div style={{ flex: 1 }}>

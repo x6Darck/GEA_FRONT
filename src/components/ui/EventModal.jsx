@@ -46,10 +46,12 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
     requiereTransmision: false,
     requiereCubrimiento: false,
     requierePiezaGrafica: false,
+    requiereServiciosGenerales: false,
     frecuenciaRecurrencia: 'NINGUNA',
     fechaFinRecurrencia: '',
     observaciones: '',
     esImportante: false,
+    tipoIngreso: 'LIBRE',
   });
 
   const [organizadoresList, setOrganizadoresList] = useState([]);
@@ -61,12 +63,10 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
 
   useEffect(() => {
     if (isOpen) {
-      setFormData(prev => ({ 
-        ...prev, 
-        fechaEvento: initialDate || '',
-        oficinaResponsable: user?.oficinaNombre || '',
-        idOficina: user?.idOficina || ''
-      }));
+      resetForm();
+      if (initialDate) {
+        setFormData(prev => ({ ...prev, fechaEvento: initialDate }));
+      }
       cargarDatosMaestros();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -181,6 +181,46 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
 
+    // Helper para comparar horas numéricamente (evita comparaciones lexicográficas de strings)
+    const toMinutes = (hhmm) => {
+      if (!hhmm || typeof hhmm !== 'string' || !hhmm.includes(':')) return null;
+      const [h, m] = hhmm.split(':').map(Number);
+      return h * 60 + m;
+    };
+
+    // Validaciones de cliente antes de enviar
+    if (!formData.nombreEvento || !formData.nombreEvento.trim()) {
+      notification.error('El nombre del evento es obligatorio.');
+      return;
+    }
+    if (!formData.fechaEvento) {
+      notification.error('Debes seleccionar la fecha del evento.');
+      return;
+    }
+    const hoyStr = new Date().toISOString().split('T')[0];
+    if (formData.fechaEvento < hoyStr) {
+      notification.error('La fecha del evento no puede ser en el pasado.');
+      return;
+    }
+    {
+      const ini = toMinutes(formData.horaInicio);
+      const fin = toMinutes(formData.horaFin);
+      if (ini == null || fin == null || fin <= ini) {
+        notification.error('La hora de fin debe ser posterior a la hora de inicio.');
+        return;
+      }
+    }
+    if (formData.frecuenciaRecurrencia && formData.frecuenciaRecurrencia !== 'NINGUNA') {
+      if (!formData.fechaFinRecurrencia) {
+        notification.error('Debes indicar la fecha fin de la recurrencia.');
+        return;
+      }
+      if (formData.fechaFinRecurrencia < formData.fechaEvento) {
+        notification.error('La fecha fin de recurrencia no puede ser anterior a la fecha del evento.');
+        return;
+      }
+    }
+
     // VALIDACIÓN DE CONFLICTOS (Lugar + Hora)
     if (allEvents && lugaresSeleccionados.length > 0 && formData.fechaEvento) {
       const conflict = allEvents.find(ev => {
@@ -193,11 +233,11 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
          
          if (!hasCommonLocation) return false;
          
-         const s1 = formData.horaInicio;
-         const e1 = formData.horaFin;
-         const s2 = ev.horaInicio;
-         const e2 = ev.horaFin;
-         
+         const s1 = toMinutes(formData.horaInicio);
+         const e1 = toMinutes(formData.horaFin);
+         const s2 = toMinutes(ev.horaInicio);
+         const e2 = toMinutes(ev.horaFin);
+         if (s1 == null || e1 == null || s2 == null || e2 == null) return false;
          return (s1 < e2 && e1 > s2);
       });
 
@@ -230,9 +270,11 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
         linkConexion: formData.linkConexion,
         responsableEvento: organizadoresList[0]?.nombre || '',
         tipoEvento: formData.tipoEvento,
+        tipoIngreso: formData.tipoIngreso || 'LIBRE',
         requierePiezaGrafica: !!formData.requierePiezaGrafica,
         requiereTransmision: !!formData.requiereTransmision,
         requiereCubrimiento: !!formData.requiereCubrimiento,
+        requiereServiciosGenerales: !!formData.requiereServiciosGenerales,
         observaciones: formData.observaciones,
         esImportante: !!formData.esImportante,
         frecuenciaRecurrencia: formData.frecuenciaRecurrencia || 'NINGUNA',
@@ -296,13 +338,14 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
       nombreEvento: '', descripcionEvento: '', fechaEvento: '',
       lugar: '', oficinaResponsable: user?.oficinaNombre || '', horaInicio: '08:00', horaFin: '10:00',
       tipoEvento: tiposEvento[0]?.nombre || '', hasInvitados: 'No', hasPatrocinadores: 'No',
-      requiereTransmision: false, requiereCubrimiento: false, requierePiezaGrafica: false,
+      requiereTransmision: false, requiereCubrimiento: false, requierePiezaGrafica: false, requiereServiciosGenerales: false,
       frecuenciaRecurrencia: 'NINGUNA', fechaFinRecurrencia: '',
-      observaciones: '', esImportante: false
+      observaciones: '', esImportante: false, tipoIngreso: 'LIBRE'
     });
     setOrganizadoresList([]);
     setInvitadosList([]);
     setPatrocinadoresList([]);
+    setLugaresSeleccionados([]);
   };
 
   const getImageUrl = (url) => resolveImageUrl(url);
@@ -531,6 +574,20 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
                       ))}
                     </select>
                 </div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <label style={labelStyle}>Tipo de ingreso <span style={{color: '#ce1126'}}>*</span></label>
+                    <select
+                      name="tipoIngreso"
+                      value={formData.tipoIngreso}
+                      onChange={(e) => setFormData({ ...formData, tipoIngreso: e.target.value })}
+                      style={inputStyle}
+                      required
+                    >
+                      <option value="LIBRE">Libre</option>
+                      <option value="PAGO">Pago</option>
+                      <option value="PRIVADO">Evento privado</option>
+                    </select>
+                </div>
               </div>
             </div>
           </div>
@@ -698,33 +755,22 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
                 <div style={{ padding: '8px', borderRadius: '10px', background: '#fef3c7', display: 'flex' }}><ShieldCheck size={20} color="#d97706" /></div>
                 Requerimientos Técnicos y Adicionales
               </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
-                <label style={{ ...inputStyle, display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', background: formData.requiereTransmision ? '#fffbeb' : '#fff' }}>
-                  <input 
-                    type="checkbox" 
-                    checked={formData.requiereTransmision} 
-                    onChange={e => setFormData({...formData, requiereTransmision: e.target.checked})}
-                    style={{ width: '18px', height: '18px' }}
-                  />
-                  <span style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b' }}>Requiere Transmisión</span>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '24px' }}>
+                <label style={{ padding: '9px 14px', borderRadius: '10px', background: formData.requiereTransmision ? '#eff6ff' : '#f8fafc', border: `1px solid ${formData.requiereTransmision ? '#bfdbfe' : '#e2e8f0'}`, fontSize: '12px', fontWeight: '600', color: formData.requiereTransmision ? '#1d4ed8' : '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.15s' }}>
+                  <input type="checkbox" style={{ accentColor: '#1d4ed8' }} checked={formData.requiereTransmision} onChange={e => setFormData({...formData, requiereTransmision: e.target.checked})} />
+                  Transmisión
                 </label>
-                <label style={{ ...inputStyle, display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', background: formData.requiereCubrimiento ? '#fffbeb' : '#fff' }}>
-                  <input 
-                    type="checkbox" 
-                    checked={formData.requiereCubrimiento} 
-                    onChange={e => setFormData({...formData, requiereCubrimiento: e.target.checked})}
-                    style={{ width: '18px', height: '18px' }}
-                  />
-                  <span style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b' }}>Requiere Cubrimiento</span>
+                <label style={{ padding: '9px 14px', borderRadius: '10px', background: formData.requiereCubrimiento ? '#f0fdf4' : '#f8fafc', border: `1px solid ${formData.requiereCubrimiento ? '#bbf7d0' : '#e2e8f0'}`, fontSize: '12px', fontWeight: '600', color: formData.requiereCubrimiento ? '#16a34a' : '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.15s' }}>
+                  <input type="checkbox" style={{ accentColor: '#16a34a' }} checked={formData.requiereCubrimiento} onChange={e => setFormData({...formData, requiereCubrimiento: e.target.checked})} />
+                  Cubrimiento
                 </label>
-                <label style={{ ...inputStyle, display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', background: formData.requierePiezaGrafica ? '#fffbeb' : '#fff' }}>
-                  <input 
-                    type="checkbox" 
-                    checked={formData.requierePiezaGrafica} 
-                    onChange={e => setFormData({...formData, requierePiezaGrafica: e.target.checked})}
-                    style={{ width: '18px', height: '18px' }}
-                  />
-                  <span style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b' }}>Requiere Pieza Gráfica</span>
+                <label style={{ padding: '9px 14px', borderRadius: '10px', background: formData.requierePiezaGrafica ? '#fff1f2' : '#f8fafc', border: `1px solid ${formData.requierePiezaGrafica ? '#fecaca' : '#e2e8f0'}`, fontSize: '12px', fontWeight: '600', color: formData.requierePiezaGrafica ? '#ce1126' : '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.15s' }}>
+                  <input type="checkbox" style={{ accentColor: '#ce1126' }} checked={formData.requierePiezaGrafica} onChange={e => setFormData({...formData, requierePiezaGrafica: e.target.checked})} />
+                  Pieza gráfica
+                </label>
+                <label style={{ padding: '9px 14px', borderRadius: '10px', background: formData.requiereServiciosGenerales ? '#fff7ed' : '#f8fafc', border: `1px solid ${formData.requiereServiciosGenerales ? '#fed7aa' : '#e2e8f0'}`, fontSize: '12px', fontWeight: '600', color: formData.requiereServiciosGenerales ? '#ea580c' : '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.15s' }}>
+                  <input type="checkbox" style={{ accentColor: '#ea580c' }} checked={formData.requiereServiciosGenerales} onChange={e => setFormData({...formData, requiereServiciosGenerales: e.target.checked})} />
+                  Servicios generales
                 </label>
               </div>
 

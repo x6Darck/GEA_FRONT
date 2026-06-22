@@ -113,11 +113,13 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
   const status = (event.status || '').toUpperCase();
   const isAdmin = user?.rol === 'SUPER_ADMIN' || user?.rol === 'COMUNICACIONES' || user?.rol === 'ADMIN';
   const isSuperAdmin = user?.rol === 'SUPER_ADMIN';
+  // CONSULTORIA es revisor de SOLO LECTURA: ve los eventos pero no edita ni ejecuta acciones
+  const isReadOnlyReviewer = user?.rol === 'CONSULTORIA';
 
   const canReview = isAdmin && status === 'PENDIENTE';
   const canPublish = isAdmin && status === 'APROBADA';
   const canManage = isAdmin && (status === 'PUBLICADA' || status === 'APROBADA');
-  const canEditOwn = !isAdmin && status === 'EN_REVISION';
+  const canEditOwn = !isAdmin && !isReadOnlyReviewer && (status === 'PENDIENTE' || status === 'RECHAZADA' || status === 'EN_REVISION');
 
   const handlePublishFileChange = (e) => {
     const file = e.target.files?.[0];
@@ -134,6 +136,8 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
     PUBLICADA:   { label: 'Publicada',    subtitle: 'Visible en la plataforma',     color: '#0ea5e9', bg: '#f0f9ff', border: '#e0f2fe', text: '#0284c7' },
     EN_REVISION: { label: 'En revisión',  subtitle: 'Correcciones solicitadas',     color: '#8b5cf6', bg: '#faf5ff', border: '#ede9fe', text: '#7c3aed' }
   }[status] || { label: status, subtitle: '', color: '#64748b', bg: '#f8fafc', border: '#e2e8f0', text: '#475569' };
+
+  const INGRESO_LABEL = { LIBRE: 'Libre', PAGO: 'Pago', PRIVADO: 'Evento privado' };
 
   const renderField = (label, value, isEditingLocal, fieldName, type = 'text', icon = null, forceReadOnly = false) => {
     if (isEditingLocal && !forceReadOnly) {
@@ -169,10 +173,16 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
                   const selected = tiposEvento.find(t => String(t.id || t.idTipoEvento) === val || t.nombre === val);
                   setFormData(prev => ({...prev, tipoEvento: selected ? selected.nombre : val, idTipoEvento: selected ? (selected.id || selected.idTipoEvento) : ''}));
               }} className={styles.inputField}>
-                 <option value={formData[fieldName]}>{formData[fieldName] || 'Seleccione Categoría'}</option>
+                 {!formData[fieldName] && <option value="">Seleccione Categoría</option>}
                  {(tiposEvento || []).map(t => (
                      <option key={t.id || t.idTipoEvento} value={t.nombre}>{t.nombre}</option>
                  ))}
+              </select>
+          ) : type === 'tipoIngreso' ? (
+              <select name={fieldName} value={formData[fieldName] || 'LIBRE'} onChange={handleInputChange} className={styles.inputField}>
+                 <option value="LIBRE">Libre</option>
+                 <option value="PAGO">Pago</option>
+                 <option value="PRIVADO">Evento privado</option>
               </select>
           ) : type === 'oficina' ? (
               <select name={fieldName} value={formData[fieldName] || ''} onChange={(e) => {
@@ -357,6 +367,7 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
                         if (!id) return;
                         if (!formData.idsLugaresFisicos.includes(id)) {
                           const lug = lugaresFisicos.find(l => l.id === id);
+                          if (!lug) return; // catálogo aún no cargó: evitar crash
                           setFormData({
                             ...formData,
                             idsLugaresFisicos: [...formData.idsLugaresFisicos, id],
@@ -393,6 +404,7 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
                 )}
               </div>
               {renderField('Tipo de Evento', formData.tipoEvento, isEditing, 'tipoEvento', 'tipoEvento', <Tag size={14}/>)}
+              {renderField('Tipo de Ingreso', isEditing ? formData.tipoIngreso : (INGRESO_LABEL[formData.tipoIngreso] || 'Libre'), isEditing, 'tipoIngreso', 'tipoIngreso', <Tag size={14}/>)}
             </div>
           </div>
 
@@ -430,6 +442,10 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
                       <input type="checkbox" style={{ accentColor: '#ce1126' }} checked={formData.requierePiezaGrafica} onChange={e => setFormData({...formData, requierePiezaGrafica: e.target.checked})} />
                       Pieza gráfica
                     </label>
+                    <label style={{ padding: '9px 14px', borderRadius: '10px', background: formData.requiereServiciosGenerales ? '#fff7ed' : '#f8fafc', border: `1px solid ${formData.requiereServiciosGenerales ? '#fed7aa' : '#e2e8f0'}`, fontSize: '12px', fontWeight: '600', color: formData.requiereServiciosGenerales ? '#ea580c' : '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.15s' }}>
+                      <input type="checkbox" style={{ accentColor: '#ea580c' }} checked={formData.requiereServiciosGenerales} onChange={e => setFormData({...formData, requiereServiciosGenerales: e.target.checked})} />
+                      Servicios generales
+                    </label>
                     {isAdmin && (
                       <label style={{ padding: '9px 14px', borderRadius: '10px', background: formData.esImportante ? '#fffbeb' : '#f8fafc', border: `1px solid ${formData.esImportante ? '#fde68a' : '#e2e8f0'}`, fontSize: '12px', fontWeight: '600', color: formData.esImportante ? '#b45309' : '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.15s' }}>
                         <input type="checkbox" style={{ accentColor: '#b45309' }} checked={formData.esImportante} onChange={e => setFormData({...formData, esImportante: e.target.checked})} />
@@ -454,6 +470,11 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
                          <Camera size={13} /> Cubrimiento
                        </span>
                      )}
+                     {formData.requiereServiciosGenerales && (
+                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '5px 12px', borderRadius: '100px', background: '#fff7ed', border: '1px solid #fed7aa', fontSize: '12px', fontWeight: '600', color: '#ea580c' }}>
+                         <ShieldCheck size={13} /> Servicios generales
+                       </span>
+                     )}
                      {formData.esImportante && (
                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '5px 12px', borderRadius: '100px', background: '#fffbeb', border: '1px solid #fde68a', fontSize: '12px', fontWeight: '600', color: '#b45309' }}>
                          <Star size={13} /> Evento importante
@@ -464,7 +485,7 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
                          <RefreshCw size={13} /> Recurrente {formData.frecuenciaRecurrencia.toLowerCase()} — hasta {formData.fechaFinRecurrencia?.split('T')[0]}
                        </span>
                      )}
-                     {!formData.requierePiezaGrafica && !formData.requiereTransmision && !formData.requiereCubrimiento && !formData.esImportante && !(formData.frecuenciaRecurrencia && formData.frecuenciaRecurrencia !== 'NINGUNA') && (
+                     {!formData.requierePiezaGrafica && !formData.requiereTransmision && !formData.requiereCubrimiento && !formData.requiereServiciosGenerales && !formData.esImportante && !(formData.frecuenciaRecurrencia && formData.frecuenciaRecurrencia !== 'NINGUNA') && (
                        <span style={{ fontSize: '12px', color: '#94a3b8', fontStyle: 'italic' }}>Sin requerimientos adicionales</span>
                      )}
                    </div>
@@ -724,7 +745,9 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
                           requiereCubrimiento: event.requiereCubrimiento || false,
                           observaciones: event.observaciones || '',
                           esImportante: event.esImportante || false,
+                          tipoIngreso: event.tipoIngreso || 'LIBRE',
                           requierePiezaGrafica: event.requierePiezaGrafica || false,
+                          requiereServiciosGenerales: event.requiereServiciosGenerales || false,
                           frecuenciaRecurrencia: event.frecuenciaRecurrencia || 'NINGUNA',
                           fechaFinRecurrencia: event.fechaFinRecurrencia ? (typeof event.fechaFinRecurrencia === 'string' ? event.fechaFinRecurrencia.split('T')[0] : event.fechaFinRecurrencia) : '',
                         });

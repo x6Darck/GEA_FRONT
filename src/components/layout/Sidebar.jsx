@@ -142,7 +142,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
 
         <div className={styles.footerBrand}>
           <div className={styles.brandLogo}>
-             <img src={geaLogo} alt="GEA Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+             <img src={geaLogoText} alt="GEA Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
         </div>
       </div>

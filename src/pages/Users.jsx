@@ -242,8 +242,8 @@ const Users = () => {
                  <div key={role} className={`${styles.roleSection} ${role === 'Oficina' ? styles.bigSection : ''}`} style={{ marginBottom: '20px' }}>
                    <h3 className={styles.roleTitle}>{role}</h3>
                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '15px' }}>
-                     {roleUsers.map(user => (
-                       <div key={user.id || user.idUsuario || Math.random()} className={styles.userCard}>
+                     {roleUsers.map((user, idx) => (
+                       <div key={user.id || user.idUsuario || user.correo || idx} className={styles.userCard}>
                           <div className={styles.userAvatar}>
                             {user.fotoUrl ? (
                               <img src={resolveImageUrl(user.fotoUrl)} alt={user.nombres} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '14px' }} onError={e => { e.currentTarget.style.display = 'none'; }} />

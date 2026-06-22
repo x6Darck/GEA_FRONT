@@ -25,7 +25,7 @@ const ProtectedRoute = ({ allowedRoles }) => {
   }
 
   if (!user) {
-    return <Navigate to="/calendario" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   // HALLAZGO AUDITORÍA: Verificar roles permitidos

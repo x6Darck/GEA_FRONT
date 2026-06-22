@@ -13,6 +13,7 @@ import {
   Download
 } from 'lucide-react';
 import { resolveImageUrl } from '../../utils/url';
+import notification from '../../utils/notification';
 
 // Sub-componente Drawer con PORTALS para evitar el "Atrapado en Modal"
 const DrawerPortal = ({ isOpen, onClose, title, children, width = '520px' }) => {
@@ -133,7 +134,7 @@ const ParticipantModal = ({ isOpen, onClose, onSave, mode, initialData, isReadOn
       setParticipant(prev => ({ ...prev, fotoUrl: url }));
     } catch (error) {
       console.error("Error subiendo imagen:", error);
-      alert("Error al subir la imagen.");
+      notification.error('Error al subir la imagen: ' + (error.response?.data?.message || error.message || 'Verifica el formato y tamaño del archivo'));
     } finally {
       setUploading(false);
     }

@@ -27,6 +27,12 @@ const Login = () => {
     try {
       await authLogin(credentials, { skipGlobalError: true });
       const savedUser = getCurrentUser();
+      if (!savedUser) {
+        const msg = 'No se pudo recuperar la sesión. Intenta de nuevo.';
+        setError(msg);
+        notification.error(msg);
+        return;
+      }
       login(savedUser);
       notification.success(`¡Bienvenido, ${savedUser.nombre || 'Usuario'}!`);
       navigate('/calendario');
