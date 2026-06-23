@@ -110,10 +110,10 @@ const DefaultErrorFallback = ({ error, onReset, isModal }) => {
 
       {/* Mensaje principal */}
       <div>
-        <h3 style={{ margin: '0 0 8px', color: '#1e293b', fontSize: '18px', fontWeight: '700' }}>
+        <h3 style={{ margin: '0 0 8px', color: 'var(--text-main)', fontSize: '18px', fontWeight: '700' }}>
           Algo salió mal
         </h3>
-        <p style={{ margin: 0, color: '#64748b', fontSize: '14px', maxWidth: '380px', lineHeight: 1.5 }}>
+        <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '14px', maxWidth: '380px', lineHeight: 1.5 }}>
           Ocurrió un error inesperado en este componente. Puedes intentar recargarlo o volver al inicio.
         </p>
 
@@ -151,7 +151,7 @@ const DefaultErrorFallback = ({ error, onReset, isModal }) => {
             style={{
               display: 'flex', alignItems: 'center', gap: '6px',
               padding: '10px 20px', borderRadius: '30px', border: '1px solid #e2e8f0',
-              backgroundColor: '#fff', color: '#475569',
+              backgroundColor: '#fff', color: 'var(--text-secondary)',
               fontWeight: '700', fontSize: '13px', cursor: 'pointer',
             }}
           >

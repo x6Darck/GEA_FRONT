@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Plus, Edit2, Eye, Camera } from 'lucide-react';
 import styles from './Users.module.css';
 import { getUsuarios, createUsuario } from '../services/usuarios.service';
-import { getOficinas } from '../services/oficinas.service';
+import { getOficinasCache } from '../services/oficinas.cache';
 import { uploadArchivo } from '../services/archivos.service';
 import { resolveImageUrl } from '../utils/url';
 import Spinner from '../components/ui/Spinner';
@@ -85,13 +85,8 @@ const Users = () => {
   
   const fetchOffices = async () => {
     try {
-      const data = await getOficinas();
-      setOffices(Array.isArray(data) ? data : data.data || []);
-      
-      // Si hay oficinas y la actual no existe en el fetch, poner la primera
-      if (data.length > 0 && !data.find(o => o.id.toString() === formData.idOficina)) {
-        setFormData(prev => ({ ...prev, idOficina: data[0].id.toString() }));
-      }
+      const data = await getOficinasCache();
+      setOffices(data);
     } catch (err) {
       console.error('Error al cargar oficinas:', err);
     }
@@ -180,12 +175,12 @@ const Users = () => {
     setIsDrawerOpen(true);
   };
 
-  const groupedUsers = users.reduce((acc, user) => {
+  const groupedUsers = useMemo(() => users.reduce((acc, user) => {
     const roleName = user.roleName || 'Otros';
     if (!acc[roleName]) acc[roleName] = [];
     acc[roleName].push(user);
     return acc;
-  }, {});
+  }, {}), [users]);
 
   return (
     <div className="page-container">
@@ -199,7 +194,7 @@ const Users = () => {
       <div className="card">
         <div className={styles.filterToolbar}>
           <div style={{ position: 'relative' }}>
-            <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
+            <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
             <input
               type="text"
               placeholder="Buscar por nombre, correo o teléfono..."
@@ -274,7 +269,7 @@ const Users = () => {
                 </div>
               ))
            ) : (
-              <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '100px 20px', color: '#94a3b8', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc', borderRadius: '16px', border: '1px dashed #e2e8f0' }}>
+              <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '100px 20px', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--surface-2)', borderRadius: 'var(--radius-lg)', border: '1px dashed var(--border)' }}>
                  <User size={48} style={{ marginBottom: '16px', opacity: 0.3 }} />
                  <p style={{ fontSize: '16px', fontWeight: '500' }}>No se encontraron usuarios activos.</p>
               </div>
@@ -302,7 +297,7 @@ const Users = () => {
           <form onSubmit={handleCreateSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             
             {formError && (
-              <div style={{ backgroundColor: '#fff1f2', border: '1px solid #fecaca', color: '#be123c', padding: '12px 16px', borderRadius: '12px', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ backgroundColor: 'var(--danger-soft)', border: '1px solid var(--danger-soft)', color: 'var(--danger)', padding: '12px 16px', borderRadius: '12px', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <AlertCircle size={18} />
                 <span>{formError}</span>
               </div>
@@ -310,13 +305,13 @@ const Users = () => {
             
             {/* SECTION 1: DATOS PERSONALES */}
             <div className={modalStyles.card}>
-              <h3 className={modalStyles.cardTitle} style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '12px', marginBottom: '16px' }}>
-                <User size={16} color="#ce1126" /> Datos Personales
+              <h3 className={modalStyles.cardTitle} style={{ borderBottom: '1px solid var(--border)', paddingBottom: '12px', marginBottom: '16px' }}>
+                <User size={16} color="var(--text-muted)" /> Datos Personales
               </h3>
               
               {/* PHOTO UPLOAD BLOCK */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '24px' }}>
-                <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: '#f1f5f9', border: '2px dashed #cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
+                <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: 'var(--surface-2)', border: '2px dashed var(--border-strong)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
                   {formData.fotoUrl ? (
                     <>
                       <img src={resolveImageUrl(formData.fotoUrl)} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => {
@@ -328,7 +323,7 @@ const Users = () => {
                       </button>
                     </>
                   ) : (
-                    <User size={30} color="#94a3b8" />
+                    <User size={30} color="var(--text-muted)" />
                   )}
                   {isUploadingFoto && (
                     <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -341,7 +336,7 @@ const Users = () => {
                     <Camera size={16} /> {formData.fotoUrl ? 'Cambiar Foto' : 'Subir Foto de Perfil'}
                     <input type="file" accept="image/*" onChange={handleFotoUpload} style={{ display: 'none' }} disabled={isUploadingFoto} />
                   </label>
-                  <p style={{ fontSize: '12px', color: '#64748b', marginTop: '6px' }}>JPG, PNG o WEBP. Máx 2MB.</p>
+                  <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '6px' }}>JPG, PNG o WEBP. Máx 2MB.</p>
                 </div>
               </div>
 
@@ -365,8 +360,8 @@ const Users = () => {
 
             {/* SECTION 2: CONFIGURACIÓN DE CUENTA */}
             <div className={modalStyles.cardGrey}>
-              <h3 className={modalStyles.cardTitle} style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '12px', marginBottom: '16px' }}>
-                <Lock size={16} color="#ce1126" /> Configuración de Cuenta
+              <h3 className={modalStyles.cardTitle} style={{ borderBottom: '1px solid var(--border)', paddingBottom: '12px', marginBottom: '16px' }}>
+                <Lock size={16} color="var(--text-muted)" /> Configuración de Cuenta
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -406,9 +401,9 @@ const Users = () => {
                   )}
                   {formData.idRol === '4' && (
                     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                       <div style={{ backgroundColor: '#f8fafc', padding: '10px 12px', borderRadius: '10px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <Info size={14} color="#64748b" />
-                          <span style={{ fontSize: '11px', color: '#64748b' }}>Los estudiantes no requieren asignación de oficina.</span>
+                       <div style={{ backgroundColor: 'var(--surface-2)', padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <Info size={14} color="var(--text-secondary)" />
+                          <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Los estudiantes no requieren asignación de oficina.</span>
                        </div>
                     </div>
                   )}
@@ -418,7 +413,7 @@ const Users = () => {
 
             {/* FOOTER */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }}>
-              <div style={{ fontSize: '13px', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '500' }}>
+              <div style={{ fontSize: '13px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '500' }}>
                  <AlertCircle size={15}/> El usuario deberá cambiar su clave al ingresar.
               </div>
               <div style={{ display: 'flex', gap: '12px' }}>

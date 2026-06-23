@@ -5,7 +5,7 @@ import modalStyles from './DetailModal.module.css';
 import { AuthContext } from '../../context/AuthContext';
 import { updateUsuario, deleteUsuario } from '../../services/usuarios.service';
 import { uploadArchivo } from '../../services/archivos.service';
-import { getOficinas } from '../../services/oficinas.service';
+import { getOficinasCache } from '../../services/oficinas.cache';
 import { resolveImageUrl } from '../../utils/url';
 import Spinner from './Spinner';
 import notification from '../../utils/notification';
@@ -53,10 +53,10 @@ const UserDetailDrawer = ({ isOpen, onClose, user, initialMode = 'VIEW', onRefre
     if (isOpen && user) {
       setMode(initialMode);
       setFormError(null);
-      
+
       const phoneVal = (user.celular || user.telefono || '');
       const officeId = (user.idOficina || user.oficina?.id)?.toString() || '';
-      
+
       setFormData({
         nombre: user.nombre || user.nombres || '',
         correo: user.correo || user.email || '',
@@ -67,15 +67,22 @@ const UserDetailDrawer = ({ isOpen, onClose, user, initialMode = 'VIEW', onRefre
         fotoUrl: user.fotoUrl || '',
         estado: user.estado || 'ACTIVO'
       });
-      
-      // Si entramos directamente en modo EDIT y no hay oficina, intentar pre-seleccionar la primera
-      if (initialMode === 'EDIT' && !officeId && offices.length > 0) {
-        setFormData(prev => ({ ...prev, idOficina: offices[0].id.toString() }));
-      }
-      
+
       fetchOffices();
     }
-  }, [isOpen, user, initialMode, offices.length]);
+  }, [isOpen, user, initialMode]);
+
+  // Pre-seleccionar primera oficina cuando se abre en modo EDIT y no hay oficina asignada
+  useEffect(() => {
+    if (isOpen && initialMode === 'EDIT' && offices.length > 0) {
+      setFormData(prev => {
+        if (!prev.idOficina) {
+          return { ...prev, idOficina: offices[0].id.toString() };
+        }
+        return prev;
+      });
+    }
+  }, [isOpen, initialMode, offices]);
 
   // Si no tenemos oficinaNombre en el user, intentamos buscarla en la lista cargada
   const displayOficina = formData.idRol === '4' 
@@ -86,8 +93,8 @@ const UserDetailDrawer = ({ isOpen, onClose, user, initialMode = 'VIEW', onRefre
 
   const fetchOffices = async () => {
     try {
-      const data = await getOficinas();
-      setOffices(Array.isArray(data) ? data : data.data || []);
+      const data = await getOficinasCache();
+      setOffices(data);
     } catch (err) {
       console.error('Error oficinas:', err);
     }
@@ -230,11 +237,11 @@ const UserDetailDrawer = ({ isOpen, onClose, user, initialMode = 'VIEW', onRefre
         
         {/* AVATAR COMÚN */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '24px' }}>
-          <div style={{ width: mode === 'EDIT' ? '100px' : '120px', height: mode === 'EDIT' ? '100px' : '120px', borderRadius: '50%', backgroundColor: '#f1f5f9', border: '3px solid white', boxShadow: '0 4px 12px rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
+          <div style={{ width: mode === 'EDIT' ? '100px' : '120px', height: mode === 'EDIT' ? '100px' : '120px', borderRadius: '50%', backgroundColor: 'var(--surface-2)', border: '3px solid var(--surface)', boxShadow: 'var(--shadow-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
             {formData.fotoUrl ? (
               <img src={resolveImageUrl(formData.fotoUrl)} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : (
-              <User size={mode === 'EDIT' ? 40 : 50} color="#94a3b8" />
+              <User size={mode === 'EDIT' ? 40 : 50} color="var(--text-muted)" />
             )}
             {mode === 'EDIT' && uploadingFoto && (
                 <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -252,8 +259,8 @@ const UserDetailDrawer = ({ isOpen, onClose, user, initialMode = 'VIEW', onRefre
             </div>
           ) : (
             <div style={{ textAlign: 'center', marginTop: '16px' }}>
-              <h2 style={{ margin: '0 0 4px 0', fontSize: '20px', color: '#0f172a', fontWeight: '800' }}>{formData.nombre || 'Usuario'}</h2>
-              <span style={{ backgroundColor: '#eff6ff', color: '#1d4ed8', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '700' }}>
+              <h2 style={{ margin: '0 0 4px 0', fontSize: '20px', color: 'var(--text-main)', fontWeight: '800' }}>{formData.nombre || 'Usuario'}</h2>
+              <span style={{ backgroundColor: 'var(--surface-2)', color: 'var(--text-secondary)', padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em', border: '1px solid var(--border)' }}>
                 {user?.roleName || 'Usuario'}
               </span>
             </div>
@@ -270,36 +277,36 @@ const UserDetailDrawer = ({ isOpen, onClose, user, initialMode = 'VIEW', onRefre
         {mode === 'VIEW' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div className={modalStyles.card}>
-              <h3 className={modalStyles.cardTitle} style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '12px', marginBottom: '16px' }}><User size={16} color="#ce1126" /> Información Personal</h3>
+              <h3 className={modalStyles.cardTitle} style={{ borderBottom: '1px solid var(--border)', paddingBottom: '12px', marginBottom: '16px' }}><User size={16} color="var(--text-muted)" /> Información Personal</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                  <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <label className={modalStyles.fieldLabel}>Nombre Completo</label>
-                    <div style={{ color: '#0f172a', fontWeight: '500', fontSize: '14px' }}>{formData.nombre || 'Sin nombre'}</div>
+                    <div style={{ color: 'var(--text-main)', fontWeight: '500', fontSize: '14px' }}>{formData.nombre || 'Sin nombre'}</div>
                  </div>
                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                        <label className={modalStyles.fieldLabel}><Mail size={14} style={{ marginRight: '4px' }}/> Correo</label>
-                       <div style={{ color: '#0f172a', fontWeight: '500', fontSize: '14px' }}>{formData.correo || 'Sin correo'}</div>
+                       <div style={{ color: 'var(--text-main)', fontWeight: '500', fontSize: '14px' }}>{formData.correo || 'Sin correo'}</div>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                        <label className={modalStyles.fieldLabel}><Phone size={14} style={{ marginRight: '4px' }}/> Teléfono</label>
-                       <div style={{ color: '#0f172a', fontWeight: '500', fontSize: '14px' }}>{formData.telefono || 'Sin celular'}</div>
+                       <div style={{ color: 'var(--text-main)', fontWeight: '500', fontSize: '14px' }}>{formData.telefono || 'Sin celular'}</div>
                     </div>
                  </div>
               </div>
             </div>
 
             <div className={modalStyles.cardGrey}>
-              <h3 className={modalStyles.cardTitle} style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '12px', marginBottom: '16px' }}><Lock size={16} color="#ce1126" /> Configuración de Cuenta</h3>
+              <h3 className={modalStyles.cardTitle} style={{ borderBottom: '1px solid var(--border)', paddingBottom: '12px', marginBottom: '16px' }}><Lock size={16} color="var(--text-muted)" /> Configuración de Cuenta</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                        <label className={modalStyles.fieldLabel}><Shield size={14} style={{ marginRight: '4px' }}/> Rol Institucional</label>
-                       <div style={{ color: '#0f172a', fontWeight: '500', fontSize: '14px' }}>{user?.roleName || 'Usuario'}</div>
+                       <div style={{ color: 'var(--text-main)', fontWeight: '500', fontSize: '14px' }}>{user?.roleName || 'Usuario'}</div>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                        <label className={modalStyles.fieldLabel}><Building size={14} style={{ marginRight: '4px' }}/> Oficina</label>
-                       <div style={{ color: '#0f172a', fontWeight: '500', fontSize: '14px' }}>{displayOficina}</div>
+                       <div style={{ color: 'var(--text-main)', fontWeight: '500', fontSize: '14px' }}>{displayOficina}</div>
                     </div>
                  </div>
               </div>
@@ -316,7 +323,7 @@ const UserDetailDrawer = ({ isOpen, onClose, user, initialMode = 'VIEW', onRefre
         {mode === 'EDIT' && (
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div className={modalStyles.card}>
-              <h3 className={modalStyles.cardTitle} style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '12px', marginBottom: '16px' }}><User size={16} color="#ce1126" /> Información Personal</h3>
+              <h3 className={modalStyles.cardTitle} style={{ borderBottom: '1px solid var(--border)', paddingBottom: '12px', marginBottom: '16px' }}><User size={16} color="var(--text-muted)" /> Información Personal</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                  <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <label className={modalStyles.fieldLabel}>Nombre Completo</label>
@@ -336,7 +343,7 @@ const UserDetailDrawer = ({ isOpen, onClose, user, initialMode = 'VIEW', onRefre
             </div>
 
             <div className={modalStyles.cardGrey}>
-              <h3 className={modalStyles.cardTitle} style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '12px', marginBottom: '16px' }}><Lock size={16} color="#ce1126" /> Configuración de Cuenta</h3>
+              <h3 className={modalStyles.cardTitle} style={{ borderBottom: '1px solid var(--border)', paddingBottom: '12px', marginBottom: '16px' }}><Lock size={16} color="var(--text-muted)" /> Configuración de Cuenta</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                  <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <label className={modalStyles.fieldLabel}>Contraseña (Dejar en blanco para no cambiar)</label>
@@ -366,9 +373,9 @@ const UserDetailDrawer = ({ isOpen, onClose, user, initialMode = 'VIEW', onRefre
                      )}
                      {formData.idRol === '4' && (
                        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                          <div style={{ backgroundColor: '#f8fafc', padding: '8px 12px', borderRadius: '10px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '8px', height: '40px' }}>
-                             <Info size={14} color="#64748b" />
-                             <span style={{ fontSize: '11px', color: '#64748b' }}>Los estudiantes no requieren oficina.</span>
+                          <div style={{ backgroundColor: 'var(--surface-2)', padding: '8px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '8px', height: '40px' }}>
+                             <Info size={14} color="var(--text-secondary)" />
+                             <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Los estudiantes no requieren oficina.</span>
                           </div>
                        </div>
                      )}

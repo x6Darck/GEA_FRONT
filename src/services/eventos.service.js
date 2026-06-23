@@ -108,7 +108,8 @@ export const mapEventoDTO = (evt) => {
     idGrupoRecurrencia: evt.idGrupoRecurrencia || null,
     frecuenciaRecurrencia: evt.frecuenciaRecurrencia || 'NINGUNA',
     fechaFinRecurrencia: evt.fechaFinRecurrencia || null,
-    esPrincipal: evt.esPrincipal || false
+    esPrincipal: evt.esPrincipal || false,
+    ubicacionExterna: evt.ubicacionExterna || ''
   };
 };
 

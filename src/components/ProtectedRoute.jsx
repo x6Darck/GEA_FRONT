@@ -36,7 +36,7 @@ const ProtectedRoute = ({ allowedRoles }) => {
         <p>No tienes permisos suficientes para acceder a esta sección.</p>
         <button 
           onClick={() => navigate('/calendario')}
-          style={{ marginTop: '20px', padding: '10px 20px', background: '#111827', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+          style={{ marginTop: '20px', padding: '10px 20px', background: 'var(--text-main)', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
         >
           Volver al Calendario
         </button>

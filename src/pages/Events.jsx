@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useContext, useRef } from 'react';
-import { Search, Plus, Calendar, Filter, Trash2, Eye, EyeOff, MoreHorizontal, ChevronRight, FileText, CheckCircle, Clock, Layers } from 'lucide-react';
+import { Search, Plus, Calendar, Filter, Trash2, Eye, EyeOff, MoreHorizontal, ChevronRight, FileText, CheckCircle, Clock, Layers, Star } from 'lucide-react';
 import styles from './Events.module.css';
 import { getEventosSolicitudes, getOficinaById, getEventosPublicados, getEventoById } from '../services/eventos.service';
 import { getUsuarios } from '../services/usuarios.service';
@@ -305,7 +305,7 @@ const Events = () => {
       <div className="card">
         <div className={styles.filterToolbar}>
           <div style={{ position: 'relative' }}>
-            <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
+            <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
             <input type="text" placeholder="Buscar por nombre, descripción o responsable..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className={styles.searchInput} />
           </div>
           <div className={styles.filterRow}>
@@ -336,7 +336,7 @@ const Events = () => {
             <div style={{ padding: '60px 20px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
               <Calendar size={40} style={{ opacity: 0.2, color: '#ef4444' }} />
               <p style={{ color: '#ef4444', fontWeight: '600', margin: 0 }}>{error}</p>
-              <button onClick={fetchEvents} style={{ padding: '8px 20px', borderRadius: 'var(--radius-md)', border: '1px solid #ef4444', background: 'white', color: '#ef4444', fontWeight: '600', cursor: 'pointer' }}>
+              <button onClick={fetchEvents} style={{ padding: '8px 20px', borderRadius: 'var(--radius-md)', border: '1px solid #ef4444', background: 'var(--surface)', color: '#ef4444', fontWeight: '600', cursor: 'pointer' }}>
                 Reintentar
               </button>
             </div>
@@ -368,17 +368,17 @@ const Events = () => {
                         onClick={isGroup ? (e) => toggleGroup(row.groupId, e) : undefined}
                         style={{ cursor: isGroup ? 'pointer' : 'default', backgroundColor: isGroup ? '#fffafa' : 'inherit', ...(isGroup && { borderLeft: '3px solid #fecaca' }) }}
                       >
-                        <td style={{ fontSize: '12px', fontWeight: 'bold', color: '#64748b' }}>
+                        <td style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>
                           {index + 1}
                         </td>
-                        <td style={{ fontSize: '11px', color: '#94a3b8' }}>
+                        <td style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
                           <div>#{item.id}</div>
                           {isGroup && (
                             <div style={{
                               display: 'inline-flex', alignItems: 'center', gap: '3px',
                               marginTop: '5px',
                               fontSize: '9px', fontWeight: '700',
-                              color: isExpanded ? '#ce1126' : '#94a3b8',
+                              color: isExpanded ? '#ce1126' : 'var(--text-muted)',
                               letterSpacing: '0.2px', textTransform: 'uppercase',
                               transition: 'color 0.2s ease'
                             }}>
@@ -391,7 +391,7 @@ const Events = () => {
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', maxWidth: '130px' }}>
                             <span style={{ 
                               fontWeight: '800', 
-                              color: '#1e293b', 
+                              color: 'var(--text-main)', 
                               overflow: 'hidden', 
                               textOverflow: 'ellipsis', 
                               whiteSpace: 'nowrap', 
@@ -404,7 +404,7 @@ const Events = () => {
                             {isGroup && <Layers size={10} color="#ce1126" />}
                             {item.esImportante && (
                               <span style={{ 
-                                backgroundColor: '#fff1f2', 
+                                backgroundColor: 'var(--primary-soft)', 
                                 color: '#ce1126', 
                                 padding: '1px 4px', 
                                 borderRadius: '4px', 
@@ -413,11 +413,11 @@ const Events = () => {
                                 border: '1px solid #fecaca',
                                 flexShrink: 0
                               }}>
-                                ★
+                                <Star size={13} fill="currentColor" />
                               </span>
                             )}
                           </div>
-                          <div className={styles.truncate} style={{ fontSize: '10px', color: '#64748b', maxWidth: '200px' }} title={item.descripcionEvento || item.desc}>{item.descripcionEvento || item.desc}</div>
+                          <div className={styles.truncate} style={{ fontSize: '10px', color: 'var(--text-secondary)', maxWidth: '200px' }} title={item.descripcionEvento || item.desc}>{item.descripcionEvento || item.desc}</div>
                         </td>
                         <td className={styles.hideMobile}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -426,19 +426,19 @@ const Events = () => {
                           </div>
                         </td>
                         <td>
-                          <div style={{ fontSize: '12px', color: '#1e293b', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '110px' }} title={item.office || item.oficinaNombre}>{item.office || item.oficinaNombre || '-'}</div>
-                          <div style={{ fontSize: '9px', color: '#94a3b8', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '110px' }} title={item.solicitanteEmail || item.usuarioSolicitanteCorreo}>
+                          <div style={{ fontSize: '12px', color: 'var(--text-main)', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '110px' }} title={item.office || item.oficinaNombre}>{item.office || item.oficinaNombre || '-'}</div>
+                          <div style={{ fontSize: '9px', color: 'var(--text-muted)', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '110px' }} title={item.solicitanteEmail || item.usuarioSolicitanteCorreo}>
                             {item.solicitanteEmail || item.usuarioSolicitanteCorreo || '-'}
                           </div>
                         </td>
                         <td>
-                          <div style={{ fontSize: '12px', color: '#1e293b' }}>
+                          <div style={{ fontSize: '12px', color: 'var(--text-main)' }}>
                             {item.fechaEvento?.split('T')[0] || item.fecha?.split('T')[0] || '-'}
                           </div>
                         </td>
                         <td>
                           {item.piezaGraficaUrl ? (
-                            <div style={{ width: '28px', height: '28px', borderRadius: '4px', background: `url(${resolveImg(item.piezaGraficaUrl)}) center/cover`, border: '1px solid #e2e8f0' }} />
+                            <div style={{ width: '28px', height: '28px', borderRadius: '4px', background: `url(${resolveImg(item.piezaGraficaUrl)}) center/cover`, border: '1px solid var(--border)' }} />
                           ) : (
                             <FileText size={18} color="#cbd5e1" />
                           )}
@@ -458,18 +458,18 @@ const Events = () => {
                         <tr
                           key={sub.id}
                           className={isClosing ? styles.subRowExit : styles.subRowEnter}
-                          style={{ cursor: 'default', backgroundColor: '#f9fafb', borderLeft: '3px solid #ce1126', animationDelay: `${sIdx * 0.04}s` }}
+                          style={{ cursor: 'default', backgroundColor: 'var(--surface-2)', border: '1px solid var(--border)', animationDelay: `${sIdx * 0.04}s` }}
                         >
-                          <td style={{ fontSize: '11px', color: '#94a3b8', textAlign: 'right' }}>{index + 1}.{sIdx + 1}</td>
+                          <td style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'right' }}>{index + 1}.{sIdx + 1}</td>
                           <td style={{ fontSize: '10px', color: '#cbd5e1' }}>#{sub.id}</td>
                           <td colSpan={3}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <Clock size={10} color="#94a3b8" />
-                              <span style={{ fontSize: '11px', color: '#475569' }}>Instancia recurrente del evento</span>
+                              <Clock size={10} color="var(--text-muted)" />
+                              <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Instancia recurrente del evento</span>
                             </div>
                           </td>
                           <td>
-                            <div style={{ fontSize: '11px', color: '#1e293b', fontWeight: '600' }}>
+                            <div style={{ fontSize: '11px', color: 'var(--text-main)', fontWeight: '600' }}>
                               {sub.fechaEvento?.split('T')[0] || sub.fecha?.split('T')[0]}
                             </div>
                           </td>
@@ -489,7 +489,7 @@ const Events = () => {
                 })}
                 {groupedData.length === 0 && (
                   <tr>
-                    <td colSpan="9" style={{ textAlign: 'center', padding: '80px 20px', color: '#94a3b8' }}>
+                    <td colSpan="9" style={{ textAlign: 'center', padding: '80px 20px', color: 'var(--text-muted)' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
                         <Calendar size={40} style={{ opacity: 0.2 }} />
                         <span>{searchTerm ? `Sin resultados para "${searchTerm}". Intenta con otros términos o limpia los filtros.` : 'No se encontraron registros coincidentes.'}</span>
@@ -501,22 +501,22 @@ const Events = () => {
             </table>
           )}
           {totalPages > 1 && (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', borderTop: '1px solid #f1f5f9', flexWrap: 'wrap', gap: '8px' }}>
-              <span style={{ fontSize: '13px', color: '#64748b' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', borderTop: '1px solid var(--border)', flexWrap: 'wrap', gap: '8px' }}>
+              <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
                 Mostrando {Math.min((currentPage - 1) * PAGE_SIZE + 1, sortedData.length)}–{Math.min(currentPage * PAGE_SIZE, sortedData.length)} de {sortedData.length} registros
               </span>
               <div style={{ display: 'flex', gap: '4px' }}>
-                <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', opacity: currentPage === 1 ? 0.4 : 1 }}>‹</button>
+                <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface)', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', opacity: currentPage === 1 ? 0.4 : 1 }}>‹</button>
                 {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
                   const page = totalPages <= 7 ? i + 1 : (currentPage <= 4 ? i + 1 : currentPage - 3 + i);
                   if (page < 1 || page > totalPages) return null;
                   return (
-                    <button key={page} onClick={() => setCurrentPage(page)} style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid', borderColor: page === currentPage ? '#ce1126' : '#e2e8f0', background: page === currentPage ? '#ce1126' : 'white', color: page === currentPage ? 'white' : '#475569', fontWeight: page === currentPage ? '700' : '400', cursor: 'pointer' }}>
+                    <button key={page} onClick={() => setCurrentPage(page)} style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid', borderColor: page === currentPage ? 'var(--primary)' : 'var(--border)', background: page === currentPage ? 'var(--primary)' : 'var(--surface)', color: page === currentPage ? '#fff' : 'var(--text-secondary)', fontWeight: page === currentPage ? '700' : '400', cursor: 'pointer' }}>
                       {page}
                     </button>
                   );
                 })}
-                <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', opacity: currentPage === totalPages ? 0.4 : 1 }}>›</button>
+                <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface)', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', opacity: currentPage === totalPages ? 0.4 : 1 }}>›</button>
               </div>
             </div>
           )}

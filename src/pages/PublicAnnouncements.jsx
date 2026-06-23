@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Megaphone, Calendar, LayoutGrid } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import { getAnunciosPublicados } from '../services/anuncios.service';
 import { resolveImageUrl } from '../utils/url';
 import { formatLocalDate } from '../utils/dateUtils';
@@ -17,7 +18,7 @@ const AnnouncementCard = ({ announcement, onClick }) => {
       style={{
         borderRadius: '16px',
         overflow: 'hidden',
-        border: '1px solid #e2e8f0',
+        border: '1px solid var(--border)',
         background: 'white',
         display: 'flex',
         flexDirection: 'column',
@@ -36,9 +37,9 @@ const AnnouncementCard = ({ announcement, onClick }) => {
       }}>
       </div>
       <div style={{ padding: '15px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <h4 style={{ margin: '0 0 6px', fontSize: '14px', fontWeight: 'bold', color: '#1e293b' }}>{title}</h4>
-        <p style={{ margin: '0 0 12px', fontSize: '12px', color: '#64748b', lineHeight: '1.5', flex: 1 }}>{desc}</p>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: '#94a3b8', borderTop: '1px solid #f1f5f9', paddingTop: '10px' }}>
+        <h4 style={{ margin: '0 0 6px', fontSize: '14px', fontWeight: 'bold', color: 'var(--text-main)' }}>{title}</h4>
+        <p style={{ margin: '0 0 12px', fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5', flex: 1 }}>{desc}</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: 'var(--text-muted)', borderTop: '1px solid var(--border)', paddingTop: '10px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
             <Calendar size={12} /> {announcement.fechaInicioPublicacion ? formatLocalDate(announcement.fechaInicioPublicacion) : 'N/A'}
           </div>
@@ -53,12 +54,21 @@ const PublicAnnouncements = () => {
   const [publicAnnouncements, setPublicAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedAnuncio, setSelectedAnuncio] = useState(null);
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     const fetchAnnouncements = async () => {
       try {
         const data = await getAnunciosPublicados();
-        setPublicAnnouncements(Array.isArray(data) ? data : []);
+        const list = Array.isArray(data) ? data : [];
+        setPublicAnnouncements(list);
+
+        // Auto-open from email deep link (?anuncio=N)
+        const anuncioId = searchParams.get('anuncio');
+        if (anuncioId) {
+          const found = list.find(a => a.id?.toString() === anuncioId);
+          if (found) setSelectedAnuncio(found);
+        }
       } catch (err) {
         console.error('Error al cargar anuncios públicos:', err);
       } finally {
@@ -89,7 +99,7 @@ const PublicAnnouncements = () => {
               <AnnouncementCard key={a.id} announcement={a} onClick={() => handleOpenDetail(a)} />
             ))}
             {publicAnnouncements.length === 0 && (
-              <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '100px 20px', color: '#94a3b8', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '100px 20px', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                 <LayoutGrid size={48} style={{ marginBottom: '16px', opacity: 0.3 }} />
                 <p style={{ fontSize: '16px', fontWeight: '500' }}>No hay anuncios disponibles en este momento.</p>
               </div>

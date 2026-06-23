@@ -105,7 +105,7 @@ const AnnouncementDetailModal = ({ isOpen, onClose, announcement, onSuccess, isR
     RECHAZADA:   { label: 'Rechazada',    subtitle: 'Revisa el motivo del rechazo',  color: '#ef4444', bg: '#fef2f2', border: '#fee2e2', text: '#dc2626' },
     PUBLICADA:   { label: 'Publicada',    subtitle: 'Visible en la plataforma',      color: '#0ea5e9', bg: '#f0f9ff', border: '#e0f2fe', text: '#0284c7' },
     EN_REVISION: { label: 'En revisión',  subtitle: 'Correcciones solicitadas',      color: '#8b5cf6', bg: '#faf5ff', border: '#ede9fe', text: '#7c3aed' }
-  }[status] || { label: status, subtitle: '', color: '#64748b', bg: '#f8fafc', border: '#e2e8f0', text: '#475569' };
+  }[status] || { label: status, subtitle: '', color: 'var(--text-secondary)', bg: '#f8fafc', border: '#e2e8f0', text: 'var(--text-secondary)' };
 
 
   const handleFileChange = (e) => {
@@ -170,7 +170,7 @@ const AnnouncementDetailModal = ({ isOpen, onClose, announcement, onSuccess, isR
           />
         )
       ) : (
-        <div style={{ fontSize: '15px', color: '#1e293b', fontWeight: 'bold' }}>{value || '—'}</div>
+        <div style={{ fontSize: '15px', color: 'var(--text-main)', fontWeight: 'bold' }}>{value || '—'}</div>
       )}
     </div>
   );
@@ -201,7 +201,7 @@ const AnnouncementDetailModal = ({ isOpen, onClose, announcement, onSuccess, isR
             </div>
             {canManage && (
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '800', marginBottom: '2px', textTransform: 'uppercase' }}>Visibilidad</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '800', marginBottom: '2px', textTransform: 'uppercase' }}>Visibilidad</div>
                 <div style={{
                   fontSize: '14px', fontWeight: '800',
                   color: localVisible ? '#059669' : '#d97706',
@@ -220,7 +220,7 @@ const AnnouncementDetailModal = ({ isOpen, onClose, announcement, onSuccess, isR
             <div style={{ fontSize: '12px', fontWeight: '700', color: '#7c3aed', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <AlertCircle size={14} /> Observaciones del moderador
             </div>
-            <p style={{ margin: 0, fontSize: '14px', color: '#1e293b', lineHeight: '1.6' }}>{announcement.observacionesRevision}</p>
+            <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-main)', lineHeight: '1.6' }}>{announcement.observacionesRevision}</p>
           </div>
         )}
 
@@ -237,11 +237,11 @@ const AnnouncementDetailModal = ({ isOpen, onClose, announcement, onSuccess, isR
 
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 position: 'relative', cursor: isEditing ? 'pointer' : 'default',
-                transition: 'all 0.3s ease'
+                transition: 'border-color var(--dur) var(--ease-standard), box-shadow var(--dur) var(--ease-standard)'
               }} onClick={() => isEditing && document.getElementById(`ann-file-edit-${announcement.id}`)?.click()}>
                 {publishFilePreview
                   ? <img src={getImageUrl(publishFilePreview)} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="Pieza gráfica" />
-                  : <div style={{ color: '#94a3b8', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                  : <div style={{ color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
                       <ImageIcon size={40} style={{ opacity: 0.5 }} />
                       <span style={{ fontSize: '13px', fontWeight: '600' }}>Sin pieza gráfica vinculada</span>
                     </div>
@@ -274,7 +274,7 @@ const AnnouncementDetailModal = ({ isOpen, onClose, announcement, onSuccess, isR
                     type="button"
                     onClick={() => document.getElementById(`ann-file-edit-${announcement.id}`).click()}
                     className={styles.btnSecondary} 
-                    style={{ width: '100%', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 'bold', background: '#1e293b', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
+                    style={{ width: '100%', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 'bold', background: 'var(--text-main)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
                   >
                     <Upload size={18} /> {publishFilePreview ? 'Cambiar Pieza Gráfica' : 'Subir Pieza Gráfica'}
                   </button>
@@ -304,7 +304,7 @@ const AnnouncementDetailModal = ({ isOpen, onClose, announcement, onSuccess, isR
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
           
           <div className={styles.card} style={{ gridColumn: '1 / -1', background: '#f8fafc' }}>
-            <div style={{ fontSize: '13px', fontWeight: '700', color: '#64748b', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-secondary)', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Tag size={14} color="#ce1126" /> Información General
             </div>
             {renderField("Título", "titulo", <Tag size={11} />, announcement.titulo, false)}
@@ -312,7 +312,7 @@ const AnnouncementDetailModal = ({ isOpen, onClose, announcement, onSuccess, isR
           </div>
 
           <div className={styles.card} style={{ background: '#f8fafc' }}>
-            <div style={{ fontSize: '13px', fontWeight: '700', color: '#64748b', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-secondary)', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <MapPin size={14} color="#ce1126" /> Ubicación y Contacto
             </div>
             <div style={{ marginBottom: '15px' }}>
@@ -359,15 +359,15 @@ const AnnouncementDetailModal = ({ isOpen, onClose, announcement, onSuccess, isR
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
                     {(formData.lugares || []).length > 0 ? (formData.lugares || []).map((l, i) => (
                       <span key={i} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '3px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold' }}>{l}</span>
-                    )) : <div style={{ fontSize: '15px', color: '#1e293b', fontWeight: 'bold' }}>No definido</div>}
+                    )) : <div style={{ fontSize: '15px', color: 'var(--text-main)', fontWeight: 'bold' }}>No definido</div>}
                   </div>
                 )}
             </div>
-            {renderField("Correo de Contacto", "correoContacto", <Mail size={11} />, announcement.correoContacto, false, "email", { readOnly: true, style: isEditing ? { backgroundColor: '#f8fafc', color: '#64748b' } : {} })}
+            {renderField("Correo de Contacto", "correoContacto", <Mail size={11} />, announcement.correoContacto, false, "email", { readOnly: true, style: isEditing ? { backgroundColor: '#f8fafc', color: 'var(--text-secondary)' } : {} })}
           </div>
 
           <div className={styles.card} style={{ background: '#f8fafc' }}>
-            <div style={{ fontSize: '13px', fontWeight: '700', color: '#64748b', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-secondary)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <ShieldCheck size={14} color="#ce1126" /> Información de la Solicitud
             </div>
             {renderField("Oficina Solicitante", "oficina", <Layers size={11} />, announcement.oficinaNombre || announcement.oficina || 'N/A', false, 'oficina', {}, !isSuperAdmin)}
@@ -382,18 +382,20 @@ const AnnouncementDetailModal = ({ isOpen, onClose, announcement, onSuccess, isR
                   onChange={e => setFormData({...formData, requierePiezaGrafica: e.target.checked})}
                   style={{ width: '18px', height: '18px' }}
                 />
-                <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#1e293b' }}>Requiere Pieza Gráfica</span>
+                <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-main)' }}>Requiere Pieza Gráfica</span>
               </label>
             )}
             {!isEditing && (
-              <div style={{ padding: '10px', borderRadius: '10px', background: formData.requierePiezaGrafica ? '#fff1f2' : '#f8fafc', border: '1px solid #e2e8f0', fontSize: '12px', fontWeight: 'bold', color: formData.requierePiezaGrafica ? '#ce1126' : '#94a3b8', marginTop: '10px' }}>
-                  {formData.requierePiezaGrafica ? '✅ Requiere Pieza Gráfica' : '❌ No Pieza Gráfica'}
+              <div style={{ padding: '10px', borderRadius: '10px', background: formData.requierePiezaGrafica ? '#fff1f2' : '#f8fafc', border: '1px solid #e2e8f0', fontSize: '12px', fontWeight: 'bold', color: formData.requierePiezaGrafica ? '#ce1126' : 'var(--text-muted)', marginTop: '10px' }}>
+                  {formData.requierePiezaGrafica
+                    ? <><CheckCircle size={13} style={{ marginRight: 4, verticalAlign: '-2px' }} />Requiere Pieza Gráfica</>
+                    : <>No requiere Pieza Gráfica</>}
               </div>
             )}
           </div>
 
           <div className={styles.cardGrey} style={{ gridColumn: '1 / -1' }}>
-            <div style={{ fontSize: '13px', fontWeight: '700', color: '#64748b', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-secondary)', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Calendar size={14} color="#ce1126" /> Vigencia de la Publicación
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
@@ -474,7 +476,7 @@ const AnnouncementDetailModal = ({ isOpen, onClose, announcement, onSuccess, isR
                 <img src={getImageUrl(publishFilePreview)} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="Preview" />
               ) : (
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '42px', marginBottom: '12px' }}>🖼️</div>
+                  <div style={{ marginBottom: '12px', display: 'flex', justifyContent: 'center' }}><ImageIcon size={40} style={{ color: '#059669' }} /></div>
                   <div style={{ color: '#059669', fontWeight: '800', fontSize: '14px' }}>Subir Pieza Gráfica para Publicar</div>
                 </div>
               )}
@@ -525,8 +527,8 @@ const AnnouncementDetailModal = ({ isOpen, onClose, announcement, onSuccess, isR
                     onClick={handleToggleVisibility} disabled={manageLoading}
                     style={{ 
                       padding: '10px 20px', borderRadius: '30px', 
-                      background: localVisible ? '#f8fafc' : '#1e293b', 
-                      color: localVisible ? '#475569' : 'white', 
+                      background: localVisible ? '#f8fafc' : 'var(--text-main)', 
+                      color: localVisible ? 'var(--text-secondary)' : 'white', 
                       border: '1px solid #e2e8f0', fontWeight: 'bold', 
                       fontSize: '12px', cursor: 'pointer', display: 'flex', 
                       alignItems: 'center', gap: '8px' 
@@ -552,7 +554,7 @@ const AnnouncementDetailModal = ({ isOpen, onClose, announcement, onSuccess, isR
             {!isEditing ? (
               <button 
                 onClick={() => setIsEditing(true)} 
-                className={styles.btnSecondary} style={{ width: '100%', padding: '16px', color: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
+                className={styles.btnSecondary} style={{ width: '100%', padding: '16px', color: 'var(--text-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
               >
                 <Edit2 size={18} /> Actualizar Información Pública
               </button>
@@ -616,14 +618,14 @@ const AnnouncementDetailModal = ({ isOpen, onClose, announcement, onSuccess, isR
         {/* Panel de edición para oficina (PENDIENTE / RECHAZADA / EN_REVISION) */}
         {canEditOwn && (
           <div style={{ padding: '20px', border: '1px solid #e2e8f0', borderRadius: '12px', background: 'white' }}>
-            <h4 style={{ margin: '0 0 16px', fontSize: '14px', fontWeight: '700', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <h4 style={{ margin: '0 0 16px', fontSize: '14px', fontWeight: '700', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Edit2 size={16} color="#ce1126" /> Mi solicitud
             </h4>
             {!isEditing ? (
               <button
                 onClick={() => setIsEditing(true)}
                 className={styles.btnSecondary}
-                style={{ width: '100%', padding: '14px', color: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
+                style={{ width: '100%', padding: '14px', color: 'var(--text-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
               >
                 <Edit2 size={16} /> Editar y reenviar solicitud
               </button>
