@@ -768,7 +768,7 @@ const CalendarView = () => {
             <div className={styles.controls}>
               <button className={styles.iconBtn} onClick={handlePrevMonth} aria-label="Mes anterior"><ChevronDown size={18} style={{ transform:'rotate(90deg)' }}/></button>
               <button className={styles.iconBtn} onClick={handleNextMonth} aria-label="Mes siguiente"><ChevronUp size={18} style={{ transform:'rotate(90deg)' }}/></button>
-              {user && (
+              {user && user?.rol?.toString().toUpperCase() !== 'CONSULTORIA' && (
                 <button className={styles.primaryBtn} onClick={() => setIsEventModalOpen(true)}>
                   <Plus size={16} strokeWidth={2.5} /> Nuevo Evento
                 </button>
