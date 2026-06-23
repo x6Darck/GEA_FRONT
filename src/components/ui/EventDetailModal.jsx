@@ -120,6 +120,8 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
   const canPublish = isAdmin && status === 'APROBADA';
   const canManage = isAdmin && (status === 'PUBLICADA' || status === 'APROBADA');
   const canEditOwn = !isAdmin && !isReadOnlyReviewer && (status === 'PENDIENTE' || status === 'RECHAZADA' || status === 'EN_REVISION');
+  const esInstanciaSecundaria = !!event.idGrupoRecurrencia && !event.esPrincipal;
+  const FRECUENCIA_LABEL = { NINGUNA: 'No repetir', DIARIA: 'Diariamente', SEMANAL: 'Semanalmente', MENSUAL: 'Mensualmente' };
 
   const handlePublishFileChange = (e) => {
     const file = e.target.files?.[0];
@@ -353,8 +355,8 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
                 <MapPin size={14} color="var(--text-muted)" /> Ubicación y Tipo
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
-              {renderField('Cita Virtual (Link)', formData.linkConexion, isEditing && isAdmin, 'linkConexion', 'text', <Link size={14}/>)}
-              {(formData.ubicacionExterna || isEditing) && renderField('Lugar del Evento Externo', formData.ubicacionExterna, isEditing && isAdmin, 'ubicacionExterna', 'text', <MapPin size={14}/>)}
+              {renderField('Cita Virtual (Link)', formData.linkConexion, isEditing, 'linkConexion', 'text', <Link size={14}/>)}
+              {(formData.ubicacionExterna || isEditing) && renderField('Lugar del Evento Externo', formData.ubicacionExterna, isEditing, 'ubicacionExterna', 'text', <MapPin size={14}/>)}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}>
                   <MapPin size={12}/> Lugares Físicos
@@ -418,8 +420,62 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
                {renderField(<span>Hora Inicio <span style={{color: '#ce1126'}}>*</span></span>, isEditing ? formData.horaInicio : formatTime12h(formData.horaInicio), isEditing, 'horaInicio', 'time', <Clock size={12}/>)}
                {renderField(<span>Hora Fin <span style={{color: '#ce1126'}}>*</span></span>, isEditing ? formData.horaFin : formatTime12h(formData.horaFin), isEditing, 'horaFin', 'time', <Clock size={12}/>)}
             </div>
+            {isEditing && (
+              <div style={{ marginTop: '16px', padding: '16px', borderRadius: '12px', background: '#f0f9ff', border: '1px solid #e0f2fe' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                  <RefreshCw size={15} color="#0369a1" />
+                  <span style={{ fontSize: '12px', fontWeight: '800', color: '#0369a1', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                    Repetición (Recurrencia)
+                  </span>
+                </div>
+                {esInstanciaSecundaria ? (
+                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                    Este evento pertenece a una serie. Para cambiar la repetición, edita el <strong>evento principal</strong> de la serie.
+                    Repetición actual: <strong>{FRECUENCIA_LABEL[formData.frecuenciaRecurrencia] || 'No repetir'}</strong>
+                    {formData.frecuenciaRecurrencia && formData.frecuenciaRecurrencia !== 'NINGUNA' && formData.fechaFinRecurrencia
+                      ? <> — hasta {String(formData.fechaFinRecurrencia).split('T')[0]}</> : null}
+                  </div>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <label className={styles.fieldLabel}>Frecuencia</label>
+                      <select
+                        name="frecuenciaRecurrencia"
+                        value={formData.frecuenciaRecurrencia || 'NINGUNA'}
+                        onChange={handleInputChange}
+                        className={styles.inputField}
+                      >
+                        <option value="NINGUNA">No repetir</option>
+                        <option value="DIARIA">Diariamente</option>
+                        <option value="SEMANAL">Semanalmente</option>
+                        <option value="MENSUAL">Mensualmente</option>
+                      </select>
+                    </div>
+                    {formData.frecuenciaRecurrencia && formData.frecuenciaRecurrencia !== 'NINGUNA' && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <label className={styles.fieldLabel}>Repetir hasta <span style={{ color: '#ce1126' }}>*</span></label>
+                        <input
+                          type="date"
+                          name="fechaFinRecurrencia"
+                          value={formData.fechaFinRecurrencia || ''}
+                          onChange={handleInputChange}
+                          className={styles.inputField}
+                          min={formData.fechaEvento}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+                {!esInstanciaSecundaria && event.idGrupoRecurrencia && (
+                  <p style={{ margin: '10px 0 0', fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                    Al cambiar la frecuencia o la fecha fin se regenerarán las fechas de la serie
+                    (las instancias ya aprobadas o publicadas se conservan).
+                  </p>
+                )}
+              </div>
+            )}
           </div>
-          
+
           <div className={styles.card} style={{ gridColumn: '1 / -1' }}>
              <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-secondary)', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <ShieldCheck size={14} color="var(--text-muted)"/> Información de la Solicitud
