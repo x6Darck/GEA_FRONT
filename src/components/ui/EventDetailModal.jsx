@@ -119,7 +119,7 @@ const EventDetailModal = ({ isOpen, onClose, event, onSuccess }) => {
   const canReview = isAdmin && status === 'PENDIENTE';
   const canPublish = isAdmin && status === 'APROBADA';
   const canManage = isAdmin && (status === 'PUBLICADA' || status === 'APROBADA');
-  const canEditOwn = !isAdmin && !isReadOnlyReviewer && (status === 'PENDIENTE' || status === 'RECHAZADA' || status === 'EN_REVISION');
+  const canEditOwn = !isAdmin && !isReadOnlyReviewer && (status === 'RECHAZADA' || status === 'EN_REVISION');
   const esInstanciaSecundaria = !!event.idGrupoRecurrencia && !event.esPrincipal;
   const FRECUENCIA_LABEL = { NINGUNA: 'No repetir', DIARIA: 'Diariamente', SEMANAL: 'Semanalmente', MENSUAL: 'Mensualmente' };
 
