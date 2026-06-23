@@ -140,6 +140,17 @@ export const useEventManagement = (event, onSuccess, onClose) => {
   };
 
   const handleSaveEdition = async () => {
+    const frec = formData.frecuenciaRecurrencia || 'NINGUNA';
+    if (frec !== 'NINGUNA') {
+      if (!formData.fechaFinRecurrencia) {
+        notification.error('Indica la fecha "Repetir hasta" para la recurrencia.');
+        return;
+      }
+      if (formData.fechaEvento && formData.fechaFinRecurrencia < formData.fechaEvento) {
+        notification.error('La fecha fin de recurrencia no puede ser anterior a la fecha del evento.');
+        return;
+      }
+    }
     setManageLoading(true);
     try {
       let piezaUrl = event.piezaGraficaUrl;
