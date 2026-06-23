@@ -86,14 +86,16 @@ const Sidebar = ({ isOpen = false, onClose }) => {
               Anuncios
             </NavLink>
 
-            <NavLink
-              to="/reportes"
-              onClick={handleNavClick}
-              className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}
-            >
-              <FileText className={styles.icon} size={20} />
-              Reportes
-            </NavLink>
+            {user?.rol?.toString().toUpperCase() !== 'CONSULTORIA' && (
+              <NavLink
+                to="/reportes"
+                onClick={handleNavClick}
+                className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}
+              >
+                <FileText className={styles.icon} size={20} />
+                Reportes
+              </NavLink>
+            )}
 
             {['SUPER_ADMIN', 'ADMIN'].includes(user?.rol?.toString().toUpperCase()) && (
               <NavLink

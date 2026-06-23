@@ -297,9 +297,11 @@ const Events = () => {
     <div className="page-container">
       <div className={styles.header}>
         <h1 className="page-title" style={{marginBottom: 0}}>Gestión de Eventos</h1>
-        <button className={styles.createBtn} onClick={() => setIsCreateModalOpen(true)}>
-          <Plus size={18} /> Nuevo Evento
-        </button>
+        {user?.rol?.toString().toUpperCase() !== 'CONSULTORIA' && (
+          <button className={styles.createBtn} onClick={() => setIsCreateModalOpen(true)}>
+            <Plus size={18} /> Nuevo Evento
+          </button>
+        )}
       </div>
 
       <div className="card">

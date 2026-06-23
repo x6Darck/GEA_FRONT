@@ -37,7 +37,7 @@ const App = () => {
                 <Route path="/anuncios" element={<ErrorBoundary><Suspense fallback={<Spinner message="Cargando..." />}><Announcements /></Suspense></ErrorBoundary>} />
               </Route>
 
-              <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN', 'ADMIN', 'COMUNICACIONES', 'OFICINA', 'CONSULTORIA']} />}>
+              <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN', 'ADMIN', 'COMUNICACIONES', 'OFICINA']} />}>
                 <Route path="/reportes" element={<ErrorBoundary><Suspense fallback={<Spinner message="Cargando..." />}><Reports /></Suspense></ErrorBoundary>} />
               </Route>
 

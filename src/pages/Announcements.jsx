@@ -346,9 +346,11 @@ const Announcements = () => {
           <button className={styles.secondaryBtn} onClick={() => setIsPublishedModalOpen(true)}>
             <LayoutGrid size={18} /> Ver Galería Pública
           </button>
-          <button className={styles.createBtn} onClick={() => setIsModalOpen(true)}>
-            <Plus size={18} /> Crear Anuncio
-          </button>
+          {user?.rol?.toString().toUpperCase() !== 'CONSULTORIA' && (
+            <button className={styles.createBtn} onClick={() => setIsModalOpen(true)}>
+              <Plus size={18} /> Crear Anuncio
+            </button>
+          )}
         </div>
       </div>
       
