@@ -14,13 +14,13 @@ const EmptyState = ({
     justifyContent: 'center',
     padding: '80px 24px',
     gap: '12px',
-    color: '#94a3b8',
+    color: 'var(--text-muted)',
     textAlign: 'center',
   }}>
     {Icon && <Icon size={44} style={{ opacity: 0.25, flexShrink: 0 }} />}
-    <p style={{ fontSize: '15px', fontWeight: '600', color: '#64748b', margin: 0 }}>{title}</p>
+    <p style={{ fontSize: '15px', fontWeight: '600', color: 'var(--text-secondary)', margin: 0 }}>{title}</p>
     {description && (
-      <p style={{ fontSize: '13px', color: '#94a3b8', margin: 0, maxWidth: '360px', lineHeight: 1.5 }}>{description}</p>
+      <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0, maxWidth: '360px', lineHeight: 1.5 }}>{description}</p>
     )}
     {action && actionLabel && (
       <button

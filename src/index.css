@@ -1,31 +1,86 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ============================================================
+   GEA — Sistema de diseño (Minimalista Premium)
+   Un solo sistema de color, rojo institucional como acento
+   escaso, neutrales cálidos, sombras ultra-difusas, motion
+   sobrio. Todos los nombres de variables previos se conservan.
+   ============================================================ */
 
 :root {
-  --primary: #D32F2F;
-  --primary-hover: #B71C1C;
-  --secondary: #F5F5F5;
-  --background: #FFFFFF;
-  --text-main: #212121;
-  --text-muted: #757575;
-  --text-secondary: #757575;
-  --border: #E0E0E0;
-  
-  --success: #43A047;
-  --success-hover: #2E7D32;
-  --warning: #FFA000;
-  --danger: #D32F2F;
-  --info: #1976D2;
+  /* ── Marca ───────────────────────────────────────────── */
+  --primary: #ce1126;          /* Rojo institucional GEA (unificado) */
+  --primary-hover: #a90f20;
+  --primary-active: #8c0c1a;
+  --primary-soft: #fdebec;     /* fondo pastel para acentos/badges */
+  --primary-on-soft: #9f2f2d;  /* texto sobre el pastel rojo */
 
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.12);
-  --shadow-modal: 0 24px 48px rgba(0,0,0,0.15);
-  
-  --radius-sm: 6px;
-  --radius-md: 10px;
+  /* ── Neutrales cálidos ───────────────────────────────── */
+  --canvas: #fafaf9;           /* fondo de la aplicación (warm off-white) */
+  --surface: #ffffff;          /* superficie de tarjetas/paneles */
+  --surface-2: #f7f7f6;        /* superficie sutil / estados hover */
+  --surface-3: #efeeec;        /* relleno/inputs/skeleton */
+
+  --text-main: #1a1a1a;        /* off-black (nunca negro puro) */
+  --text-secondary: #6b6b66;   /* gris cálido apagado */
+  --text-muted: #9a9a93;       /* terciario / placeholders */
+  --text-on-primary: #ffffff;
+
+  --border: #e8e6e1;           /* divisores 1px (warm light) */
+  --border-strong: #d8d5cf;    /* bordes de inputs / énfasis */
+
+  /* Alias de compatibilidad (no romper componentes existentes) */
+  --secondary: var(--surface-2);
+  --background: var(--surface);
+
+  /* ── Acentos semánticos (sólido + pastel) ────────────── */
+  --success: #2e7d44;  --success-hover: #25683a;  --success-soft: #edf3ec; --success-on-soft: #346538;
+  --warning: #b06d00;  --warning-hover: #935b00;  --warning-soft: #fbf3db; --warning-on-soft: #956400;
+  --danger:  #c0271f;  --danger-hover:  #a11f18;  --danger-soft:  #fdebec; --danger-on-soft:  #9f2f2d;
+  --info:    #1f6c9f;  --info-hover:    #195a85;  --info-soft:    #e1f3fe; --info-on-soft:    #1f6c9f;
+
+  /* ── Sombras ultra-difusas (opacidad baja) ───────────── */
+  --shadow-sm: 0 1px 2px rgba(20, 18, 16, 0.04);
+  --shadow-md: 0 2px 10px rgba(20, 18, 16, 0.06);
+  --shadow-lg: 0 10px 30px rgba(20, 18, 16, 0.08);
+  --shadow-modal: 0 20px 56px rgba(20, 18, 16, 0.16);
+
+  /* ── Radios (crisp, pill solo para tags pequeños) ────── */
+  --radius-sm: 8px;
+  --radius-md: 12px;
   --radius-lg: 16px;
-  
-  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --radius-pill: 9999px;
+
+  /* ── Escala tipográfica ──────────────────────────────── */
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-md: 16px;
+  --text-lg: 18px;
+  --text-xl: 22px;
+  --text-2xl: 28px;
+  --text-3xl: 34px;
+
+  /* ── Motion (curvas + duraciones, estilo Emil) ───────── */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur-fast: 120ms;
+  --dur: 200ms;
+  --dur-slow: 320ms;
+
+  /* Alias previo: se mantiene como transición base afinada */
+  --transition: 200ms var(--ease-standard);
+
+  /* ── Escala de z-index semántica (nunca valores arbitrarios) */
+  --z-dropdown:       100;
+  --z-sticky:         200;
+  --z-modal-backdrop: 900;
+  --z-modal:         1000;
+  --z-drawer:        2000;
+  --z-toast:         3000;
+  --z-tooltip:       4000;
 }
 
 * {
@@ -34,11 +89,26 @@
   padding: 0;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   color: var(--text-main);
-  background-color: var(--secondary);
+  background-color: var(--canvas);
+  font-size: var(--text-base);
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'cv05' 1, 'ss01' 1, 'tnum' 1; /* numerales tabulares + glifos refinados */
+}
+
+/* Tipografía base de encabezados: tracking ceñido, peso fuerte */
+h1, h2, h3, h4 {
+  letter-spacing: -0.018em;
+  line-height: 1.2;
+  color: var(--text-main);
 }
 
 button {
@@ -46,87 +116,223 @@ button {
   cursor: pointer;
   border: none;
   background: none;
-  transition: var(--transition);
+  transition: background-color var(--dur) var(--ease-standard),
+              color var(--dur) var(--ease-standard),
+              border-color var(--dur) var(--ease-standard),
+              box-shadow var(--dur) var(--ease-standard),
+              transform var(--dur-fast) var(--ease-out);
+}
+
+/* Feedback de presión universal (Emil: los botones deben sentirse) */
+button:active {
+  transform: scale(0.975);
 }
 
 a {
   text-decoration: none;
   color: inherit;
-  transition: var(--transition);
+  transition: color var(--dur) var(--ease-standard);
 }
 
 input, textarea, select {
   font-family: inherit;
-  transition: var(--transition);
-}
-
-/* --- Global Animation Utilities --- */
-.fade-in {
-  animation: fadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  will-change: opacity;
-}
-
-.scale-in {
-  animation: scaleIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  will-change: transform, opacity;
-}
-
-.slide-up {
-  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  will-change: transform, opacity;
-}
-
-@keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Announcement Card Staggered Simulation */
-.ann-card-animate {
-  animation: slideUp 0.6s ease-out both;
-}
-
-/* Page Transitions */
-/* Utilities */
-.page-container {
-  padding: 20px 28px;
-  max-width: 1600px;
-  margin: 0 auto;
-  animation: fadeIn 0.5s ease-out;
-  width: 100%;
-}
-
-@media (max-width: 768px) {
-  .page-container {
-    padding: 16px;
-  }
-}
-
-.page-title {
-  font-size: 28px;
-  font-weight: 700;
-  margin-bottom: 24px;
+  font-size: var(--text-base);
   color: var(--text-main);
+  transition: border-color var(--dur) var(--ease-standard),
+              box-shadow var(--dur) var(--ease-standard),
+              background-color var(--dur) var(--ease-standard);
 }
 
-.card {
-  background: var(--background);
+input::placeholder, textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* Accesibilidad: foco visible y consistente con la marca */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--primary-soft);
+  color: var(--primary-on-soft);
+}
+
+/* Scrollbar discreto */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: var(--radius-pill);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--text-muted); background-clip: padding-box; }
+
+/* ============================================================
+   Primitivos base (utilidades reutilizables por tokens)
+   ============================================================ */
+
+/* Superficie / tarjeta */
+.card,
+.surface {
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
   padding: 24px;
-  transition: var(--transition);
+  transition: box-shadow var(--dur) var(--ease-standard),
+              transform var(--dur) var(--ease-out),
+              border-color var(--dur) var(--ease-standard);
 }
-
 .card:hover {
   box-shadow: var(--shadow-md);
 }
 
+/* Botón base */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  line-height: 1;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--primary);
+  color: var(--text-on-primary);
+}
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-primary:active { background: var(--primary-active); }
+.btn-secondary {
+  background: var(--surface);
+  color: var(--text-main);
+  border-color: var(--border-strong);
+}
+.btn-secondary:hover { background: var(--surface-2); }
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+}
+.btn-ghost:hover { background: var(--surface-2); color: var(--text-main); }
+
+/* Input base */
+.input {
+  width: 100%;
+  background: var(--surface);
+  color: var(--text-main);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  outline: none;
+}
+.input:hover { border-color: var(--text-muted); }
+.input:focus-visible {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+/* Badge / chip pequeño (pill solo para tags chicos) */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  line-height: 1;
+}
+
+/* ============================================================
+   Utilidades de animación (Emil: transform+opacity únicos,
+   will-change NO en reglas estáticas — solo durante la animación)
+   ============================================================ */
+.fade-in {
+  animation: fadeIn var(--dur) var(--ease-out) forwards;
+}
+.scale-in {
+  animation: scaleIn var(--dur-slow) var(--ease-spring) forwards;
+}
+.slide-up {
+  animation: slideUp var(--dur-slow) var(--ease-out) forwards;
+}
+.ann-card-animate {
+  animation: slideUp 420ms var(--ease-out) both;
+}
+
+/* ── Utilidad de stagger (Emil §Stagger) ─────────────────────
+   Usar con style={{ '--i': index }} en cada ítem de lista/grilla */
+.stagger-item {
+  opacity: 0;
+  animation: slideUp 280ms var(--ease-out) forwards;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+
+/* ── prefers-reduced-motion (impeccable: no opcional) ─────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.96); }  /* nunca desde 0 (Emil) */
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   Layout / utilidades de página
+   ============================================================ */
+.page-container {
+  padding: 28px 32px;
+  max-width: 1600px;
+  margin: 0 auto;
+  width: 100%;
+  animation: fadeIn 420ms var(--ease-out);
+}
+.page-title {
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  letter-spacing: -0.022em;
+  margin-bottom: 24px;
+  color: var(--text-main);
+}
+
+@media (max-width: 768px) {
+  .page-container { padding: 16px; }
+  .page-title { font-size: var(--text-xl); }
+}
+
+/* Respeto a usuarios que reducen movimiento */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }

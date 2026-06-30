@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { Calendar, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { Eye, EyeOff, AlertCircle } from 'lucide-react';
 import styles from './Login.module.css';
 import { useNavigate } from 'react-router-dom';
 import geaLogo from '../assets/gea-logo.png';
@@ -27,6 +27,12 @@ const Login = () => {
     try {
       await authLogin(credentials, { skipGlobalError: true });
       const savedUser = getCurrentUser();
+      if (!savedUser) {
+        const msg = 'No se pudo recuperar la sesión. Intenta de nuevo.';
+        setError(msg);
+        notification.error(msg);
+        return;
+      }
       login(savedUser);
       notification.success(`¡Bienvenido, ${savedUser.nombre || 'Usuario'}!`);
       navigate('/calendario');
@@ -57,13 +63,11 @@ const Login = () => {
 
       <div className={styles.loginBox}>
         <div className={styles.header}>
-          <div className={styles.userIconWrapper}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
-            </svg>
+          <div className={styles.brandMark}>
+            <img src={geaLogo} alt="GEA" />
           </div>
           <h1 className={styles.title}>Inicia sesión</h1>
+          <p className={styles.subtitle}>Calendario institucional GEA</p>
         </div>
 
         <form onSubmit={handleLogin} className={styles.form} noValidate>
@@ -118,7 +122,7 @@ const Login = () => {
             disabled={loading}
             aria-busy={loading}
           >
-            {loading ? 'Verificando...' : 'LOGIN'}
+            {loading ? 'Verificando…' : 'Iniciar sesión'}
           </button>
         </form>
       </div>

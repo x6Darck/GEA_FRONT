@@ -58,50 +58,53 @@ const ExportAgendaModal = ({ isOpen, onClose, currentDate }) => {
   if (!isOpen) return null;
 
   const inputStyle = {
-    padding: '10px 14px', borderRadius: '8px',
-    border: '1px solid #cbd5e1', fontSize: '13px',
+    padding: '10px 14px', borderRadius: 'var(--radius-sm)',
+    border: '1px solid var(--border)', fontSize: '13px',
     width: '100%', boxSizing: 'border-box', outline: 'none',
-    backgroundColor: '#fff', color: '#334155',
+    backgroundColor: 'var(--surface)', color: 'var(--text-main)',
+    transition: 'border-color var(--dur) var(--ease-standard), box-shadow var(--dur) var(--ease-standard)',
   };
 
   const labelStyle = {
-    fontSize: '12px', color: '#64748b', marginBottom: '4px',
-    fontWeight: '600', display: 'block',
+    fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px',
+    fontWeight: '700', display: 'block', textTransform: 'uppercase', letterSpacing: '0.04em',
   };
 
   return (
     <div
+      className="fade-in"
       onClick={onClose}
       style={{
-        position: 'fixed', inset: 0, zIndex: 9999,
-        backgroundColor: 'rgba(15,23,42,0.45)',
+        position: 'fixed', inset: 0, zIndex: 'var(--z-modal-backdrop)',
+        backgroundColor: 'rgba(20, 18, 16, 0.5)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '24px', backdropFilter: 'blur(4px)',
+        padding: '24px',
       }}
     >
       <div
+        className="scale-in"
         onClick={e => e.stopPropagation()}
         style={{
-          background: '#fff', borderRadius: '20px',
+          background: 'var(--surface)', borderRadius: 'var(--radius-lg)',
           maxWidth: '480px', width: '100%',
-          boxShadow: '0 24px 64px rgba(0,0,0,0.18)',
-          border: '1px solid rgba(0,0,0,0.06)',
+          boxShadow: 'var(--shadow-modal)',
+          border: '1px solid var(--border)',
           overflow: 'hidden',
         }}
       >
         {/* Header */}
         <div style={{
           padding: '20px 24px',
-          background: 'linear-gradient(135deg, #CE1126 0%, #8b0000 100%)',
+          borderBottom: '1px solid var(--border)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <FileText size={20} color="#fff" />
+            <FileText size={18} color="var(--text-muted)" />
             <div>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: '#fff' }}>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: 'var(--text-main)' }}>
                 Exportar Agenda
               </h3>
-              <p style={{ margin: 0, fontSize: '12px', color: 'rgba(255,255,255,0.75)' }}>
+              <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary)' }}>
                 Genera un PDF listo para compartir
               </p>
             </div>
@@ -109,9 +112,10 @@ const ExportAgendaModal = ({ isOpen, onClose, currentDate }) => {
           <button
             onClick={onClose}
             style={{
-              background: 'rgba(255,255,255,0.2)', border: 'none', cursor: 'pointer',
-              color: '#fff', borderRadius: '50%', width: '32px', height: '32px',
+              background: 'var(--surface-2)', border: '1px solid var(--border)', cursor: 'pointer',
+              color: 'var(--text-secondary)', borderRadius: '50%', width: '32px', height: '32px',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'background-color var(--dur) var(--ease-standard)',
             }}
           >
             <X size={16} />
@@ -123,26 +127,26 @@ const ExportAgendaModal = ({ isOpen, onClose, currentDate }) => {
 
           {/* Vista previa del formato */}
           <div style={{
-            backgroundColor: '#f8fafc', borderRadius: '12px',
-            border: '1px solid #e2e8f0', padding: '16px', marginBottom: '20px',
+            backgroundColor: 'var(--surface-2)', borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--border)', padding: '16px', marginBottom: '20px',
             display: 'flex', alignItems: 'flex-start', gap: '14px',
           }}>
             <div style={{
-              width: '42px', height: '54px', backgroundColor: '#fff',
-              borderRadius: '6px', border: '1px solid #e2e8f0', flexShrink: 0,
+              width: '42px', height: '54px', backgroundColor: 'var(--surface)',
+              borderRadius: '6px', border: '1px solid var(--border)', flexShrink: 0,
               display: 'flex', flexDirection: 'column', overflow: 'hidden',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
+              boxShadow: 'var(--shadow-sm)',
             }}>
-              <div style={{ height: '10px', backgroundColor: '#CE1126' }} />
+              <div style={{ height: '10px', backgroundColor: 'var(--primary)' }} />
               {[1,2,3].map(i => (
-                <div key={i} style={{ margin: '4px 6px 0', height: '4px', backgroundColor: i===1?'#1e293b':'#e2e8f0', borderRadius: '2px' }} />
+                <div key={i} style={{ margin: '4px 6px 0', height: '4px', backgroundColor: i===1?'var(--text-main)':'var(--border)', borderRadius: '2px' }} />
               ))}
             </div>
             <div>
-              <p style={{ margin: '0 0 4px', fontSize: '13px', fontWeight: '700', color: '#1e293b' }}>
+              <p style={{ margin: '0 0 4px', fontSize: '13px', fontWeight: '700', color: 'var(--text-main)' }}>
                 Agenda PDF — Marca GEA
               </p>
-              <p style={{ margin: 0, fontSize: '12px', color: '#64748b', lineHeight: '1.5' }}>
+              <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
                 Eventos agrupados por día, con hora, lugar y oficina.
                 Ideal para publicar en grupos o imprimir.
               </p>
@@ -181,10 +185,14 @@ const ExportAgendaModal = ({ isOpen, onClose, currentDate }) => {
             <button
               onClick={onClose}
               style={{
-                padding: '10px 20px', borderRadius: '30px', border: 'none',
-                backgroundColor: '#f1f5f9', color: '#475569',
-                fontWeight: '700', cursor: 'pointer', fontSize: '13px',
+                padding: '10px 22px', borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--border-strong)',
+                backgroundColor: 'var(--surface)', color: 'var(--text-secondary)',
+                fontWeight: '600', cursor: 'pointer', fontSize: '13px',
+                transition: 'background-color var(--dur) var(--ease-standard), transform var(--dur-fast) var(--ease-out)',
               }}
+              onMouseDown={e => e.currentTarget.style.transform = 'scale(0.98)'}
+              onMouseUp={e => e.currentTarget.style.transform = ''}
             >
               Cancelar
             </button>
@@ -192,21 +200,23 @@ const ExportAgendaModal = ({ isOpen, onClose, currentDate }) => {
               onClick={handleExport}
               disabled={loading}
               style={{
-                padding: '10px 24px', borderRadius: '30px', border: 'none',
-                backgroundColor: loading ? '#94a3b8' : '#CE1126',
+                padding: '10px 24px', borderRadius: 'var(--radius-sm)', border: 'none',
+                backgroundColor: loading ? 'var(--text-muted)' : 'var(--primary)',
                 color: '#fff', fontWeight: '700',
                 cursor: loading ? 'not-allowed' : 'pointer',
                 fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px',
-                boxShadow: loading ? 'none' : '0 4px 14px rgba(206,17,38,0.3)',
-                transition: 'all 0.2s',
+                transition: 'background-color var(--dur) var(--ease-standard), transform var(--dur-fast) var(--ease-out)',
+                opacity: loading ? 0.7 : 1,
               }}
+              onMouseDown={e => !loading && (e.currentTarget.style.transform = 'scale(0.98)')}
+              onMouseUp={e => e.currentTarget.style.transform = ''}
             >
               {loading ? (
                 <>
                   <span style={{
                     width: '14px', height: '14px', border: '2px solid rgba(255,255,255,0.4)',
                     borderTop: '2px solid #fff', borderRadius: '50%',
-                    animation: 'spin 0.8s linear infinite', display: 'inline-block',
+                    animation: 'spin 0.6s linear infinite', display: 'inline-block',
                   }} />
                   Generando...
                 </>

@@ -75,7 +75,7 @@ const AmPmTimePicker = ({ value, onChange, disabled }) => {
         ))}
       </select>
       
-      <span style={{ fontWeight: 'bold', color: '#64748b' }}>:</span>
+      <span style={{ fontWeight: 'bold', color: 'var(--text-secondary)' }}>:</span>
       
       <select 
          value={minute} 

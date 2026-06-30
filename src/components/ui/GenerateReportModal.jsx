@@ -108,10 +108,10 @@ const GenerateReportModal = ({ isOpen, onClose, onSuccess }) => {
   const inputStyle = {
     padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1',
     fontSize: '13px', width: '100%', boxSizing: 'border-box', outline: 'none',
-    backgroundColor: '#fff', color: '#334155'
+    backgroundColor: '#fff', color: 'var(--text-secondary)'
   };
 
-  const labelStyle = { fontSize: '12px', color: '#64748b', marginBottom: '4px', fontWeight: '600', display: 'block' };
+  const labelStyle = { fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px', fontWeight: '600', display: 'block' };
 
   return (
     <Modal
@@ -128,7 +128,7 @@ const GenerateReportModal = ({ isOpen, onClose, onSuccess }) => {
 
             {/* Sección 1: Información */}
             <div style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-              <h3 style={{ margin: '0 0 12px', fontSize: '14px', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <h3 style={{ margin: '0 0 12px', fontSize: '14px', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <FileText size={16} color="#ce1126" /> Información del Reporte
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -152,7 +152,7 @@ const GenerateReportModal = ({ isOpen, onClose, onSuccess }) => {
 
             {/* Sección 2: Alcance */}
             <div style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-              <h3 style={{ margin: '0 0 12px', fontSize: '14px', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <h3 style={{ margin: '0 0 12px', fontSize: '14px', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Info size={16} color="#ce1126" /> Alcance del Reporte
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
@@ -165,10 +165,10 @@ const GenerateReportModal = ({ isOpen, onClose, onSuccess }) => {
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
                     padding: '12px', borderRadius: '10px', border: `2px solid ${formData.alcance === opt.val ? '#ce1126' : '#e2e8f0'}`,
                     backgroundColor: formData.alcance === opt.val ? '#fff5f5' : 'transparent',
-                    cursor: 'pointer', transition: 'all 0.2s', textAlign: 'center'
+                    cursor: 'pointer', transition: 'background-color var(--dur) var(--ease-standard), color var(--dur) var(--ease-standard), transform var(--dur-fast) var(--ease-out)', textAlign: 'center'
                   }}>
                     <input type="radio" name="alcance" value={opt.val} checked={formData.alcance === opt.val} onChange={handleChange} style={{ display: 'none' }} />
-                    <span style={{ fontSize: '12px', fontWeight: '700', color: formData.alcance === opt.val ? '#ce1126' : '#64748b' }}>
+                    <span style={{ fontSize: '12px', fontWeight: '700', color: formData.alcance === opt.val ? '#ce1126' : 'var(--text-secondary)' }}>
                       {opt.label}
                     </span>
                   </label>
@@ -222,7 +222,7 @@ const GenerateReportModal = ({ isOpen, onClose, onSuccess }) => {
             {/* Sección 4: Fechas y Formato */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
               <div style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                <h3 style={{ margin: '0 0 12px', fontSize: '14px', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h3 style={{ margin: '0 0 12px', fontSize: '14px', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Calendar size={16} color="#ce1126" /> Rango de Fechas
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -238,7 +238,7 @@ const GenerateReportModal = ({ isOpen, onClose, onSuccess }) => {
               </div>
 
               <div style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                <h3 style={{ margin: '0 0 12px', fontSize: '14px', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h3 style={{ margin: '0 0 12px', fontSize: '14px', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Download size={16} color="#ce1126" /> Formato de Salida
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -247,10 +247,10 @@ const GenerateReportModal = ({ isOpen, onClose, onSuccess }) => {
                       display: 'flex', alignItems: 'center', gap: '10px', padding: '10px',
                       borderRadius: '8px', border: '1px solid #e2e8f0',
                       backgroundColor: formData.formato === f.val ? '#fff' : 'transparent',
-                      cursor: 'pointer', transition: 'all 0.2s'
+                      cursor: 'pointer', transition: 'background-color var(--dur) var(--ease-standard), color var(--dur) var(--ease-standard), transform var(--dur-fast) var(--ease-out)'
                     }}>
                       <input type="radio" name="formato" value={f.val} checked={formData.formato === f.val} onChange={handleChange} />
-                      <span style={{ fontSize: '13px', fontWeight: '700', color: formData.formato === f.val ? f.color : '#475569' }}>
+                      <span style={{ fontSize: '13px', fontWeight: '700', color: formData.formato === f.val ? f.color : 'var(--text-secondary)' }}>
                         {f.label}
                       </span>
                     </label>
@@ -262,7 +262,7 @@ const GenerateReportModal = ({ isOpen, onClose, onSuccess }) => {
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', paddingTop: '4px' }}>
               <button type="button" onClick={onClose} style={{
                 padding: '10px 22px', borderRadius: '30px', border: 'none',
-                backgroundColor: '#f1f5f9', color: '#475569', fontWeight: '700', cursor: 'pointer', fontSize: '14px'
+                backgroundColor: '#f1f5f9', color: 'var(--text-secondary)', fontWeight: '700', cursor: 'pointer', fontSize: '14px'
               }}>
                 Cancelar
               </button>
@@ -285,8 +285,8 @@ const GenerateReportModal = ({ isOpen, onClose, onSuccess }) => {
               width: '64px', height: '64px', border: '4px solid #f1f5f9', borderTop: '4px solid #ce1126',
               borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: '24px'
             }} />
-            <h2 style={{ margin: '0 0 8px', color: '#0f172a', fontSize: '20px' }}>Generando Reporte...</h2>
-            <p style={{ margin: 0, color: '#64748b', maxWidth: '380px' }}>
+            <h2 style={{ margin: '0 0 8px', color: 'var(--text-main)', fontSize: '20px' }}>Generando Reporte...</h2>
+            <p style={{ margin: 0, color: 'var(--text-secondary)', maxWidth: '380px' }}>
               Procesando los datos para crear tu archivo {formData.formato}. Esto tomará unos segundos.
             </p>
             <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
@@ -302,8 +302,8 @@ const GenerateReportModal = ({ isOpen, onClose, onSuccess }) => {
             }}>
               <CheckCircle size={42} />
             </div>
-            <h2 style={{ margin: '0 0 12px', color: '#0f172a', fontSize: '22px' }}>¡Reporte Generado!</h2>
-            <p style={{ margin: '0 0 32px', color: '#64748b', maxWidth: '400px' }}>
+            <h2 style={{ margin: '0 0 12px', color: 'var(--text-main)', fontSize: '22px' }}>¡Reporte Generado!</h2>
+            <p style={{ margin: '0 0 32px', color: 'var(--text-secondary)', maxWidth: '400px' }}>
               El reporte ha sido creado exitosamente y ya está disponible en tu historial para descarga.
             </p>
             <button onClick={onClose} style={{

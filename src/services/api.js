@@ -61,6 +61,11 @@ api.interceptors.response.use(
       errorMessage = error.response.data?.message || error.response.data?.error || `Error ${error.response.status}: Servidor no disponible`;
     }
 
+    // 403: mensaje claro de permisos cuando el backend no especifica uno (no se cierra sesión)
+    if (status === 403 && !error.response?.data?.message && !error.response?.data?.error) {
+      errorMessage = 'No tienes permisos para realizar esta acción.';
+    }
+
     // Lógica de Silencio para rutas específicas (ej. Login maneja sus propios 401)
     const isLoginPath = url.includes('/auth/login');
     const isAuthError = status === 401 || status === 403;

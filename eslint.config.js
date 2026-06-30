@@ -27,5 +27,12 @@ export default defineConfig([
       'react-refresh/only-export-components': 'warn',
     },
   },
+  {
+    // Tooling E2E (Playwright): corre en Node, no en el navegador
+    files: ['e2e/**/*.{js,jsx}'],
+    languageOptions: {
+      globals: { ...globals.node },
+    },
+  },
 ])
 

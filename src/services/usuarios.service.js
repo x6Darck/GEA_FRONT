@@ -14,6 +14,8 @@ const getRoleDisplayName = (rol) => {
     'OFICINA': 'Oficina',
     '4': 'Usuario Autenticado',
     'USUARIO_AUTENTICADO_APP': 'Usuario Autenticado',
+    '5': 'Consultoría',
+    'CONSULTORIA': 'Consultoría',
     'USUARIO_APP': 'Usuario APP'
   };
   

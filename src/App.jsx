@@ -1,18 +1,20 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import DashboardLayout from './components/layout/DashboardLayout';
 import Login from './pages/Login';
-import CalendarView from './pages/CalendarView';
-import Events from './pages/Events';
-import Announcements from './pages/Announcements';
-import PublicAnnouncements from './pages/PublicAnnouncements';
-import Reports from './pages/Reports';
-import Users from './pages/Users';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
+import Spinner from './components/ui/Spinner';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
+const CalendarView      = lazy(() => import('./pages/CalendarView'));
+const Events            = lazy(() => import('./pages/Events'));
+const Announcements     = lazy(() => import('./pages/Announcements'));
+const PublicAnnouncements = lazy(() => import('./pages/PublicAnnouncements'));
+const Reports           = lazy(() => import('./pages/Reports'));
+const Users             = lazy(() => import('./pages/Users'));
 
 const App = () => {
   return (
@@ -23,24 +25,24 @@ const App = () => {
             <Route path="/login" element={<Login />} />
 
             <Route element={<DashboardLayout />}>
-              <Route path="/calendario" element={<ErrorBoundary><CalendarView /></ErrorBoundary>} />
-              <Route path="/galeria-anuncios" element={<ErrorBoundary><PublicAnnouncements /></ErrorBoundary>} />
+              <Route path="/calendario" element={<ErrorBoundary><Suspense fallback={<Spinner message="Cargando..." />}><CalendarView /></Suspense></ErrorBoundary>} />
+              <Route path="/galeria-anuncios" element={<ErrorBoundary><Suspense fallback={<Spinner message="Cargando..." />}><PublicAnnouncements /></Suspense></ErrorBoundary>} />
               <Route index element={<Navigate to="/calendario" replace />} />
 
               <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN', 'ADMIN', 'COMUNICACIONES', 'OFICINA', 'CONSULTORIA']} />}>
-                <Route path="/eventos" element={<ErrorBoundary><Events /></ErrorBoundary>} />
+                <Route path="/eventos" element={<ErrorBoundary><Suspense fallback={<Spinner message="Cargando..." />}><Events /></Suspense></ErrorBoundary>} />
               </Route>
 
               <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN', 'ADMIN', 'COMUNICACIONES', 'OFICINA', 'USUARIO_AUTENTICADO_APP', 'CONSULTORIA']} />}>
-                <Route path="/anuncios" element={<ErrorBoundary><Announcements /></ErrorBoundary>} />
+                <Route path="/anuncios" element={<ErrorBoundary><Suspense fallback={<Spinner message="Cargando..." />}><Announcements /></Suspense></ErrorBoundary>} />
               </Route>
 
-              <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN', 'ADMIN', 'COMUNICACIONES', 'OFICINA', 'CONSULTORIA']} />}>
-                <Route path="/reportes" element={<ErrorBoundary><Reports /></ErrorBoundary>} />
+              <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN', 'ADMIN', 'COMUNICACIONES', 'OFICINA']} />}>
+                <Route path="/reportes" element={<ErrorBoundary><Suspense fallback={<Spinner message="Cargando..." />}><Reports /></Suspense></ErrorBoundary>} />
               </Route>
 
               <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN', 'ADMIN']} />}>
-                <Route path="/usuarios" element={<ErrorBoundary><Users /></ErrorBoundary>} />
+                <Route path="/usuarios" element={<ErrorBoundary><Suspense fallback={<Spinner message="Cargando..." />}><Users /></Suspense></ErrorBoundary>} />
               </Route>
             </Route>
 
@@ -57,7 +59,7 @@ const App = () => {
           pauseOnFocusLoss
           draggable
           pauseOnHover
-          theme="colored"
+          theme="light"
         />
       </AuthProvider>
     </ErrorBoundary>

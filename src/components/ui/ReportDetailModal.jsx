@@ -97,8 +97,8 @@ const ReportDetailModal = ({ isOpen, onClose, report, onExport, onSuccess }) => 
               </div>
             ) : (
               <>
-                <h2 style={{ margin: '0 0 4px', fontSize: '20px', color: '#0f172a' }}>{report.titulo}</h2>
-                <p style={{ margin: 0, color: '#64748b', fontSize: '14px' }}>{report.descripcion || 'Sin descripción adicional'}</p>
+                <h2 style={{ margin: '0 0 4px', fontSize: '20px', color: 'var(--text-main)' }}>{report.titulo}</h2>
+                <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '14px' }}>{report.descripcion || 'Sin descripción adicional'}</p>
               </>
             )}
           </div>
@@ -113,7 +113,7 @@ const ReportDetailModal = ({ isOpen, onClose, report, onExport, onSuccess }) => 
               <button 
                 onClick={() => setIsEditing(true)}
                 style={{ 
-                  background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', 
+                  background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', 
                   display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: 'bold' 
                 }}
               >
@@ -126,46 +126,46 @@ const ReportDetailModal = ({ isOpen, onClose, report, onExport, onSuccess }) => 
         {/* METADATA GRID */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
-            <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '700', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
               <Calendar size={12} /> Rango de Consulta
             </span>
-            <p style={{ margin: 0, fontSize: '13px', color: '#334155', fontWeight: '600' }}>
-              {report.desde} <span style={{ color: '#94a3b8', fontWeight: 'normal' }}>hasta</span> {report.hasta}
+            <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)', fontWeight: '600' }}>
+              {report.desde} <span style={{ color: 'var(--text-muted)', fontWeight: 'normal' }}>hasta</span> {report.hasta}
             </p>
           </div>
 
           <div style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
-            <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '700', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
               <Clock size={12} /> Generado el
             </span>
-            <p style={{ margin: 0, fontSize: '13px', color: '#334155', fontWeight: '600' }}>
+            <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)', fontWeight: '600' }}>
               {formatDate(report.fecha)}
             </p>
           </div>
 
           <div style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
-            <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '700', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
               <Download size={12} /> Formato
             </span>
-            <p style={{ margin: 0, fontSize: '13px', color: '#334155', fontWeight: '600' }}>
+            <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)', fontWeight: '600' }}>
               {report.formato} Document
             </p>
           </div>
 
           <div style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
-            <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '700', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
               <User size={12} /> Generado por
             </span>
-            <p style={{ margin: 0, fontSize: '13px', color: '#334155', fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)', fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {report.usuarioCorreo}
             </p>
           </div>
 
           <div style={{ backgroundColor: '#f1f5f9', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', gridColumn: 'span 2' }}>
-            <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+            <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
               <Layers size={12} /> Alcance del Reporte
             </span>
-            <p style={{ margin: 0, fontSize: '14px', color: '#0f172a', fontWeight: '700' }}>
+            <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-main)', fontWeight: '700' }}>
               {report.alcance === 'GLOBAL' ? 'General (Anuncios y Eventos)' : report.alcance === 'EVENTOS' ? 'Solo Eventos' : 'Solo Anuncios'}
             </p>
           </div>
@@ -189,7 +189,7 @@ const ReportDetailModal = ({ isOpen, onClose, report, onExport, onSuccess }) => 
               <button 
                 onClick={() => setIsEditing(false)} 
                 className="btn-secondary"
-                style={{ padding: '10px 24px', borderRadius: '30px', border: 'none', backgroundColor: '#f1f5f9', color: '#475569', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                style={{ padding: '10px 24px', borderRadius: '30px', border: 'none', backgroundColor: '#f1f5f9', color: 'var(--text-secondary)', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
               >
                 <RotateCcw size={16} /> Cancelar
               </button>
@@ -206,7 +206,7 @@ const ReportDetailModal = ({ isOpen, onClose, report, onExport, onSuccess }) => 
               <button 
                 onClick={onClose} 
                 className="btn-secondary"
-                style={{ padding: '10px 24px', borderRadius: '30px', border: 'none', backgroundColor: '#f1f5f9', color: '#475569', fontWeight: 'bold', cursor: 'pointer' }}
+                style={{ padding: '10px 24px', borderRadius: '30px', border: 'none', backgroundColor: '#f1f5f9', color: 'var(--text-secondary)', fontWeight: 'bold', cursor: 'pointer' }}
               >
                 Cerrar
               </button>

@@ -33,17 +33,27 @@ const toYMD = (d) => {
 const STAT_COLORS = ['#ce1126', '#16a34a', '#f59e0b', '#3b82f6', '#8b5cf6', '#ec4899'];
 
 const STATUS_COLORS = {
-  'APROBADA': '#16a34a',
-  'PENDIENTE': '#f59e0b',
-  'RECHAZADA': '#ce1126',
-  'PUBLICADA': '#0ea5e9'
+  'APROBADA':    '#16a34a',
+  'PENDIENTE':   '#f59e0b',
+  'RECHAZADA':   '#ce1126',
+  'PUBLICADA':   '#0ea5e9',
+  'EN_REVISION': '#6366f1',
 };
+
+const ESTADO_LABELS = {
+  'APROBADA':    'Aprobada',
+  'PENDIENTE':   'Pendiente',
+  'RECHAZADA':   'Rechazada',
+  'PUBLICADA':   'Publicada',
+  'EN_REVISION': 'En revisión',
+};
+const formatEstado = (s) => ESTADO_LABELS[s] || (s || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div style={{ backgroundColor: '#fff', padding: '12px', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}>
-        <p style={{ margin: 0, fontWeight: 'bold', fontSize: '13px', color: '#1e293b' }}>{label}</p>
+      <div style={{ backgroundColor: 'var(--surface)', padding: '12px', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', boxShadow: 'var(--shadow-md)' }}>
+        <p style={{ margin: 0, fontWeight: 'bold', fontSize: '13px', color: 'var(--text-main)' }}>{label}</p>
         <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#ce1126', fontWeight: '800' }}>
           {`${payload[0].name}: ${payload[0].value}`}
         </p>
@@ -71,10 +81,11 @@ const StatsDashboard = ({ stats, loading, tipoFilter, onTipoChange, oficinaLabel
 
   const meses = safeStats.solicitudesPorMes || [];
   const porOficina = safeStats.solicitudesPorOficina || [];
-  const estados = safeStats.tendenciaEstado || [];
+  const estadosRaw = safeStats.tendenciaEstado || [];
+  const estados = estadosRaw.map(e => ({ ...e, _raw: e.etiqueta, etiqueta: formatEstado(e.etiqueta) }));
   const categorias = safeStats.eventosPorTipo || [];
 
-  const publicadas = (estados.find(e => (e.etiqueta || '').toUpperCase() === 'PUBLICADA')?.valor) || 0;
+  const publicadas = (estadosRaw.find(e => (e.etiqueta || '').toUpperCase() === 'PUBLICADA')?.valor) || 0;
   const esAnuncios = tipoFilter === 'ANUNCIOS';
 
   const fmt = (n) => new Intl.NumberFormat('es-CO').format(n ?? 0);
@@ -131,12 +142,12 @@ const StatsDashboard = ({ stats, loading, tipoFilter, onTipoChange, oficinaLabel
       {loading && (
         <div style={{
           position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-          zIndex: 50, background: 'rgba(255,255,255,0.7)',
-          backdropFilter: 'blur(3px)', borderRadius: '16px',
+          zIndex: 50, background: 'rgba(255,255,255,0.88)',
+          borderRadius: 'var(--radius-md)',
           display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'
         }}>
-          <div style={{ width: '40px', height: '40px', border: '4px solid #f3f3f3', borderTop: '4px solid #ce1126', borderRadius: '50%', marginBottom: '12px', animation: 'spin 1s linear infinite' }}></div>
-          <p style={{ color: '#1e293b', fontSize: '14px', fontWeight: '800' }}>Actualizando Analíticas...</p>
+          <div style={{ width: '40px', height: '40px', border: '4px solid var(--border)', borderTop: '4px solid var(--primary)', borderRadius: '50%', marginBottom: '12px', animation: 'spin 1s linear infinite' }}></div>
+          <p style={{ color: 'var(--text-main)', fontSize: '14px', fontWeight: '800' }}>Actualizando Analíticas...</p>
         </div>
       )}
 
@@ -170,7 +181,7 @@ const StatsDashboard = ({ stats, loading, tipoFilter, onTipoChange, oficinaLabel
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="etiqueta" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#64748b'}} dy={10} />
+                  <XAxis dataKey="etiqueta" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: 'var(--text-secondary)'}} dy={10} />
                   <YAxis hide={true} domain={[0, 'dataMax + 1']} />
                   <Tooltip content={<CustomTooltip />} />
                   <Area type="monotone" dataKey="valor" name="Solicitudes" stroke="#ce1126" strokeWidth={3} fillOpacity={1} fill="url(#colorVal)" />
@@ -191,7 +202,7 @@ const StatsDashboard = ({ stats, loading, tipoFilter, onTipoChange, oficinaLabel
                 <BarChart layout="vertical" data={porOficina.slice(0, 5)} margin={{ left: 20, right: 10, top: 5, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
                   <XAxis type="number" hide allowDecimals={false} />
-                  <YAxis dataKey="etiqueta" type="category" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#64748b'}} width={90} />
+                  <YAxis dataKey="etiqueta" type="category" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: 'var(--text-secondary)'}} width={90} />
                   <Tooltip formatter={(value) => [value, 'Solicitudes']} />
                   <Bar dataKey="valor" name="Solicitudes" radius={[0, 6, 6, 0]}>
                     {porOficina.map((entry, index) => (
@@ -224,7 +235,7 @@ const StatsDashboard = ({ stats, loading, tipoFilter, onTipoChange, oficinaLabel
                     nameKey="etiqueta"
                   >
                     {estados.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={STATUS_COLORS[entry.etiqueta] || STAT_COLORS[index % STAT_COLORS.length]} />
+                      <Cell key={`cell-${index}`} fill={STATUS_COLORS[entry._raw] || STAT_COLORS[index % STAT_COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip formatter={(value, name) => [value, name]} />
@@ -245,12 +256,12 @@ const StatsDashboard = ({ stats, loading, tipoFilter, onTipoChange, oficinaLabel
               {categorias.length > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {categorias.slice(0, 6).map((item, idx) => (
-                    <div key={idx} style={{ padding: '8px 12px', background: '#f8fafc', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div key={idx} style={{ padding: '8px 12px', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: item.color || STAT_COLORS[idx % STAT_COLORS.length], flexShrink: 0 }} />
-                        <span style={{ fontSize: '12px', fontWeight: '600', color: '#475569' }}>{item.etiqueta}</span>
+                        <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>{item.etiqueta}</span>
                       </div>
-                      <span style={{ fontSize: '13px', fontWeight: '800', color: '#1e293b' }}>{item.valor}</span>
+                      <span style={{ fontSize: '13px', fontWeight: '800', color: 'var(--text-main)' }}>{item.valor}</span>
                     </div>
                   ))}
                 </div>
@@ -432,7 +443,7 @@ const Reports = () => {
         <div className={styles.filterToolbar}>
           {/* Búsqueda */}
           <div style={{ position: 'relative' }}>
-            <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
+            <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
             <input
               type="text"
               placeholder="Buscar reporte por título o descripción..."
@@ -478,7 +489,7 @@ const Reports = () => {
               className={styles.filterSelect}
               style={{
                 minWidth: '160px',
-                backgroundColor: (user?.rol === 'OFICINA' || user?.rol === 'USUARIO_AUTENTICADO_APP') ? '#f8fafc' : 'white',
+                backgroundColor: (user?.rol === 'OFICINA' || user?.rol === 'USUARIO_AUTENTICADO_APP') ? 'var(--surface-2)' : 'white',
                 cursor: (user?.rol === 'OFICINA' || user?.rol === 'USUARIO_AUTENTICADO_APP') ? 'not-allowed' : 'pointer'
               }}
               value={oficinaFilter}
@@ -505,7 +516,7 @@ const Reports = () => {
             </div>
 
             <button
-              style={{ marginLeft: 'auto', padding: '0 16px', height: '36px', borderRadius: '20px', border: '1px solid #e2e8f0', background: 'white', color: '#64748b', fontWeight: '600', fontSize: '0.82rem', cursor: 'pointer', whiteSpace: 'nowrap' }}
+              style={{ marginLeft: 'auto', padding: '0 16px', height: '36px', borderRadius: '20px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-secondary)', fontWeight: '600', fontSize: '0.82rem', cursor: 'pointer', whiteSpace: 'nowrap' }}
               onClick={() => {
                 if (!(user?.rol === 'OFICINA' || user?.rol === 'USUARIO_AUTENTICADO_APP')) setOficinaFilter('');
                 setDesdeFilter('');
@@ -546,16 +557,16 @@ const Reports = () => {
               <tbody>
                 {(filteredReports || []).map((report, index) => (
                   <tr key={report.id}>
-                    <td style={{ fontSize: '12px', fontWeight: 'bold', color: '#64748b' }}>{index + 1}</td>
-                    <td style={{ fontSize: '11px', color: '#94a3b8' }}>#{report.id}</td>
+                    <td style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>{index + 1}</td>
+                    <td style={{ fontSize: '11px', color: 'var(--text-muted)' }}>#{report.id}</td>
                     <td>
                       <div className={styles.truncate} style={{ color: 'var(--primary)', fontWeight: 'bold' }} title={report.titulo}>
                         {report.titulo}
                       </div>
                     </td>
                     <td className={styles.truncate} title={report.descripcion}>{report.descripcion}</td>
-                    <td style={{ fontSize: '12px', fontWeight: '600', color: '#64748b' }}>{report.usuarioOficina}</td>
-                    <td style={{ fontSize: '11px', color: '#94a3b8' }}>{report.usuarioCorreo}</td>
+                    <td style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>{report.usuarioOficina}</td>
+                    <td style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{report.usuarioCorreo}</td>
                     <td style={{ fontSize: '12px' }}>
                       {report.fecha !== '-' ? new Date(report.fecha).toLocaleDateString('es-CO') : '-'}
                     </td>
@@ -596,7 +607,7 @@ const Reports = () => {
                 ))}
                 {filteredReports.length === 0 && (
                   <tr>
-                    <td colSpan="9" style={{ textAlign: 'center', padding: '80px 20px', color: '#94a3b8' }}>
+                    <td colSpan="9" style={{ textAlign: 'center', padding: '80px 20px', color: 'var(--text-muted)' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
                         <FileText size={40} style={{ opacity: 0.2 }} />
                         <span>No se encontraron reportes con los filtros aplicados.</span>

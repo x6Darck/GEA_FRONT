@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useContext } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { ChevronDown, ChevronUp, Search, Plus, X, FileText } from 'lucide-react';
+import { ChevronDown, ChevronUp, Search, Plus, X, FileText, Calendar, Clock, MapPin, Ticket, DollarSign, Lock, Star, Link2 } from 'lucide-react';
 import styles from './CalendarView.module.css';
 import { getEventosPublicados } from '../services/eventos.service';
 import Spinner from '../components/ui/Spinner';
@@ -12,6 +12,15 @@ import { formatLocalDate, getTodayStr } from '../utils/dateUtils';
 
 /* ─── Helper: resolves image URL ─────────────────────────────────── */
 const resolveImg = (url) => resolveImageUrl(url);
+
+/* ─── Helper: estilo/etiqueta del indicador de tipo de ingreso ─────── */
+const ingresoBadge = (tipo) => {
+  switch ((tipo || 'LIBRE').toUpperCase()) {
+    case 'PAGO':    return { label: 'Pago',    Icon: DollarSign, bg: 'var(--warning-soft)', color: 'var(--warning-on-soft)' };
+    case 'PRIVADO': return { label: 'Privado', Icon: Lock,       bg: 'var(--surface-3)', color: 'var(--text-secondary)' };
+    default:        return { label: 'Libre',   Icon: Ticket,     bg: 'var(--success-soft)', color: 'var(--success-on-soft)' };
+  }
+};
 
 /* ─── Mini event card (shared between list and day-modal) ─────────── */
 const EventCard = ({ evt, onClick }) => {
@@ -69,41 +78,64 @@ const EventCard = ({ evt, onClick }) => {
         {/* No-image placeholder */}
         {!imgUrl && (
           <div style={{ padding: '10px 14px', zIndex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '18px' }}>📅</span>
+            <Calendar size={16} style={{ color: 'rgba(255,255,255,0.85)' }} />
             <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.2px' }}>Evento Institucional</span>
           </div>
         )}
 
         {/* Top badges */}
         <div style={{ position: 'absolute', top: '8px', left: '12px', right: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', zIndex: 2 }}>
-          {evt.tipoEvento && (
-            <span style={{ 
-              background: `${eventColor}33`, // 20% opacity 
-              backdropFilter: 'blur(10px)', 
-              color: '#fff', 
-              fontSize: '9px', 
-              fontWeight: '800', 
-              textTransform: 'uppercase', 
-              letterSpacing: '0.8px', 
-              padding: '4px 10px', 
-              borderRadius: '20px',
-              border: `1px solid ${eventColor}66` // 40% opacity
-            }}>
-              {evt.tipoEvento}
-            </span>
-          )}
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+            {evt.tipoEvento && (
+              <span style={{
+                background: `${eventColor}33`, // 20% opacity
+                
+                color: '#fff',
+                fontSize: '9px',
+                fontWeight: '800',
+                textTransform: 'uppercase',
+                letterSpacing: '0.8px',
+                padding: '4px 10px',
+                borderRadius: 'var(--radius-lg)',
+                border: `1px solid ${eventColor}66` // 40% opacity
+              }}>
+                {evt.tipoEvento}
+              </span>
+            )}
+            {evt.tipoIngreso && (() => {
+              const b = ingresoBadge(evt.tipoIngreso);
+              return (
+                <span style={{
+                  background: b.bg,
+                  color: b.color,
+                  fontSize: '9px',
+                  fontWeight: '800',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.6px',
+                  padding: '4px 10px',
+                  borderRadius: 'var(--radius-lg)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.28)'
+                }}>
+                  <b.Icon size={11} strokeWidth={2.5} /> {b.label}
+                </span>
+              );
+            })()}
+          </div>
           {imgUrl && onClick && (
-            <span style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', color: '#fff', fontSize: '9px', fontWeight: '700', padding: '3px 9px', borderRadius: '20px', marginLeft: 'auto' }}>
-              Ver pieza 🖼
+            <span style={{ background: 'rgba(0,0,0,0.6)',  color: '#fff', fontSize: '9px', fontWeight: '700', padding: '3px 9px', borderRadius: 'var(--radius-lg)', marginLeft: 'auto' }}>
+              Ver pieza
             </span>
           )}
         </div>
       </div>
 
       {/* Info */}
-      <div style={{ padding: '16px 20px 20px 22px', backgroundColor: '#ffffff' }}>
+      <div style={{ padding: '16px 20px 20px 22px', backgroundColor: 'var(--surface)' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '10px' }}>
-          <h4 style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: '#1e293b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.4', flex: 1, minWidth: 0 }} title={evt.nombre}>
+          <h4 style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: 'var(--text-main)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.4', flex: 1, minWidth: 0 }} title={evt.nombre}>
             {evt.nombre || 'Sin título'}
           </h4>
           {evt.esImportante && (
@@ -120,27 +152,27 @@ const EventCard = ({ evt, onClick }) => {
               border: '1px solid #fecaca',
               lineHeight: 1
             }}>
-              ★
+              <Star size={12} fill="currentColor" />
             </div>
           )}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#64748b' }}>
-            <span style={{ color: eventColor, fontSize: '14px' }}>📅</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--text-secondary)' }}>
+            <Calendar size={14} style={{ color: eventColor, flexShrink: 0 }} />
             <span style={{ fontWeight: '500' }}>{evt.fecha ? formatLocalDate(evt.fecha, { day: 'numeric', month: 'long', year: 'numeric' }) : 'Fecha por confirmar'}</span>
-            <span style={{ color: '#cbd5e1' }}>•</span>
-            <span style={{ color: eventColor }}>🕐</span>
+            <span style={{ color: 'var(--border-strong)' }}>•</span>
+            <Clock size={14} style={{ color: eventColor, flexShrink: 0 }} />
             <span style={{ fontWeight: '500' }}>{formatTime12h(evt.horaInicio) || '--:--'}</span>
           </div>
-          {evt.lugar && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#64748b' }}>
-              <span style={{ color: eventColor, fontSize: '14px' }}>📍</span>
-              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{evt.lugar}</span>
+          {(evt.ubicacionExterna ? (evt.lugar || 'Externo').replace(/\bExterno\b/gi, evt.ubicacionExterna) : evt.lugar) && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--text-secondary)' }}>
+              <MapPin size={14} style={{ color: eventColor, flexShrink: 0 }} />
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{evt.ubicacionExterna ? (evt.lugar || 'Externo').replace(/\bExterno\b/gi, evt.ubicacionExterna) : evt.lugar}</span>
             </div>
           )}
           {evt.linkConexion && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: 'var(--text-secondary)' }}>
-              <span style={{ color: eventColor, fontSize: '12px' }}>🔗</span>
+              <Link2 size={13} style={{ color: eventColor, flexShrink: 0 }} />
               <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#3b82f6' }}>Enlace virtual</span>
             </div>
           )}
@@ -172,11 +204,7 @@ const CompactEventCard = ({ evt, onClick }) => {
     <div 
       className={styles.compactCard} 
       onClick={onClick}
-      style={evt.esImportante ? { 
-        border: '1.5px solid #ce1126', 
-        background: '#fff9f9',
-        boxShadow: '0 4px 15px rgba(206,17,38,0.1)'
-      } : {}}
+      style={{}}
     >
        {/* Thicker status indicator */}
        <div className={styles.statusIndicator} style={{ backgroundColor: evt.esImportante ? '#ce1126' : eventColor, width: evt.esImportante ? '8px' : '6px' }} />
@@ -189,7 +217,7 @@ const CompactEventCard = ({ evt, onClick }) => {
            position: 'relative'
          }} 
        >
-         {!imgUrl && <span style={{ fontSize: '32px', opacity: 0.4 }}>📅</span>}
+         {!imgUrl && <Calendar size={30} style={{ opacity: 0.35, color: 'rgba(255,255,255,0.8)' }} />}
          {/* Subtle overlay for better text contrast if needed */}
          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(0,0,0,0.05), transparent)' }} />
          
@@ -199,7 +227,7 @@ const CompactEventCard = ({ evt, onClick }) => {
              position: 'absolute',
              bottom: '8px',
              left: '8px',
-             background: 'linear-gradient(135deg, #ce1126 0%, #8b0000 100%)', 
+             background: 'linear-gradient(135deg, #ce1126 0%, var(--primary-active) 100%)', 
              color: '#fff', 
              padding: '4px 8px', 
              borderRadius: '6px', 
@@ -210,45 +238,32 @@ const CompactEventCard = ({ evt, onClick }) => {
              gap: '4px',
              boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
              zIndex: 10,
-             backdropFilter: 'blur(4px)',
+             
              border: '1px solid rgba(255,255,255,0.2)'
            }}>
-             <span style={{ fontSize: '11px' }}>★</span> IMPORTANTE
+             <Star size={11} fill="currentColor" /> IMPORTANTE
            </div>
          )}
        </div>
 
        <div className={styles.compactInfo}>
-          <div className={styles.typeBadge} style={{ color: eventColor, borderBottom: `2px solid ${eventColor}22` }}>
-            <span>{evt.tipoEvento || 'Sin Categoría'}</span>
+          <div className={styles.typeBadge} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
+            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: eventColor, flexShrink: 0 }} />
+            {evt.tipoEvento || 'Sin Categoría'}
           </div>
+          {evt.tipoIngreso && (() => {
+            const b = ingresoBadge(evt.tipoIngreso);
+            return (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: b.bg, color: b.color, fontSize: '9px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '3px 9px', borderRadius: 'var(--radius-lg)', marginBottom: '6px', alignSelf: 'flex-start' }}>
+                <b.Icon size={11} strokeWidth={2.5} /> {b.label}
+              </span>
+            );
+          })()}
 
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '2px' }}>
-            <h4 className={styles.compactTitle} title={evt.nombre} style={{ 
-              ...(evt.esImportante ? { color: '#991b1b', fontWeight: '900' } : {}),
-              flex: 1,
-              minWidth: 0,
-              margin: 0
-            }}>
+            <h4 className={styles.compactTitle} title={evt.nombre} style={{ flex: 1, minWidth: 0, margin: 0 }}>
               {evt.nombre}
             </h4>
-            {evt.esImportante && (
-              <div style={{ 
-                backgroundColor: '#fff1f2', 
-                color: '#ce1126', 
-                padding: '2px 6px', 
-                borderRadius: '6px', 
-                fontSize: '12px', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                flexShrink: 0,
-                border: '1px solid #fecaca',
-                lineHeight: 1
-              }}>
-                ★
-              </div>
-            )}
           </div>
           
           {evt.desc && (
@@ -259,19 +274,19 @@ const CompactEventCard = ({ evt, onClick }) => {
 
           <div className={styles.compactMetaGrid}>
              <div className={styles.metaItem}>
-                <span className={styles.metaIcon} style={{ color: eventColor }}>📅</span>
-                <span className={styles.metaText} style={{ fontWeight: '700', color: '#1e293b' }}>
+                <Calendar size={13} className={styles.metaIcon} style={{ color: 'var(--text-muted)' }} />
+                <span className={styles.metaText} style={{ fontWeight: '700', color: 'var(--text-main)' }}>
                   {evt.fecha ? formatLocalDate(evt.fecha) : 'Pendiente'}
                 </span>
              </div>
              <div className={styles.metaItem}>
-                <span className={styles.metaIcon} style={{ color: eventColor }}>🕐</span>
+                <Clock size={13} className={styles.metaIcon} style={{ color: 'var(--text-muted)' }} />
                 <span className={styles.metaText}>{formatTime12h(evt.horaInicio)} - {formatTime12h(evt.horaFin) || 'Fin'}</span>
              </div>
-             {evt.lugar && (
+             {(evt.ubicacionExterna ? (evt.lugar || 'Externo').replace(/\bExterno\b/gi, evt.ubicacionExterna) : evt.lugar) && (
                <div className={styles.metaItem}>
-                  <span className={styles.metaIcon} style={{ color: eventColor }}>📍</span>
-                  <span className={styles.metaText} title={evt.lugar}>{evt.lugar}</span>
+                  <MapPin size={13} className={styles.metaIcon} style={{ color: 'var(--text-muted)' }} />
+                  <span className={styles.metaText} title={evt.ubicacionExterna ? (evt.lugar || 'Externo').replace(/\bExterno\b/gi, evt.ubicacionExterna) : evt.lugar}>{evt.ubicacionExterna ? (evt.lugar || 'Externo').replace(/\bExterno\b/gi, evt.ubicacionExterna) : evt.lugar}</span>
                </div>
              )}
           </div>
@@ -313,9 +328,17 @@ const GridEventCard = ({ evt, onClick }) => {
            display: 'flex', alignItems: 'center', justifyContent: 'center'
          }} 
        >
-         {!imgUrl && <span style={{ fontSize: '32px', opacity: 0.5 }}>📅</span>}
+         {!imgUrl && <Calendar size={30} style={{ opacity: 0.4, color: 'var(--text-muted)' }} />}
        </div>
        <div className={styles.gridInfo}>
+          {evt.tipoIngreso && (() => {
+            const b = ingresoBadge(evt.tipoIngreso);
+            return (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: b.bg, color: b.color, fontSize: '9px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '3px 9px', borderRadius: 'var(--radius-lg)', marginBottom: '6px' }}>
+                <b.Icon size={11} strokeWidth={2.5} /> {b.label}
+              </span>
+            );
+          })()}
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '6px' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', flex: 1, minWidth: 0 }}>
                 <div className={styles.statusDot} style={{ backgroundColor: eventColor, marginTop: '6px' }} />
@@ -335,7 +358,7 @@ const GridEventCard = ({ evt, onClick }) => {
                   border: '1px solid #fecaca',
                   lineHeight: 1
                 }}>
-                  ★
+                  <Star size={12} fill="currentColor" />
                 </div>
               )}
           </div>
@@ -344,13 +367,13 @@ const GridEventCard = ({ evt, onClick }) => {
 
           <div className={styles.gridMeta}>
              <div className={styles.metaItem}>
-                <span style={{ color: eventColor }}>🕐</span>
+                <Clock size={14} style={{ color: eventColor, flexShrink: 0 }} />
                 <span className={styles.metaText}>{formatTime12h(evt.horaInicio)} - {formatTime12h(evt.horaFin) || 'Fin'}</span>
              </div>
-             {evt.lugar && (
+             {(evt.ubicacionExterna ? (evt.lugar || 'Externo').replace(/\bExterno\b/gi, evt.ubicacionExterna) : evt.lugar) && (
                <div className={styles.metaItem}>
-                  <span style={{ color: eventColor }}>📍</span>
-                  <span className={styles.metaText} title={evt.lugar}>{evt.lugar}</span>
+                  <MapPin size={13} style={{ color: eventColor, flexShrink: 0 }} />
+                  <span className={styles.metaText} title={evt.ubicacionExterna ? (evt.lugar || 'Externo').replace(/\bExterno\b/gi, evt.ubicacionExterna) : evt.lugar}>{evt.ubicacionExterna ? (evt.lugar || 'Externo').replace(/\bExterno\b/gi, evt.ubicacionExterna) : evt.lugar}</span>
                </div>
              )}
           </div>
@@ -381,17 +404,17 @@ const Lightbox = ({ evt, onClose }) => {
 
   return (
     <div onClick={onClose} style={{
-      position: 'fixed', inset: 0, zIndex: 9999,
+      position: 'fixed', inset: 0, zIndex: 'var(--z-modal-backdrop)',
       backgroundColor: 'rgba(255,255,255,0.88)',
       display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center',
-      padding: '24px', backdropFilter: 'blur(4px)'
+      padding: '24px'
     }}>
       <p style={{ color: 'rgba(0,0,0,0.3)', fontSize: '12px', marginBottom: '12px' }}>
         Clic fuera para cerrar
       </p>
       <div onClick={e => e.stopPropagation()} style={{
-        background: '#fff', borderRadius: '20px', overflow: 'hidden',
+        background: 'var(--surface)', borderRadius: 'var(--radius-lg)', overflow: 'hidden',
         maxWidth: '560px', width: '100%',
         boxShadow: '0 20px 60px rgba(0,0,0,0.18)',
         border: '1px solid rgba(0,0,0,0.07)',
@@ -408,8 +431,8 @@ const Lightbox = ({ evt, onClose }) => {
             width: '32px', height: '32px', borderRadius: '50%',
             backgroundColor: 'rgba(0,0,0,0.05)', border: 'none',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', zIndex: 10, transition: 'all 0.2s',
-            color: '#1e293b'
+            cursor: 'pointer', zIndex: 10, transition: 'background-color var(--dur) var(--ease-standard), color var(--dur) var(--ease-standard), transform var(--dur-fast) var(--ease-out)',
+            color: 'var(--text-main)'
           }}
           onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.1)'}
           onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'}
@@ -421,28 +444,28 @@ const Lightbox = ({ evt, onClose }) => {
         <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column' }}>
           {imgUrl ? (
             <img src={imgUrl} alt={evt.nombre}
-              style={{ width: '100%', display: 'block', maxHeight: '70vh', objectFit: 'contain', backgroundColor: '#f8fafc', flexShrink: 0 }} />
+              style={{ width: '100%', display: 'block', maxHeight: '70vh', objectFit: 'contain', backgroundColor: 'var(--surface-2)', flexShrink: 0 }} />
           ) : (
-            <div style={{ height: '200px', background: 'linear-gradient(135deg,#cc0000 0%,#8b0000 100%)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', flexShrink: 0 }}>
-              <span style={{ fontSize: '40px' }}>📅</span>
+            <div style={{ height: '200px', background: 'linear-gradient(135deg,var(--primary) 0%,var(--primary-active) 100%)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', flexShrink: 0 }}>
+              <Calendar size={36} style={{ color: '#fff' }} />
               <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1px' }}>Sin pieza gráfica</span>
             </div>
           )}
           <div style={{ padding: '18px 22px', flexShrink: 0 }}>
-            <h3 style={{ margin: '0 0 8px', fontSize: '16px', fontWeight: '700', color: '#1e293b' }}>{evt.nombre}</h3>
+            <h3 style={{ margin: '0 0 8px', fontSize: '16px', fontWeight: '700', color: 'var(--text-main)' }}>{evt.nombre}</h3>
             
             {/* Enhanced details with description and end time */}
-            <div style={{ marginBottom: '16px', fontSize: '13px', color: '#475569', lineHeight: '1.6', background: '#f8fafc', padding: '12px', borderRadius: '10px', border: '1px solid #f1f5f9' }}>
+            <div style={{ marginBottom: '16px', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.6', background: '#f8fafc', padding: '12px', borderRadius: '10px', border: '1px solid var(--border)' }}>
                <p style={{ margin: 0 }}>{evt.desc || 'Sin descripción disponible.'}</p>
             </div>
 
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', fontSize: '12px', color: '#64748b' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', fontSize: '12px', color: 'var(--text-secondary)' }}>
               <span>📆 {evt.fecha ? formatLocalDate(evt.fecha, { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}</span>
-              <span>🕐 {formatTime12h(evt.horaInicio)} {evt.horaFin ? ` a ${formatTime12h(evt.horaFin)}` : ''}</span>
-              {evt.lugar && <span>📍 {evt.lugar}</span>}
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><Clock size={13} /> {formatTime12h(evt.horaInicio)} {evt.horaFin ? ` a ${formatTime12h(evt.horaFin)}` : ''}</span>
+              {(evt.ubicacionExterna ? (evt.lugar || 'Externo').replace(/\bExterno\b/gi, evt.ubicacionExterna) : evt.lugar) && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><MapPin size={13} /> {evt.ubicacionExterna ? (evt.lugar || 'Externo').replace(/\bExterno\b/gi, evt.ubicacionExterna) : evt.lugar}</span>}
               {evt.linkConexion && (
                 <a href={evt.linkConexion} target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  🔗 Unirse a reunión
+                  Unirse a reunión
                 </a>
               )}
             </div>
@@ -474,37 +497,37 @@ const DayEventsModal = ({ dateStr, events, onClose, onSelectEvent }) => {
       position: 'fixed', inset: 0, zIndex: 9000,
       backgroundColor: 'rgba(255,255,255,0.88)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: '24px', backdropFilter: 'blur(4px)',
+      padding: '24px',
     }}>
       <div onClick={e => e.stopPropagation()} style={{
-        background: '#fff', borderRadius: '24px',
+        background: 'var(--surface)', borderRadius: 'var(--radius-lg)',
         maxWidth: '1000px', width: '95%', maxHeight: '88vh',
         display: 'flex', flexDirection: 'column',
         boxShadow: '0 30px 80px rgba(0,0,0,0.22)', overflow: 'hidden',
         border: '1px solid rgba(0,0,0,0.08)',
-        transition: 'all 0.3s ease'
+        transition: 'border-color var(--dur) var(--ease-standard), box-shadow var(--dur) var(--ease-standard)'
       }}>
         {/* Premium gradient header */}
         <div style={{
           padding: '24px 30px',
-          background: 'linear-gradient(135deg, #cc0000 0%, #8b0000 100%)',
+          background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-active) 100%)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
           <div>
             <h3 style={{ margin: '0 0 5px', fontSize: '20px', fontWeight: '800', color: '#fff', letterSpacing: '-0.5px' }}>Eventos del día</h3>
             <p style={{ margin: 0, fontSize: '13px', color: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span style={{ fontWeight: '500' }}>{dateStr}</span>
-              <span style={{ background: 'rgba(255,255,255,0.25)', padding: '2px 10px', borderRadius: '20px', fontWeight: '800', fontSize: '11px', textTransform: 'uppercase' }}>
+              <span style={{ background: 'rgba(255,255,255,0.25)', padding: '2px 10px', borderRadius: 'var(--radius-lg)', fontWeight: '800', fontSize: '11px', textTransform: 'uppercase' }}>
                 {events.length} {events.length === 1 ? 'evento' : 'eventos'}
               </span>
             </p>
           </div>
-          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', cursor: 'pointer', color: '#fff', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.3)'} onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}>
+          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', cursor: 'pointer', color: '#fff', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',  transition: 'background-color var(--dur) var(--ease-standard), color var(--dur) var(--ease-standard), transform var(--dur-fast) var(--ease-out)' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.3)'} onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}>
             <X size={20} />
           </button>
         </div>
 
-        <div style={{ padding: '16px 30px', borderBottom: '1px solid #f1f5f9', backgroundColor: '#fafafa' }}>
+        <div style={{ padding: '16px 30px', borderBottom: '1px solid var(--border)', backgroundColor: 'var(--surface-2)' }}>
            <div style={{ position: 'relative', maxWidth: '400px' }}>
              <input 
                type="text" 
@@ -512,13 +535,13 @@ const DayEventsModal = ({ dateStr, events, onClose, onSelectEvent }) => {
                value={searchTerm}
                onChange={e => setSearchTerm(e.target.value)}
                style={{ 
-                 width: '100%', padding: '10px 14px 10px 40px', borderRadius: '12px', border: '1px solid #e2e8f0', 
-                 fontSize: '14px', outline: 'none', transition: 'all 0.2s', boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                 width: '100%', padding: '10px 14px 10px 40px', borderRadius: '12px', border: '1px solid var(--border)', 
+                 fontSize: '14px', outline: 'none', transition: 'background-color var(--dur) var(--ease-standard), color var(--dur) var(--ease-standard), transform var(--dur-fast) var(--ease-out)', boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
                }}
-               onFocus={e => { e.target.style.borderColor = '#cc0000'; e.target.style.boxShadow = '0 0 0 3px rgba(204,0,0,0.1)'; }}
-               onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.02)'; }}
+               onFocus={e => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px var(--primary-soft)'; }}
+               onBlur={e => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.02)'; }}
              />
-             <Search size={18} style={{ position: 'absolute', left: '14px', top: '12px', color: '#94a3b8' }} />
+             <Search size={18} style={{ position: 'absolute', left: '14px', top: '12px', color: 'var(--text-muted)' }} />
            </div>
         </div>
 
@@ -529,7 +552,7 @@ const DayEventsModal = ({ dateStr, events, onClose, onSelectEvent }) => {
           flexDirection: 'column', 
           gap: '20px', 
           flex: 1,
-          backgroundColor: '#f8fafc',
+          backgroundColor: 'var(--surface-2)',
           alignItems: 'center'
         }}>
           {filtered.length > 0 ? (
@@ -545,7 +568,7 @@ const DayEventsModal = ({ dateStr, events, onClose, onSelectEvent }) => {
               ))}
             </div>
           ) : (
-            <div style={{ textAlign: 'center', padding: '60px 20px', color: '#94a3b8', fontSize: '15px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+            <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)', fontSize: '15px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
               <div style={{ fontSize: '48px', opacity: 0.5 }}>🔍</div>
               <p>No se encontraron eventos para "{searchTerm}"</p>
             </div>
@@ -577,8 +600,16 @@ const CalendarView = () => {
 
   const { user } = useContext(AuthContext);
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
+    // ?anuncio= → redirect to the public announcements gallery
+    const anuncioId = searchParams.get('anuncio');
+    if (anuncioId) {
+      navigate(`/galeria-anuncios?anuncio=${anuncioId}`, { replace: true });
+      return;
+    }
+
     fetchEvents().then(events => {
       const eventoId = searchParams.get('evento');
       if (eventoId && events) {
@@ -713,20 +744,20 @@ const CalendarView = () => {
           <div className={styles.header}>
             {/* Left: day + month/year picker trigger */}
             <div className={styles.monthSelector}>
-              <span style={{ fontSize: '2rem', fontWeight: '600', letterSpacing: '-1px', color: 'var(--text)' }}>
+              <span style={{ fontSize: '2rem', fontWeight: '600', letterSpacing: '-1px', color: 'var(--text-main)' }}>
                 {selectedDate.getDate()}
               </span>
               <div style={{ display: 'flex', flexDirection: 'column', lineHeight: '1.1' }}>
                 <button
                   onClick={() => setPickerMode(p => p === 'month' ? 'none' : 'month')}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0', textAlign: 'left', fontWeight: '700', fontSize: '1rem', color: pickerMode === 'month' ? '#cc0000' : 'var(--text)', display: 'flex', alignItems: 'center', gap: '4px' }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0', textAlign: 'left', fontWeight: '700', fontSize: '1rem', color: pickerMode === 'month' ? 'var(--primary)' : 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '4px' }}
                 >
                   {MONTHS_ES[currentMonth]}
                   <span style={{ fontSize: '10px', opacity: 0.5 }}>▾</span>
                 </button>
                 <button
                   onClick={() => setPickerMode(p => p === 'year' ? 'none' : 'year')}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0', textAlign: 'left', fontWeight: '400', fontSize: '0.85rem', color: pickerMode === 'year' ? '#cc0000' : 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0', textAlign: 'left', fontWeight: '400', fontSize: '0.85rem', color: pickerMode === 'year' ? 'var(--primary)' : 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}
                 >
                   {currentYear}
                   <span style={{ fontSize: '10px', opacity: 0.5 }}>▾</span>
@@ -737,7 +768,7 @@ const CalendarView = () => {
             <div className={styles.controls}>
               <button className={styles.iconBtn} onClick={handlePrevMonth} aria-label="Mes anterior"><ChevronDown size={18} style={{ transform:'rotate(90deg)' }}/></button>
               <button className={styles.iconBtn} onClick={handleNextMonth} aria-label="Mes siguiente"><ChevronUp size={18} style={{ transform:'rotate(90deg)' }}/></button>
-              {user && (
+              {user && user?.rol?.toString().toUpperCase() !== 'CONSULTORIA' && (
                 <button className={styles.primaryBtn} onClick={() => setIsEventModalOpen(true)}>
                   <Plus size={16} strokeWidth={2.5} /> Nuevo Evento
                 </button>
@@ -756,10 +787,10 @@ const CalendarView = () => {
                     style={{
                       padding: '14px 8px', borderRadius: '10px', border: 'none', cursor: 'pointer',
                       fontWeight: isActive ? '700' : '500', fontSize: '13px',
-                      background: isActive ? 'linear-gradient(135deg,#cc0000,#8b0000)' : 'var(--secondary)',
-                      color: isActive ? '#fff' : 'var(--text)',
+                      background: isActive ? 'linear-gradient(135deg,var(--primary),var(--primary-active))' : 'var(--secondary)',
+                      color: isActive ? '#fff' : 'var(--text-main)',
                       boxShadow: isActive ? '0 4px 12px rgba(204,0,0,0.3)' : 'none',
-                      transition: 'all 0.15s',
+                      transition: 'background-color var(--dur) var(--ease-standard), border-color var(--dur) var(--ease-standard), color var(--dur) var(--ease-standard)',
                     }}
                     onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'var(--border)'; e.currentTarget.style.transform = 'scale(1.03)'; } }}
                     onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'var(--secondary)'; e.currentTarget.style.transform = 'scale(1)'; } }}
@@ -783,10 +814,10 @@ const CalendarView = () => {
                       style={{
                         padding: '14px 6px', borderRadius: '10px', border: 'none', cursor: 'pointer',
                         fontWeight: isActive ? '700' : '500', fontSize: '13px',
-                        background: isActive ? 'linear-gradient(135deg,#cc0000,#8b0000)' : 'var(--secondary)',
-                        color: isActive ? '#fff' : 'var(--text)',
+                        background: isActive ? 'linear-gradient(135deg,var(--primary),var(--primary-active))' : 'var(--secondary)',
+                        color: isActive ? '#fff' : 'var(--text-main)',
                         boxShadow: isActive ? '0 4px 12px rgba(204,0,0,0.3)' : 'none',
-                        transition: 'all 0.15s',
+                        transition: 'background-color var(--dur) var(--ease-standard), border-color var(--dur) var(--ease-standard), color var(--dur) var(--ease-standard)',
                       }}
                       onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'var(--border)'; e.currentTarget.style.transform = 'scale(1.03)'; } }}
                       onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'var(--secondary)'; e.currentTarget.style.transform = 'scale(1)'; } }}
@@ -813,25 +844,10 @@ const CalendarView = () => {
                   >
                     {cell.dayNum}
                     
-                    {/* Star Indicator - Independent for maximum visibility */}
+                    {/* Indicador discreto de evento importante */}
                     {eventsForDay.some(e => e.esImportante) && (
-                      <div style={{
-                        position: 'absolute',
-                        top: '2px',
-                        left: '4px',
-                        zIndex: 10,
-                        pointerEvents: 'none'
-                      }}>
-                        <span style={{ 
-                          color: '#facc15', 
-                          fontSize: '16px', 
-                          fontWeight: '900', 
-                          textShadow: '0 0 10px rgba(0,0,0,0.5)', 
-                          animation: 'pulseStar 2s infinite ease-in-out',
-                          lineHeight: '1'
-                        }}>
-                          ★
-                        </span>
+                      <div style={{ position: 'absolute', top: '3px', left: '4px', zIndex: 10, pointerEvents: 'none', color: 'var(--primary)' }}>
+                        <Star size={9} fill="currentColor" />
                       </div>
                     )}
 
@@ -865,7 +881,7 @@ const CalendarView = () => {
               alignItems: 'center',
               gap: '6px',
               padding: '8px 16px',
-              borderRadius: '20px',
+              borderRadius: 'var(--radius-lg)',
               border: '1.5px solid #fecaca',
               backgroundColor: '#fff',
               color: '#CE1126',
@@ -873,7 +889,7 @@ const CalendarView = () => {
               fontSize: '12px',
               cursor: 'pointer',
               boxShadow: '0 2px 10px rgba(206,17,38,0.15)',
-              transition: 'all 0.2s',
+              transition: 'background-color var(--dur) var(--ease-standard), color var(--dur) var(--ease-standard), transform var(--dur-fast) var(--ease-out)',
               zIndex: 10,
             }}
             onMouseEnter={e => {
@@ -897,7 +913,7 @@ const CalendarView = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <h2 className={styles.upcomingTitle}>Eventos próximos</h2>
                 {filteredEvents.length > 0 && (
-                  <span style={{ background: '#cc0000', color: '#fff', fontSize: '10px', fontWeight: '700', padding: '2px 9px', borderRadius: '20px', lineHeight: '1.6' }}>
+                  <span style={{ background: 'var(--primary)', color: '#fff', fontSize: '10px', fontWeight: '700', padding: '2px 9px', borderRadius: 'var(--radius-lg)', lineHeight: '1.6' }}>
                     {filteredEvents.length}
                   </span>
                 )}
@@ -925,7 +941,7 @@ const CalendarView = () => {
               ))
             ) : (
               <div style={{ textAlign:'center', padding:'30px 10px', color:'var(--text-secondary)', fontSize:'13px' }}>
-                <div style={{ fontSize:'32px', marginBottom:'8px' }}>📅</div>
+                <div style={{ marginBottom:'8px', display:'flex', justifyContent:'center' }}><Calendar size={30} style={{ color: 'var(--text-muted)' }} /></div>
                 {searchQuery ? `Sin resultados para "${searchQuery}"` : 'No hay eventos publicados próximos'}
               </div>
             )}

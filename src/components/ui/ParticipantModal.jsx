@@ -13,6 +13,7 @@ import {
   Download
 } from 'lucide-react';
 import { resolveImageUrl } from '../../utils/url';
+import notification from '../../utils/notification';
 
 // Sub-componente Drawer con PORTALS para evitar el "Atrapado en Modal"
 const DrawerPortal = ({ isOpen, onClose, title, children, width = '520px' }) => {
@@ -29,28 +30,24 @@ const DrawerPortal = ({ isOpen, onClose, title, children, width = '520px' }) => 
 
   const overlayStyle = {
     position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(15, 23, 42, 0.85)', // Más oscuro para aislamiento total
+    inset: 0,
+    backgroundColor: 'rgba(20, 18, 16, 0.5)',
     display: 'flex',
     justifyContent: 'flex-end',
-    zIndex: 10000, 
-    backdropFilter: 'blur(4px)', // Más desenfoque para efecto premium
-    animation: 'fadeIn 0.2s ease-out'
+    zIndex: 'var(--z-drawer)',
+    animation: 'fadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
   };
 
   const drawerStyle = {
-    backgroundColor: '#ffffff',
+    backgroundColor: 'var(--surface)',
     height: '100%',
     width: `min(${width}, 100%)`,
     display: 'flex',
     flexDirection: 'column',
-    boxShadow: '-15px 0 35px rgba(0, 0, 0, 0.2)',
+    boxShadow: 'var(--shadow-modal)',
     position: 'relative',
-    borderLeft: '1px solid #e2e8f0',
-    animation: 'slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards'
+    borderLeft: '1px solid var(--border)',
+    animation: 'slideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards',
   };
 
   const headerStyle = {
@@ -58,9 +55,9 @@ const DrawerPortal = ({ isOpen, onClose, title, children, width = '520px' }) => 
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderBottom: '1px solid #f1f5f9',
-    background: '#fff',
-    zIndex: 10
+    borderBottom: '1px solid var(--border)',
+    background: 'var(--surface)',
+    zIndex: 10,
   };
 
   // Renderizamos en document.body para que NADA lo atrape
@@ -68,14 +65,14 @@ const DrawerPortal = ({ isOpen, onClose, title, children, width = '520px' }) => 
     <div style={overlayStyle} onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div style={drawerStyle}>
         <div style={headerStyle}>
-          <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>{title}</h2>
+          <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.02em' }}>{title}</h2>
           <button 
             onClick={onClose} 
             style={{ 
-              background: '#f8fafc', border: '1px solid #e2e8f0', color: '#64748b', 
+              background: '#f8fafc', border: '1px solid #e2e8f0', color: 'var(--text-secondary)', 
               width: '36px', height: '36px', borderRadius: '50%', display: 'flex', 
               alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-              transition: 'all 0.2s'
+              transition: 'background-color var(--dur) var(--ease-standard), color var(--dur) var(--ease-standard), transform var(--dur-fast) var(--ease-out)'
             }}
           >
             <X size={20} />
@@ -133,7 +130,7 @@ const ParticipantModal = ({ isOpen, onClose, onSave, mode, initialData, isReadOn
       setParticipant(prev => ({ ...prev, fotoUrl: url }));
     } catch (error) {
       console.error("Error subiendo imagen:", error);
-      alert("Error al subir la imagen.");
+      notification.error('Error al subir la imagen: ' + (error.response?.data?.message || error.message || 'Verifica el formato y tamaño del archivo'));
     } finally {
       setUploading(false);
     }
@@ -159,12 +156,17 @@ const ParticipantModal = ({ isOpen, onClose, onSave, mode, initialData, isReadOn
     }
   };
 
+  const DESC_MAX = 250;
+  const descLen = participant.descripcion?.length || 0;
+  const descOver = descLen > DESC_MAX;
+
   const handleSave = (e) => {
     e.preventDefault();
     if (isReadOnly) {
       onClose();
       return;
     }
+    if (descOver) return;
     onSave({ ...participant, id: participant.id || Date.now() });
     onClose();
   };
@@ -186,8 +188,8 @@ const ParticipantModal = ({ isOpen, onClose, onSave, mode, initialData, isReadOn
     background: isRead ? '#f8fafc' : '#ffffff', 
     fontSize: '14px', 
     outline: 'none', 
-    transition: 'all 0.2s',
-    color: isRead ? '#475569' : '#0f172a',
+    transition: 'background-color var(--dur) var(--ease-standard), color var(--dur) var(--ease-standard), transform var(--dur-fast) var(--ease-out)',
+    color: isRead ? 'var(--text-secondary)' : 'var(--text-main)',
     cursor: isRead ? 'default' : 'text'
   });
 
@@ -234,8 +236,8 @@ const ParticipantModal = ({ isOpen, onClose, onSave, mode, initialData, isReadOn
               <input id="av-up-3" type="file" accept="image/*" hidden onChange={handleImageChange} />
             </div>
             <div style={{ marginTop: '20px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '800', color: '#0f172a' }}>{participant.nombre || 'Nuevo Perfil'}</h3>
-              <p style={{ margin: '6px 0 0', fontSize: '14px', color: '#64748b', fontWeight: '600' }}>{participant.cargo || 'Cargo no asignado'}</p>
+              <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '800', color: 'var(--text-main)' }}>{participant.nombre || 'Nuevo Perfil'}</h3>
+              <p style={{ margin: '6px 0 0', fontSize: '14px', color: 'var(--text-secondary)', fontWeight: '600' }}>{participant.cargo || 'Cargo no asignado'}</p>
               
               {participant.fotoUrl && (
                 <button
@@ -247,18 +249,18 @@ const ParticipantModal = ({ isOpen, onClose, onSave, mode, initialData, isReadOn
                     borderRadius: '20px',
                     background: '#fff',
                     border: '1.5px solid #e2e8f0',
-                    color: '#64748b',
+                    color: 'var(--text-secondary)',
                     fontSize: '12px',
                     fontWeight: '700',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '8px',
                     cursor: 'pointer',
-                    transition: 'all 0.2s',
+                    transition: 'background-color var(--dur) var(--ease-standard), color var(--dur) var(--ease-standard), transform var(--dur-fast) var(--ease-out)',
                     boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
                   }}
                   onMouseOver={(e) => { e.currentTarget.style.borderColor = '#ce1126'; e.currentTarget.style.color = '#ce1126'; }}
-                  onMouseOut={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#64748b'; }}
+                  onMouseOut={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
                 >
                   <Download size={14} /> Descargar Imagen
                 </button>
@@ -269,14 +271,14 @@ const ParticipantModal = ({ isOpen, onClose, onSave, mode, initialData, isReadOn
           {/* Form Fields */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label style={{ fontSize: '11px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <label style={{ fontSize: '11px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <User size={12}/> Nombre Completo <span style={{color: '#ce1126'}}>*</span>
               </label>
               <input type="text" name="nombre" value={participant.nombre} onChange={handleChange} readOnly={isReadOnly} required placeholder="Nombre completo del participante" style={inputStyle(isReadOnly)} />
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label style={{ fontSize: '11px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <label style={{ fontSize: '11px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <BriefcaseIcon size={12}/> Cargo / Posición <span style={{color: '#ce1126'}}>*</span>
               </label>
               <input type="text" name="cargo" value={participant.cargo} onChange={handleChange} readOnly={isReadOnly} required placeholder="Ej. Director General" style={inputStyle(isReadOnly)} />
@@ -284,18 +286,40 @@ const ParticipantModal = ({ isOpen, onClose, onSave, mode, initialData, isReadOn
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <label style={{ fontSize: '11px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '8px' }}><Mail size={12}/> Correo</label>
+                <label style={{ fontSize: '11px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '8px' }}><Mail size={12}/> Correo</label>
                 <input type="email" name="correo" value={participant.correo} onChange={handleChange} readOnly={isReadOnly} placeholder={isReadOnly ? "N/A" : "nombre@ejemplo.com"} style={inputStyle(isReadOnly)} />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <label style={{ fontSize: '11px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '8px' }}><Phone size={12}/> Teléfono</label>
+                <label style={{ fontSize: '11px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '8px' }}><Phone size={12}/> Teléfono</label>
                 <input type="tel" name="telefono" value={participant.telefono} onChange={handleChange} readOnly={isReadOnly} placeholder={isReadOnly ? "N/A" : "+57 300 0000000"} style={inputStyle(isReadOnly)} />
               </div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label style={{ fontSize: '11px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '8px' }}><FileText size={12}/> Biografía / Experiencia</label>
-              <textarea name="descripcion" value={participant.descripcion} onChange={handleChange} readOnly={isReadOnly} rows="6" placeholder={isReadOnly ? "Sin descripción." : "Cuéntanos un poco sobre el perfil..."} style={{ ...inputStyle(isReadOnly), resize: 'none' }} />
+              <label style={{ fontSize: '11px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '8px' }}><FileText size={12}/> Biografía / Experiencia</label>
+              <textarea
+                name="descripcion"
+                value={participant.descripcion}
+                onChange={handleChange}
+                readOnly={isReadOnly}
+                rows="6"
+                placeholder={isReadOnly ? "Sin descripción." : "Cuéntanos un poco sobre el perfil..."}
+                style={{ ...inputStyle(isReadOnly), resize: 'none', border: !isReadOnly && descOver ? '1.5px solid #ce1126' : '1.5px solid #f1f5f9' }}
+              />
+              {!isReadOnly && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
+                  {descOver ? (
+                    <span style={{ fontSize: '12px', color: '#ce1126', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      ⚠ Excede el límite de {DESC_MAX} caracteres. Reduce el texto para poder guardar.
+                    </span>
+                  ) : (
+                    <span />
+                  )}
+                  <span style={{ fontSize: '12px', fontWeight: '700', color: descOver ? '#ce1126' : 'var(--text-muted)', whiteSpace: 'nowrap', marginLeft: '8px' }}>
+                    {descLen} / {DESC_MAX}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -307,15 +331,15 @@ const ParticipantModal = ({ isOpen, onClose, onSave, mode, initialData, isReadOn
           zIndex: 100, boxShadow: '0 -4px 15px rgba(0,0,0,0.03)' 
         }}>
           {isReadOnly ? (
-            <button type="button" onClick={onClose} style={{ flex: 1, padding: '16px', borderRadius: '32px', background: '#1e293b', color: '#fff', fontWeight: '800', cursor: 'pointer', transition: 'all 0.2s', border: 'none' }}>
+            <button type="button" onClick={onClose} style={{ flex: 1, padding: '16px', borderRadius: '32px', background: 'var(--text-main)', color: '#fff', fontWeight: '800', cursor: 'pointer', transition: 'background-color var(--dur) var(--ease-standard), color var(--dur) var(--ease-standard), transform var(--dur-fast) var(--ease-out)', border: 'none' }}>
               Cerrar Vista
             </button>
           ) : (
             <>
-              <button type="button" onClick={onClose} style={{ flex: 1, padding: '16px', borderRadius: '32px', background: '#fff', border: '2px solid #e2e8f0', color: '#64748b', fontWeight: '800', cursor: 'pointer', transition: 'all 0.2s' }}>
+              <button type="button" onClick={onClose} style={{ flex: 1, padding: '16px', borderRadius: '32px', background: '#fff', border: '2px solid #e2e8f0', color: 'var(--text-secondary)', fontWeight: '800', cursor: 'pointer', transition: 'background-color var(--dur) var(--ease-standard), color var(--dur) var(--ease-standard), transform var(--dur-fast) var(--ease-out)' }}>
                 Cancelar
               </button>
-              <button type="submit" disabled={uploading} style={{ flex: 2, padding: '16px', borderRadius: '32px', background: '#ce1126', color: '#fff', fontWeight: '800', cursor: 'pointer', boxShadow: '0 8px 25px rgba(206,17,38,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+              <button type="submit" disabled={uploading || descOver} style={{ flex: 2, padding: '16px', borderRadius: '32px', background: uploading || descOver ? '#f1f5f9' : '#ce1126', color: uploading || descOver ? 'var(--text-muted)' : '#fff', fontWeight: '800', cursor: uploading || descOver ? 'not-allowed' : 'pointer', boxShadow: uploading || descOver ? 'none' : '0 8px 25px rgba(206,17,38,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: 'background-color 0.2s, color 0.2s, box-shadow 0.2s' }}>
                 {uploading ? 'Procesando...' : <><Check size={20}/> {initialData ? 'Guardar Cambios' : 'Confirmar Registro'}</>}
               </button>
             </>

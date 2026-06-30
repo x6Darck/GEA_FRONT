@@ -4,7 +4,7 @@
   align-items: center;
   margin-bottom: 16px;
   padding: 0.5rem 0;
-  border-bottom: 2px solid #f1f5f9;
+  border-bottom: 2px solid var(--surface-2);
 }
 
 .controlsBar {
@@ -50,25 +50,29 @@
 
 .createBtn {
   margin-left: auto;
-  background: linear-gradient(135deg, #ce1126 0%, #a50e1f 100%);
+  background: var(--primary);
   color: white;
   border: none;
-  padding: 10px 24px;
-  border-radius: 30px;
+  padding: 10px 22px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   gap: 8px;
-  font-weight: 800;
-  font-size: 0.9rem;
-  box-shadow: 0 4px 14px rgba(206,17,38,0.25);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color var(--dur) var(--ease-standard),
+              box-shadow var(--dur) var(--ease-standard),
+              transform var(--dur-fast) var(--ease-out);
 }
 
 .createBtn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(206,17,38,0.35);
+  background: var(--primary-hover);
+  box-shadow: var(--shadow-md);
 }
+
+.createBtn:active { transform: scale(0.98); }
 
 .rolesGrid {
   display: grid;
@@ -113,34 +117,36 @@
 }
 
 .userCard {
-  background: white;
-  border-radius: 16px;
-  padding: 24px;
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  padding: 22px;
   display: flex;
   gap: 16px;
-  color: #1e293b;
-  border: 1px solid #f1f5f9;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-  transition: all 0.2s ease;
+  color: var(--text-main);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--dur) var(--ease-standard),
+              transform var(--dur) var(--ease-out),
+              border-color var(--dur) var(--ease-standard);
 }
 
 .userCard:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.06);
-  border-color: #e2e8f0;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
 }
 
 .userAvatar {
   width: 50px;
   height: 50px;
   flex-shrink: 0;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .userAvatar svg {
@@ -159,7 +165,7 @@
   font-size: 1.1rem;
   margin: 0 0 6px 0;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text-main);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -168,7 +174,7 @@
 
 .userInfo p {
   font-size: 0.82rem;
-  color: #64748b;
+  color: var(--text-secondary);
   margin: 0 0 4px 0;
   display: flex;
   align-items: center;
@@ -195,29 +201,31 @@
   justify-content: center;
   gap: 6px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color var(--dur) var(--ease-standard),
+              color var(--dur) var(--ease-standard),
+              transform var(--dur-fast) var(--ease-out);
   flex: 1;
   border: none;
 }
 
 .editBtn {
-  background-color: #f1f5f9;
-  color: #475569;
+  background-color: var(--surface-2);
+  color: var(--text-secondary);
 }
 
 .viewBtn {
-  background-color: #eff6ff;
-  color: #1d4ed8;
+  background-color: var(--info-soft);
+  color: var(--info-on-soft);
 }
 
 .editBtn:hover {
-  background-color: #e2e8f0;
-  color: #334155;
+  background-color: var(--border);
+  color: var(--text-secondary);
 }
 
 .viewBtn:hover {
-  background-color: #dbeafe;
-  color: #1e40af;
+  background-color: var(--info-soft);
+  color: var(--info-on-soft);
 }
 
 .badge {
@@ -232,13 +240,13 @@
 }
 
 .activeBadge {
-  background-color: #dcfce7;
-  color: #16a34a;
+  background-color: var(--success-soft);
+  color: var(--success-on-soft);
 }
 
 .inactiveBadge {
-  background-color: #fee2e2;
-  color: #dc2626;
+  background-color: var(--danger-soft);
+  color: var(--danger-on-soft);
 }
 
 .statusDot {
@@ -247,13 +255,13 @@
   border-radius: 50%;
 }
 
-.activeDot { background-color: #22c55e; }
-.inactiveDot { background-color: #ef4444; }
+.activeDot { background-color: var(--success); }
+.inactiveDot { background-color: var(--danger); }
 
 /* ─── Filter Toolbar ─────────────────────────────────────── */
 .filterToolbar {
-  background: #f8fafc;
-  border: 1px solid #f1f5f9;
+  background: var(--surface-2);
+  border: 1px solid var(--surface-2);
   border-radius: 16px;
   padding: 16px 20px;
   margin-bottom: 24px;
@@ -266,10 +274,10 @@
   width: 100%;
   padding: 11px 16px 11px 44px;
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
   font-size: 14px;
   background: #fff;
-  color: #1e293b;
+  color: var(--text-main);
   outline: none;
   box-sizing: border-box;
   transition: border-color 0.2s, box-shadow 0.2s;
@@ -277,8 +285,8 @@
 }
 
 .searchInput:focus {
-  border-color: #ce1126;
-  box-shadow: 0 0 0 3px rgba(206, 17, 38, 0.08);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
 }
 
 .filterRow {
@@ -292,10 +300,10 @@
   padding: 0 14px;
   height: 36px;
   border-radius: 20px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
   font-size: 0.82rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--text-secondary);
   background: white;
   outline: none;
   cursor: pointer;
@@ -303,45 +311,47 @@
 }
 
 .filterSelect:hover {
-  border-color: #cbd5e1;
+  border-color: var(--border-strong);
 }
 
 .filterSelect:focus {
-  border-color: #1e293b;
+  border-color: var(--text-main);
 }
 
 .filterDivider {
   width: 1px;
   height: 20px;
-  background: #e2e8f0;
+  background: var(--border);
   flex-shrink: 0;
 }
 
 .tabBtn {
   background: white;
-  border: 1px solid #e2e8f0;
-  color: #64748b;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
   padding: 0 14px;
   height: 36px;
   border-radius: 20px;
   font-weight: 600;
   font-size: 0.82rem;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color var(--dur) var(--ease-standard),
+              border-color var(--dur) var(--ease-standard),
+              color var(--dur) var(--ease-standard);
   white-space: nowrap;
 }
 
 .tabBtn:hover {
-  border-color: #cbd5e1;
-  color: #1e293b;
-  background-color: #f8fafc;
+  border-color: var(--border-strong);
+  color: var(--text-main);
+  background-color: var(--surface-2);
 }
 
 .tabBtn.active {
-  background-color: #1e293b;
+  background-color: var(--text-main);
   color: white;
-  border-color: #1e293b;
-  box-shadow: 0 4px 10px rgba(30, 41, 59, 0.18);
+  border-color: var(--text-main);
+  box-shadow: 0 4px 10px rgba(20,18,16,0.12);
 }
 
 @media (max-width: 768px) {

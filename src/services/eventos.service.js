@@ -72,7 +72,13 @@ export const mapEventoDTO = (evt) => {
     id: evt.id || evt.idSolicitud,
     nombre: evt.nombreEvento || evt.tituloVisible || evt.nombre || evt.titulo || '',
     desc: evt.descripcionEvento || evt.descripcionVisible || evt.desc || evt.descripcion || '',
-    fecha: evt.fechaEvento || evt.start || evt.fechaHoraInicio || null,
+    fecha: (() => {
+      const f = evt.fechaEvento || evt.start || evt.fechaHoraInicio || null;
+      if (Array.isArray(f) && f.length >= 3) {
+        return `${f[0]}-${String(f[1]).padStart(2, '0')}-${String(f[2]).padStart(2, '0')}`;
+      }
+      return f;
+    })(),
     horaInicio: evt.horaInicio || null,
     horaFin: evt.horaFin || null,
     office: evt.oficinaNombre || evt.office || evt.oficina?.nombre || '',
@@ -84,6 +90,7 @@ export const mapEventoDTO = (evt) => {
     participantes: normParticipantes,
     tipoEvento: evt.tipoEvento || '',
     tipoEventoColorHex: evt.tipoEventoColorHex || null,
+    tipoIngreso: evt.tipoIngreso || 'LIBRE',
     piezaGraficaUrl: evt.piezaGraficaUrl || null,
     linkConexion: evt.linkConexion || evt.enlace || evt.link || '',
     solicitanteEmail: evt.usuarioSolicitanteCorreo || '',
@@ -95,12 +102,14 @@ export const mapEventoDTO = (evt) => {
     requiereTransmision: evt.requiereTransmision || evt.requiere_transmision || false,
     requiereCubrimiento: evt.requiereCubrimiento || evt.requiere_cubrimiento || false,
     requierePiezaGrafica: evt.requierePiezaGrafica || evt.requiere_pieza_grafica || false,
+    requiereServiciosGenerales: evt.requiereServiciosGenerales || evt.requiere_servicios_generales || false,
     observaciones: evt.observaciones || evt.observaciones_adicionales || '',
     esImportante: evt.esImportante || evt.es_importante || false,
     idGrupoRecurrencia: evt.idGrupoRecurrencia || null,
     frecuenciaRecurrencia: evt.frecuenciaRecurrencia || 'NINGUNA',
     fechaFinRecurrencia: evt.fechaFinRecurrencia || null,
-    esPrincipal: evt.esPrincipal || false
+    esPrincipal: evt.esPrincipal || false,
+    ubicacionExterna: evt.ubicacionExterna || ''
   };
 };
 

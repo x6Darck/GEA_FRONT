@@ -40,10 +40,12 @@ export const useEventManagement = (event, onSuccess, onClose) => {
     lugares: [],
     idsLugaresFisicos: [],
     linkConexion: '',
+    ubicacionExterna: '',
     tipoEvento: '',
     participantes: [],
     esImportante: false,
     requierePiezaGrafica: false,
+    requiereServiciosGenerales: false,
     frecuenciaRecurrencia: 'NINGUNA',
     fechaFinRecurrencia: '',
   });
@@ -80,6 +82,7 @@ export const useEventManagement = (event, onSuccess, onClose) => {
         lugares: event.lugares || [],
         idsLugaresFisicos: event.idsLugaresFisicos || [],
         linkConexion: event.linkConexion || '',
+        ubicacionExterna: event.ubicacionExterna || '',
         tipoEvento: event.tipoEvento || '',
         office: event.oficinaNombre || event.office || '',
         idOficina: event.oficinaId || event.idOficina || '',
@@ -89,12 +92,15 @@ export const useEventManagement = (event, onSuccess, onClose) => {
         requiereCubrimiento: event.requiereCubrimiento || false,
         observaciones: event.observaciones || '',
         esImportante: event.esImportante || false,
+        tipoIngreso: event.tipoIngreso || 'LIBRE',
         requierePiezaGrafica: event.requierePiezaGrafica || false,
+        requiereServiciosGenerales: event.requiereServiciosGenerales || false,
         frecuenciaRecurrencia: event.frecuenciaRecurrencia || 'NINGUNA',
         fechaFinRecurrencia: event.fechaFinRecurrencia ? (typeof event.fechaFinRecurrencia === 'string' ? event.fechaFinRecurrencia.split('T')[0] : event.fechaFinRecurrencia) : '',
       });
     }
-  }, [event]);
+    // Depender solo del id: la hidratación del mismo evento no debe pisar ediciones en curso
+  }, [event?.id]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -104,11 +110,11 @@ export const useEventManagement = (event, onSuccess, onClose) => {
   const handleStatusUpdate = async (type) => {
     if (type === 'Rechazar' && !rejecting) { setRejecting(true); return; }
     if (type === 'Rechazar' && (!rejectReason || rejectReason.trim() === '')) {
-      alert('Por favor, ingrese un motivo de rechazo.'); return;
+      notification.error('Por favor, ingrese un motivo de rechazo.'); return;
     }
     if (type === 'Devolver' && !reviewing) { setReviewing(true); return; }
     if (type === 'Devolver' && (!reviewObservations || reviewObservations.trim() === '')) {
-      alert('Por favor, ingrese las observaciones para la oficina.'); return;
+      notification.error('Por favor, ingrese las observaciones para la oficina.'); return;
     }
     setLoadingAction(true);
     try {
@@ -134,6 +140,17 @@ export const useEventManagement = (event, onSuccess, onClose) => {
   };
 
   const handleSaveEdition = async () => {
+    const frec = formData.frecuenciaRecurrencia || 'NINGUNA';
+    if (frec !== 'NINGUNA') {
+      if (!formData.fechaFinRecurrencia) {
+        notification.error('Indica la fecha "Repetir hasta" para la recurrencia.');
+        return;
+      }
+      if (formData.fechaEvento && formData.fechaFinRecurrencia < formData.fechaEvento) {
+        notification.error('La fecha fin de recurrencia no puede ser anterior a la fecha del evento.');
+        return;
+      }
+    }
     setManageLoading(true);
     try {
       let piezaUrl = event.piezaGraficaUrl;
@@ -158,22 +175,37 @@ export const useEventManagement = (event, onSuccess, onClose) => {
         fechaFinRecurrencia: formData.fechaFinRecurrencia || null,
         idsLugaresFisicos: formData.idsLugaresFisicos
       };
-      
-      const status = (event.status || '').toUpperCase();
-      
-      if (status === 'PUBLICADA') {
-        const participantesPayload = (formData.participantes || [])
-          .filter(p => !p.virtual)
-          .map(p => ({
-            nombre: p.nombre,
-            cargo: p.cargo || '',
-            descripcion: p.descripcion || '',
-            fotoUrl: p.fotoUrl || null,
-            telefono: p.telefono || null,
-            correo: p.correo || null,
-            tipo: (p.tipo || 'INVITADO').toString().toUpperCase()
-          }));
 
+      // No enviar el campo interno de presentación 'responsable' (el backend usa 'responsableEvento')
+      delete payload.responsable;
+
+      const status = (event.status || '').toUpperCase();
+
+      // Normalizar participantes (común para todos los casos)
+      const cleanParticipantes = (formData.participantes || [])
+        .filter(p => !p.virtual)
+        .map(p => ({
+          nombre: p.nombre,
+          cargo: p.cargo || '',
+          descripcion: p.descripcion || '',
+          fotoUrl: p.fotoUrl || null,
+          telefono: p.telefono || null,
+          correo: p.correo || null,
+          tipo: (p.tipo || 'INVITADO').toString().toUpperCase()
+        }));
+
+      const cleanPayload = {
+        ...payload,
+        participantes: cleanParticipantes,
+        fechaEvento: formData.fechaEvento || null,
+        horaInicio: formData.horaInicio && formData.horaInicio !== '-' ? formData.horaInicio : null,
+        horaFin: formData.horaFin && formData.horaFin !== '-' ? formData.horaFin : null
+      };
+
+      // La edición de TODA la serie tiene prioridad sobre el estado del evento
+      if (aplicarASerie && event.idGrupoRecurrencia) {
+        await updateEventoSerie(event.idGrupoRecurrencia, cleanPayload);
+      } else if (status === 'PUBLICADA') {
         const pubPayload = {
           tituloVisible: formData.nombreEvento,
           descripcionVisible: formData.descripcionEvento,
@@ -185,6 +217,7 @@ export const useEventManagement = (event, onSuccess, onClose) => {
           horaFin: formData.horaFin && formData.horaFin !== '-' ? formData.horaFin : null,
           idsLugaresFisicos: formData.idsLugaresFisicos,
           linkConexion: formData.linkConexion,
+          ubicacionExterna: formData.ubicacionExterna || null,
           responsableEvento: formData.responsable,
           idOficina: formData.idOficina,
           tipoEvento: formData.tipoEvento,
@@ -192,34 +225,20 @@ export const useEventManagement = (event, onSuccess, onClose) => {
           requiereCubrimiento: formData.requiereCubrimiento,
           observaciones: formData.observaciones,
           esImportante: formData.esImportante,
+          tipoIngreso: formData.tipoIngreso || 'LIBRE',
           requierePiezaGrafica: formData.requierePiezaGrafica,
-          participantes: participantesPayload
+          requiereServiciosGenerales: formData.requiereServiciosGenerales,
+          participantes: cleanParticipantes
         };
         await updatePublicacionEvento(event.id, pubPayload);
-
-        // Actualizar caché local para que el modal refleje los datos correctos al reabrir
-        try {
-          localStorage.setItem(`event_hydra_${event.id}`, JSON.stringify({ participantes: participantesPayload, cacheTime: Date.now() }));
-        } catch (_) { /* no crítico */ }
       } else {
-        const cleanPayload = {
-            ...payload,
-            fechaEvento: formData.fechaEvento || null,
-            horaInicio: formData.horaInicio && formData.horaInicio !== '-' ? formData.horaInicio : null,
-            horaFin: formData.horaFin && formData.horaFin !== '-' ? formData.horaFin : null
-        };
-        if (aplicarASerie && event.esPrincipal && event.idGrupoRecurrencia) {
-          await updateEventoSerie(event.idGrupoRecurrencia, cleanPayload);
-        } else {
-          await updateEvento(event.id, cleanPayload);
-        }
-
-        // Actualizar caché local
-        try {
-          const cached = (formData.participantes || []).filter(p => !p.virtual);
-          localStorage.setItem(`event_hydra_${event.id}`, JSON.stringify({ participantes: cached, cacheTime: Date.now() }));
-        } catch (_) { /* no crítico */ }
+        await updateEvento(event.id, cleanPayload);
       }
+
+      // Actualizar caché local
+      try {
+        localStorage.setItem(`event_hydra_${event.id}`, JSON.stringify({ participantes: cleanParticipantes, cacheTime: Date.now() }));
+      } catch (_) { /* no crítico */ }
 
       notification.success('Cambios guardados correctamente');
       setIsEditing(false);
@@ -240,7 +259,7 @@ export const useEventManagement = (event, onSuccess, onClose) => {
       setLocalVisible(newVisible);
       if (onSuccess) onSuccess();
     } catch (error) {
-      alert('Error: ' + (error.response?.data?.message || error.message));
+      notification.error('Error: ' + (error.response?.data?.message || error.message));
     } finally {
       setManageLoading(false);
     }
@@ -269,12 +288,19 @@ export const useEventManagement = (event, onSuccess, onClose) => {
         const uploadResult = await uploadArchivo(publishFile);
         piezaUrl = uploadResult.urlAcceso || uploadResult.urlDescarga || uploadResult.url;
       }
-      await publicarEvento(event.id, {
+      const publishPayload = {
         tituloVisible: formData.nombreEvento,
         descripcionVisible: formData.descripcionEvento,
-        piezaGraficaUrl: piezaUrl,
         fechaPublicacion: new Date().toISOString(),
-      });
+      };
+      // Solo tocar la pieza gráfica si hay una URL real, o si el usuario la quitó explícitamente.
+      // Evita borrar la imagen existente cuando el evento aún no se ha hidratado (piezaUrl null).
+      if (piezaUrl) {
+        publishPayload.piezaGraficaUrl = piezaUrl;
+      } else if (!publishFilePreview) {
+        publishPayload.piezaGraficaUrl = null;
+      }
+      await publicarEvento(event.id, publishPayload);
       notification.success('Evento publicado exitosamente');
       if (onSuccess) onSuccess();
       onClose();

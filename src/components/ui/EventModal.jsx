@@ -46,10 +46,13 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
     requiereTransmision: false,
     requiereCubrimiento: false,
     requierePiezaGrafica: false,
+    requiereServiciosGenerales: false,
     frecuenciaRecurrencia: 'NINGUNA',
     fechaFinRecurrencia: '',
     observaciones: '',
     esImportante: false,
+    tipoIngreso: 'LIBRE',
+    ubicacionExterna: '',
   });
 
   const [organizadoresList, setOrganizadoresList] = useState([]);
@@ -61,12 +64,10 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
 
   useEffect(() => {
     if (isOpen) {
-      setFormData(prev => ({ 
-        ...prev, 
-        fechaEvento: initialDate || '',
-        oficinaResponsable: user?.oficinaNombre || '',
-        idOficina: user?.idOficina || ''
-      }));
+      resetForm();
+      if (initialDate) {
+        setFormData(prev => ({ ...prev, fechaEvento: initialDate }));
+      }
       cargarDatosMaestros();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -181,6 +182,46 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
 
+    // Helper para comparar horas numéricamente (evita comparaciones lexicográficas de strings)
+    const toMinutes = (hhmm) => {
+      if (!hhmm || typeof hhmm !== 'string' || !hhmm.includes(':')) return null;
+      const [h, m] = hhmm.split(':').map(Number);
+      return h * 60 + m;
+    };
+
+    // Validaciones de cliente antes de enviar
+    if (!formData.nombreEvento || !formData.nombreEvento.trim()) {
+      notification.error('El nombre del evento es obligatorio.');
+      return;
+    }
+    if (!formData.fechaEvento) {
+      notification.error('Debes seleccionar la fecha del evento.');
+      return;
+    }
+    const hoyStr = new Date().toISOString().split('T')[0];
+    if (formData.fechaEvento < hoyStr) {
+      notification.error('La fecha del evento no puede ser en el pasado.');
+      return;
+    }
+    {
+      const ini = toMinutes(formData.horaInicio);
+      const fin = toMinutes(formData.horaFin);
+      if (ini == null || fin == null || fin <= ini) {
+        notification.error('La hora de fin debe ser posterior a la hora de inicio.');
+        return;
+      }
+    }
+    if (formData.frecuenciaRecurrencia && formData.frecuenciaRecurrencia !== 'NINGUNA') {
+      if (!formData.fechaFinRecurrencia) {
+        notification.error('Debes indicar la fecha fin de la recurrencia.');
+        return;
+      }
+      if (formData.fechaFinRecurrencia < formData.fechaEvento) {
+        notification.error('La fecha fin de recurrencia no puede ser anterior a la fecha del evento.');
+        return;
+      }
+    }
+
     // VALIDACIÓN DE CONFLICTOS (Lugar + Hora)
     if (allEvents && lugaresSeleccionados.length > 0 && formData.fechaEvento) {
       const conflict = allEvents.find(ev => {
@@ -193,17 +234,17 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
          
          if (!hasCommonLocation) return false;
          
-         const s1 = formData.horaInicio;
-         const e1 = formData.horaFin;
-         const s2 = ev.horaInicio;
-         const e2 = ev.horaFin;
-         
+         const s1 = toMinutes(formData.horaInicio);
+         const e1 = toMinutes(formData.horaFin);
+         const s2 = toMinutes(ev.horaInicio);
+         const e2 = toMinutes(ev.horaFin);
+         if (s1 == null || e1 == null || s2 == null || e2 == null) return false;
          return (s1 < e2 && e1 > s2);
       });
 
       if (conflict) {
          const confirmacion = window.confirm(
-           `⚠️ ADVERTENCIA DE CONFLICTO:\n\n` +
+           `ADVERTENCIA DE CONFLICTO:\n\n` +
            `Uno de los lugares seleccionados ya está ocupado por el evento:\n` +
            `"${conflict.nombreEvento || conflict.nombre}"\n` +
            `Horario: ${conflict.horaInicio} - ${conflict.horaFin}\n\n` +
@@ -211,6 +252,11 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
          );
          if (!confirmacion) return;
       }
+    }
+
+    if (lugaresSeleccionados.some(l => l.esExterno) && !formData.ubicacionExterna?.trim()) {
+      notification.error('Debes indicar el lugar donde se realizará el evento externo.');
+      return;
     }
 
     if (organizadoresList.length === 0) {
@@ -228,11 +274,14 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
         horaFin: formData.horaFin,
         idsLugaresFisicos: lugaresSeleccionados.map(l => l.id),
         linkConexion: formData.linkConexion,
+        ubicacionExterna: formData.ubicacionExterna || null,
         responsableEvento: organizadoresList[0]?.nombre || '',
         tipoEvento: formData.tipoEvento,
+        tipoIngreso: formData.tipoIngreso || 'LIBRE',
         requierePiezaGrafica: !!formData.requierePiezaGrafica,
         requiereTransmision: !!formData.requiereTransmision,
         requiereCubrimiento: !!formData.requiereCubrimiento,
+        requiereServiciosGenerales: !!formData.requiereServiciosGenerales,
         observaciones: formData.observaciones,
         esImportante: !!formData.esImportante,
         frecuenciaRecurrencia: formData.frecuenciaRecurrencia || 'NINGUNA',
@@ -296,13 +345,15 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
       nombreEvento: '', descripcionEvento: '', fechaEvento: '',
       lugar: '', oficinaResponsable: user?.oficinaNombre || '', horaInicio: '08:00', horaFin: '10:00',
       tipoEvento: tiposEvento[0]?.nombre || '', hasInvitados: 'No', hasPatrocinadores: 'No',
-      requiereTransmision: false, requiereCubrimiento: false, requierePiezaGrafica: false,
+      requiereTransmision: false, requiereCubrimiento: false, requierePiezaGrafica: false, requiereServiciosGenerales: false,
       frecuenciaRecurrencia: 'NINGUNA', fechaFinRecurrencia: '',
-      observaciones: '', esImportante: false
+      observaciones: '', esImportante: false, tipoIngreso: 'LIBRE',
+      ubicacionExterna: '',
     });
     setOrganizadoresList([]);
     setInvitadosList([]);
     setPatrocinadoresList([]);
+    setLugaresSeleccionados([]);
   };
 
   const getImageUrl = (url) => resolveImageUrl(url);
@@ -319,17 +370,17 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
 
   const inputStyle = { 
     padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '14px', 
-    width: '100%', backgroundColor: '#fff', color: '#1e293b', transition: 'border-color 0.2s ease, box-shadow 0.2s ease', outline: 'none',
+    width: '100%', backgroundColor: '#fff', color: 'var(--text-main)', transition: 'border-color 0.2s ease, box-shadow 0.2s ease', outline: 'none',
     boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
   };
 
   const labelStyle = { 
-    fontSize: '12px', color: '#64748b', marginBottom: '8px', fontWeight: '800', 
+    fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: '800', 
     display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase', letterSpacing: '0.5px'
   };
 
   const sectionHeader = {
-    margin: '0 0 20px 0', fontSize: '16px', fontWeight: '800', color: '#1e293b',
+    margin: '0 0 20px 0', fontSize: '16px', fontWeight: '800', color: 'var(--text-main)',
     display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px'
   };
 
@@ -345,12 +396,12 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
              {item.fotoUrl ? <img src={getImageUrl(item.fotoUrl)} alt="perfil" style={{width: '100%', height:'100%', objectFit: 'cover'}} /> : <User size={16} />}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#1e293b', lineHeight: '1.1' }}>{item.nombre}</span>
-            <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '600' }}>{item.cargo || (mode === 'organizador' ? 'Organizador' : 'Invitado')}</span>
+            <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-main)', lineHeight: '1.1' }}>{item.nombre}</span>
+            <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: '600' }}>{item.cargo || (mode === 'organizador' ? 'Organizador' : 'Invitado')}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginLeft: '8px', borderLeft: '1px solid #f1f5f9', paddingLeft: '8px' }}>
-             <button type="button" onClick={() => handleEditParticipant(mode, index)} style={{ padding: '6px', background: 'transparent', border: 'none', cursor: 'pointer', color: '#94a3b8' }} onMouseEnter={e => e.currentTarget.style.color = '#3b82f6'} onMouseLeave={e => e.currentTarget.style.color = '#94a3b8'}><Edit2 size={14} /></button>
-             <button type="button" onClick={() => handleDeleteParticipant(mode, index)} style={{ padding: '6px', background: 'transparent', border: 'none', cursor: 'pointer', color: '#94a3b8' }} onMouseEnter={e => e.currentTarget.style.color = '#ef4444'} onMouseLeave={e => e.currentTarget.style.color = '#94a3b8'}><Trash2 size={14} /></button>
+             <button type="button" onClick={() => handleEditParticipant(mode, index)} style={{ padding: '6px', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }} onMouseEnter={e => e.currentTarget.style.color = '#3b82f6'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}><Edit2 size={14} /></button>
+             <button type="button" onClick={() => handleDeleteParticipant(mode, index)} style={{ padding: '6px', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }} onMouseEnter={e => e.currentTarget.style.color = '#ef4444'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}><Trash2 size={14} /></button>
           </div>
         </div>
       ))}
@@ -360,7 +411,7 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
         style={{ 
           display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', 
           backgroundColor: mode === 'organizador' ? '#fff5f5' : '#f0f9ff', border: `1px dashed ${mode === 'organizador' ? '#fecaca' : '#bae6fd'}`, borderRadius: '40px', 
-          cursor: 'pointer', color: mode === 'organizador' ? '#dc2626' : '#0284c7', fontWeight: '800', fontSize: '12px', transition: 'all 0.3s'
+          cursor: 'pointer', color: mode === 'organizador' ? '#dc2626' : '#0284c7', fontWeight: '800', fontSize: '12px', transition: 'background-color var(--dur) var(--ease-standard), color var(--dur) var(--ease-standard), transform var(--dur-fast) var(--ease-out)'
         }} onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'; }}>
          <Plus size={16} /> Añadir {mode === 'organizador' ? 'Organizador' : mode === 'invitado' ? 'Invitado' : 'Colaborador'}
       </button>
@@ -371,9 +422,9 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
     <>
       {/* Diálogo de confirmación SIAPAC */}
       {siapacDialogOpen && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 9999,
-          backgroundColor: 'rgba(15, 23, 42, 0.55)',
+        <div className="fade-in" style={{
+          position: 'fixed', inset: 0, zIndex: 'var(--z-toast)',
+          backgroundColor: 'rgba(20, 18, 16, 0.5)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           padding: '16px'
         }}>
@@ -396,14 +447,14 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
                 <p style={{ margin: 0, fontSize: '11px', fontWeight: '800', color: '#ea580c', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                   Confirmación requerida — SIAPAC
                 </p>
-                <p style={{ margin: '4px 0 0', fontSize: '16px', fontWeight: '800', color: '#1e293b' }}>
+                <p style={{ margin: '4px 0 0', fontSize: '16px', fontWeight: '800', color: 'var(--text-main)' }}>
                   Préstamo de espacio
                 </p>
               </div>
             </div>
 
-            <p style={{ margin: 0, fontSize: '14px', color: '#475569', lineHeight: '1.65' }}>
-              Ha seleccionado el espacio <strong style={{ color: '#1e293b' }}>"{pendingLugar?.nombre}"</strong>.
+            <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)', lineHeight: '1.65' }}>
+              Ha seleccionado el espacio <strong style={{ color: 'var(--text-main)' }}>"{pendingLugar?.nombre}"</strong>.
             </p>
             <div style={{
               backgroundColor: '#fff7ed', border: '1px solid #fed7aa',
@@ -415,7 +466,7 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
                 ¿Usted ya realizó el préstamo de este espacio en el sistema <strong>SIAPAC</strong>?
               </p>
             </div>
-            <p style={{ margin: 0, fontSize: '12px', color: '#94a3b8', lineHeight: '1.5' }}>
+            <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-muted)', lineHeight: '1.5' }}>
               Recuerde que el préstamo en SIAPAC debe realizarse <strong>antes</strong> de registrar el lugar en GEA.
               Si aún no lo ha hecho, cancele y complete el proceso en el sistema de préstamo de aulas y espacios.
             </p>
@@ -426,7 +477,7 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
                 onClick={() => { setSiapacDialogOpen(false); setPendingLugar(null); }}
                 style={{
                   padding: '11px 24px', borderRadius: '30px', border: '1px solid #e2e8f0',
-                  backgroundColor: '#f8fafc', color: '#64748b', fontWeight: '700',
+                  backgroundColor: '#f8fafc', color: 'var(--text-secondary)', fontWeight: '700',
                   cursor: 'pointer', fontSize: '14px'
                 }}
               >
@@ -443,7 +494,7 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
                 }}
                 style={{
                   padding: '11px 28px', borderRadius: '30px', border: 'none',
-                  backgroundColor: '#1e293b', color: '#fff', fontWeight: '800',
+                  backgroundColor: 'var(--text-main)', color: '#fff', fontWeight: '800',
                   cursor: 'pointer', fontSize: '14px',
                   boxShadow: '0 4px 12px rgba(30,41,59,0.25)'
                 }}
@@ -468,7 +519,7 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
             {/* SECTION 1: INFO GENERAL */}
             <div style={glassCard}>
               <h3 style={sectionHeader}>
-                <div style={{ padding: '8px', borderRadius: '10px', background: '#fff1f2', display: 'flex' }}><Info size={20} color="#ce1126" /></div>
+                <div style={{ padding: '8px', borderRadius: '10px', background: 'var(--surface-2)', display: 'flex' }}><Info size={20} color="var(--text-secondary)" /></div>
                 Información del Evento
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -504,7 +555,7 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
                         ))}
                       </select>
                     ) : (
-                      <div style={{ ...inputStyle, backgroundColor: '#f8fafc', border: '1px solid #f1f5f9', color: '#64748b', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ ...inputStyle, backgroundColor: '#f8fafc', border: '1px solid #f1f5f9', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <ShieldCheck size={16} /> {formData.oficinaResponsable || user?.oficinaNombre || 'Cargando oficina...'}
                       </div>
                     )}
@@ -531,6 +582,20 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
                       ))}
                     </select>
                 </div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <label style={labelStyle}>Tipo de ingreso <span style={{color: '#ce1126'}}>*</span></label>
+                    <select
+                      name="tipoIngreso"
+                      value={formData.tipoIngreso}
+                      onChange={(e) => setFormData({ ...formData, tipoIngreso: e.target.value })}
+                      style={inputStyle}
+                      required
+                    >
+                      <option value="LIBRE">Libre</option>
+                      <option value="PAGO">Pago</option>
+                      <option value="PRIVADO">Evento privado</option>
+                    </select>
+                </div>
               </div>
             </div>
           </div>
@@ -538,7 +603,7 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
             {/* SECTION 2: LOGÍSTICA */}
             <div style={glassCard}>
               <h3 style={sectionHeader}>
-                <div style={{ padding: '8px', borderRadius: '10px', background: '#f0fdf4', display: 'flex' }}><Calendar size={20} color="#16a34a" /></div>
+                <div style={{ padding: '8px', borderRadius: '10px', background: 'var(--surface-2)', display: 'flex' }}><Calendar size={20} color="var(--text-secondary)" /></div>
                 Ubicación y Tiempo
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '32px', marginBottom: '24px' }}>
@@ -553,8 +618,12 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
                           if (!id) return;
                           const selected = lugaresFisicos.find(l => l.id === id);
                           if (selected && !lugaresSeleccionados.find(l => l.id === id)) {
-                            setPendingLugar(selected);
-                            setSiapacDialogOpen(true);
+                            if (selected.esExterno) {
+                              setLugaresSeleccionados(prev => [...prev, selected]);
+                            } else {
+                              setPendingLugar(selected);
+                              setSiapacDialogOpen(true);
+                            }
                           }
                           e.target.value = "";
                         }}
@@ -568,7 +637,7 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
                       </select>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', minHeight: '32px' }}>
                         {lugaresSeleccionados.length === 0 && (
-                          <span style={{ fontSize: '12px', color: '#94a3b8', fontStyle: 'italic' }}>Ningún lugar seleccionado</span>
+                          <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontStyle: 'italic' }}>Ningún lugar seleccionado</span>
                         )}
                         {lugaresSeleccionados.map(lugar => (
                           <div 
@@ -599,6 +668,20 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
                       </div>
                     </div>
                   </div>
+                  {lugaresSeleccionados.some(l => l.esExterno) && (
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <label style={labelStyle}><MapPin size={14} style={{ marginRight: '2px' }}/> ¿Dónde será el evento? <span style={{color: '#ce1126'}}>*</span></label>
+                      <input
+                        type="text"
+                        name="ubicacionExterna"
+                        value={formData.ubicacionExterna}
+                        onChange={handleInputChange}
+                        placeholder="Ej: Auditorio Central, Hotel Ramada, Parque Municipal…"
+                        style={inputStyle}
+                        maxLength={300}
+                      />
+                    </div>
+                  )}
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <label style={labelStyle}>Fecha del Evento <span style={{color: '#ce1126'}}>*</span></label>
                     <input type="date" name="fechaEvento" value={formData.fechaEvento} onChange={handleInputChange} style={{...inputStyle, width: 'fit-content'}} required />
@@ -656,12 +739,12 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
             </div>
 
             {/* SECTION 3: PERFILES */}
-            <div style={{ ...glassCard, border: '1px solid #f1f5f9', background: 'linear-gradient(135deg, rgba(255,255,255,0.9), rgba(248,250,252,0.5))' }}>
-              <h3 style={{ ...sectionHeader, color: '#1e293b', borderBottom: '1px solid #f1f5f9' }}>
-                <div style={{ padding: '8px', borderRadius: '10px', background: '#f8fafc', display: 'flex' }}><Users size={20} color="#64748b" /></div>
+            <div style={{ ...glassCard, border: '1px solid var(--border)', background: 'var(--surface)' }}>
+              <h3 style={{ ...sectionHeader, color: 'var(--text-main)', borderBottom: '1px solid #f1f5f9' }}>
+                <div style={{ padding: '8px', borderRadius: '10px', background: '#f8fafc', display: 'flex' }}><Users size={20} color="var(--text-secondary)" /></div>
                 Equipo Organizador
               </h3>
-              <p style={{ fontSize: '12px', color: '#64748b', marginTop: '-12px', marginBottom: '16px', fontWeight: '500' }}>
+              <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '-12px', marginBottom: '16px', fontWeight: '500' }}>
                 Añade a las personas encargadas de la gestión y ejecución del evento.
               </p>
               {renderParticipantsSleek(organizadoresList, 'organizador')}
@@ -669,7 +752,7 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
 
             <div style={glassCard}>
               <h3 style={sectionHeader}>
-                <div style={{ padding: '8px', borderRadius: '10px', background: '#eff6ff', display: 'flex' }}><Users size={20} color="#3b82f6" /></div>
+                <div style={{ padding: '8px', borderRadius: '10px', background: 'var(--surface-2)', display: 'flex' }}><Users size={20} color="var(--text-secondary)" /></div>
                 Otros Participantes
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -695,36 +778,25 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
             {/* SECTION 4: REQUERIMIENTOS TÉCNICOS */}
             <div style={glassCard}>
               <h3 style={sectionHeader}>
-                <div style={{ padding: '8px', borderRadius: '10px', background: '#fef3c7', display: 'flex' }}><ShieldCheck size={20} color="#d97706" /></div>
+                <div style={{ padding: '8px', borderRadius: '10px', background: 'var(--surface-2)', display: 'flex' }}><ShieldCheck size={20} color="var(--text-secondary)" /></div>
                 Requerimientos Técnicos y Adicionales
               </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
-                <label style={{ ...inputStyle, display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', background: formData.requiereTransmision ? '#fffbeb' : '#fff' }}>
-                  <input 
-                    type="checkbox" 
-                    checked={formData.requiereTransmision} 
-                    onChange={e => setFormData({...formData, requiereTransmision: e.target.checked})}
-                    style={{ width: '18px', height: '18px' }}
-                  />
-                  <span style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b' }}>Requiere Transmisión</span>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '24px' }}>
+                <label style={{ padding: '9px 14px', borderRadius: '10px', background: formData.requiereTransmision ? 'var(--primary-soft)' : 'var(--surface-2)', border: `1px solid ${formData.requiereTransmision ? 'var(--primary)' : 'var(--border)'}`, fontSize: '12px', fontWeight: '600', color: formData.requiereTransmision ? 'var(--primary)' : 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'background-color var(--dur) var(--ease-standard), border-color var(--dur) var(--ease-standard), color var(--dur) var(--ease-standard)' }}>
+                  <input type="checkbox" style={{ accentColor: 'var(--primary)' }} checked={formData.requiereTransmision} onChange={e => setFormData({...formData, requiereTransmision: e.target.checked})} />
+                  Transmisión
                 </label>
-                <label style={{ ...inputStyle, display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', background: formData.requiereCubrimiento ? '#fffbeb' : '#fff' }}>
-                  <input 
-                    type="checkbox" 
-                    checked={formData.requiereCubrimiento} 
-                    onChange={e => setFormData({...formData, requiereCubrimiento: e.target.checked})}
-                    style={{ width: '18px', height: '18px' }}
-                  />
-                  <span style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b' }}>Requiere Cubrimiento</span>
+                <label style={{ padding: '9px 14px', borderRadius: '10px', background: formData.requiereCubrimiento ? 'var(--primary-soft)' : 'var(--surface-2)', border: `1px solid ${formData.requiereCubrimiento ? 'var(--primary)' : 'var(--border)'}`, fontSize: '12px', fontWeight: '600', color: formData.requiereCubrimiento ? 'var(--primary)' : 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'background-color var(--dur) var(--ease-standard), border-color var(--dur) var(--ease-standard), color var(--dur) var(--ease-standard)' }}>
+                  <input type="checkbox" style={{ accentColor: 'var(--primary)' }} checked={formData.requiereCubrimiento} onChange={e => setFormData({...formData, requiereCubrimiento: e.target.checked})} />
+                  Cubrimiento
                 </label>
-                <label style={{ ...inputStyle, display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', background: formData.requierePiezaGrafica ? '#fffbeb' : '#fff' }}>
-                  <input 
-                    type="checkbox" 
-                    checked={formData.requierePiezaGrafica} 
-                    onChange={e => setFormData({...formData, requierePiezaGrafica: e.target.checked})}
-                    style={{ width: '18px', height: '18px' }}
-                  />
-                  <span style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b' }}>Requiere Pieza Gráfica</span>
+                <label style={{ padding: '9px 14px', borderRadius: '10px', background: formData.requierePiezaGrafica ? 'var(--primary-soft)' : 'var(--surface-2)', border: `1px solid ${formData.requierePiezaGrafica ? 'var(--primary)' : 'var(--border)'}`, fontSize: '12px', fontWeight: '600', color: formData.requierePiezaGrafica ? 'var(--primary)' : 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'background-color var(--dur) var(--ease-standard), border-color var(--dur) var(--ease-standard), color var(--dur) var(--ease-standard)' }}>
+                  <input type="checkbox" style={{ accentColor: 'var(--primary)' }} checked={formData.requierePiezaGrafica} onChange={e => setFormData({...formData, requierePiezaGrafica: e.target.checked})} />
+                  Pieza gráfica
+                </label>
+                <label style={{ padding: '9px 14px', borderRadius: '10px', background: formData.requiereServiciosGenerales ? 'var(--primary-soft)' : 'var(--surface-2)', border: `1px solid ${formData.requiereServiciosGenerales ? 'var(--primary)' : 'var(--border)'}`, fontSize: '12px', fontWeight: '600', color: formData.requiereServiciosGenerales ? 'var(--primary)' : 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'background-color var(--dur) var(--ease-standard), border-color var(--dur) var(--ease-standard), color var(--dur) var(--ease-standard)' }}>
+                  <input type="checkbox" style={{ accentColor: 'var(--primary)' }} checked={formData.requiereServiciosGenerales} onChange={e => setFormData({...formData, requiereServiciosGenerales: e.target.checked})} />
+                  Servicios generales
                 </label>
               </div>
 
@@ -741,15 +813,15 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialDate, allEvents }) => {
             </div>
 
             {/* FOOTER */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px', padding: '20px', backgroundColor: '#fff', borderRadius: '16px', border: '1px solid #f1f5f9' }}>
-              <div style={{ fontSize: '13px', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '500' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px', padding: '20px', backgroundColor: 'var(--surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+              <div style={{ fontSize: '13px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '500' }}>
                  <AlertCircle size={18} color="#ce1126" /> Por favor, valida que los perfiles y horarios sean correctos.
               </div>
               <div style={{ display: 'flex', gap: '16px' }}>
-                <button type="button" onClick={onClose} style={{ padding: '12px 28px', borderRadius: '30px', backgroundColor: '#f1f5f9', color: '#475569', border: 'none', fontWeight: '800', cursor: 'pointer', fontSize: '14px', transition: 'all 0.2s' }}>
+                <button type="button" onClick={onClose} style={{ padding: '12px 28px', borderRadius: '30px', backgroundColor: '#f1f5f9', color: 'var(--text-secondary)', border: 'none', fontWeight: '800', cursor: 'pointer', fontSize: '14px', transition: 'background-color var(--dur) var(--ease-standard), color var(--dur) var(--ease-standard), transform var(--dur-fast) var(--ease-out)' }}>
                   Descartar
                 </button>
-                <button type="submit" disabled={formLoading} style={{ padding: '14px 40px', borderRadius: '30px', backgroundColor: '#1e293b', color: 'white', border: 'none', fontWeight: '800', cursor: formLoading ? 'not-allowed' : 'pointer', fontSize: '14px', boxShadow: '0 10px 20px rgba(30,41,59,0.2)', transition: 'all 0.3s' }}>
+                <button type="submit" disabled={formLoading} style={{ padding: '14px 40px', borderRadius: '30px', backgroundColor: 'var(--text-main)', color: 'white', border: 'none', fontWeight: '800', cursor: formLoading ? 'not-allowed' : 'pointer', fontSize: '14px', boxShadow: '0 10px 20px rgba(30,41,59,0.2)', transition: 'background-color var(--dur) var(--ease-standard), color var(--dur) var(--ease-standard), transform var(--dur-fast) var(--ease-out)' }}>
                   {formLoading ? 'Procesando...' : 'Enviar Solicitud de Evento'}
                 </button>
               </div>
