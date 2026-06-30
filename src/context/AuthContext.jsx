@@ -1,16 +1,13 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { getCurrentUser, getToken, logout as authLogout } from '../services/auth.service';
+import { getCurrentUser, logout as authLogout } from '../services/auth.service';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    const token = getToken();
-    const currentUser = getCurrentUser();
-    return (token && currentUser) ? currentUser : null;
-  });
+  // La sesión está validada por la cookie HttpOnly — el user en localStorage
+  // es solo metadatos de display (nombre, rol, foto). No depende del token.
+  const [user, setUser] = useState(() => getCurrentUser());
   const [loading, setLoading] = useState(false);
-
 
   const loginContext = (userData) => {
     setUser(userData);
@@ -24,9 +21,9 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
-  const logoutContext = () => {
-    authLogout();
-    setUser(null);
+  const logoutContext = async () => {
+    setUser(null); // limpiar UI de inmediato
+    await authLogout(); // llamar al backend para revocar la cookie + limpiar localStorage
   };
 
   // Escuchar el evento global 'auth-error' emitido por el interceptor de api.js
@@ -35,8 +32,8 @@ export const AuthProvider = ({ children }) => {
   // en lugar de useNavigate para redirigir a /login.
   useEffect(() => {
     const handleAuthError = () => {
-      authLogout();
       setUser(null);
+      authLogout(); // fire-and-forget — ya redirigimos a login
       window.location.href = '/login';
     };
 

@@ -3,9 +3,7 @@ import api from './api';
 export const login = async (credentials, config = {}) => {
   const raw = await api.post('/auth/login', credentials, config);
 
-  const token = raw.token;
-
-  // Mapeo explícito de todos los campos del usuario
+  // El token viaja en la cookie HttpOnly — no se almacena en localStorage
   const user = {
     id:            raw.id            || raw.idUsuario || null,
     nombre:        raw.nombre        || null,
@@ -16,32 +14,29 @@ export const login = async (credentials, config = {}) => {
     fotoUrl:       raw.fotoUrl       || null,
   };
 
-  if (token) {
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(user));
-  }
+  localStorage.setItem('user', JSON.stringify(user));
   return raw;
 };
 
-export const logout = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
+export const logout = async () => {
+  try {
+    await api.post('/auth/logout');
+  } catch {
+    // El backend puede fallar si el token ya expiró — continuar igual
+  } finally {
+    localStorage.removeItem('user');
+    // Limpiar token residual de sesiones anteriores a la migración
+    localStorage.removeItem('token');
+  }
 };
 
 export const getCurrentUser = () => {
   const user = localStorage.getItem('user');
   try {
     return user ? JSON.parse(user) : null;
-  } catch(e) {
+  } catch {
     return null;
   }
 };
 
-export const getToken = () => {
-  // Asegurarnos de limpiar comillas si se guardó mal en algún momento
-  let token = localStorage.getItem('token');
-  if (token && token.startsWith('"')) {
-    token = JSON.parse(token);
-  }
-  return token;
-};
+export const getToken = () => null;

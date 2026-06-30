@@ -1,28 +1,20 @@
 import axios from 'axios';
 import notification from '../utils/notification';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8083';
+// En dev usa la URL relativa '' para que el proxy de Vite enrute /api → localhost:8083
+// En producción definir VITE_API_URL con el dominio real del backend
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 const api = axios.create({
   baseURL: `${API_URL}/api`,
+  withCredentials: true,
   headers: {
     'Bypass-Tunnel-Reminder': 'true'
   }
 });
 
 api.interceptors.request.use(
-  (config) => {
-    let token = localStorage.getItem('token');
-    
-    if (token && token.startsWith('"')) {
-      token = JSON.parse(token);
-    }
-
-    if (token && token !== 'undefined' && token !== 'null') {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
+  (config) => config,
   (error) => Promise.reject(error)
 );
 
