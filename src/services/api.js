@@ -57,8 +57,11 @@ api.interceptors.response.use(
     if (!error.response) {
       errorMessage = 'Error de conexión: No se pudo contactar con el servidor';
       isConnectivityError = true;
+    } else if (status >= 500) {
+      // No exponer mensajes internos del servidor al usuario
+      errorMessage = 'Error interno del servidor. Por favor intenta más tarde.';
     } else {
-      errorMessage = error.response.data?.message || error.response.data?.error || `Error ${error.response.status}: Servidor no disponible`;
+      errorMessage = error.response.data?.message || error.response.data?.error || 'Error inesperado en el sistema';
     }
 
     // 403: mensaje claro de permisos cuando el backend no especifica uno (no se cierra sesión)

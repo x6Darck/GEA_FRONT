@@ -29,8 +29,9 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    // Logging del error (en producción conectar a Sentry, Datadog, etc.)
-    console.error('[ErrorBoundary] Error capturado:', error, errorInfo);
+    if (import.meta.env?.DEV) {
+      console.error('[ErrorBoundary] Error capturado:', error, errorInfo);
+    }
     this.setState({ errorInfo });
 
     // Callback externo opcional (para logging o monitoreo)
