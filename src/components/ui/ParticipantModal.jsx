@@ -156,12 +156,17 @@ const ParticipantModal = ({ isOpen, onClose, onSave, mode, initialData, isReadOn
     }
   };
 
+  const DESC_MAX = 250;
+  const descLen = participant.descripcion?.length || 0;
+  const descOver = descLen > DESC_MAX;
+
   const handleSave = (e) => {
     e.preventDefault();
     if (isReadOnly) {
       onClose();
       return;
     }
+    if (descOver) return;
     onSave({ ...participant, id: participant.id || Date.now() });
     onClose();
   };
@@ -292,7 +297,29 @@ const ParticipantModal = ({ isOpen, onClose, onSave, mode, initialData, isReadOn
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <label style={{ fontSize: '11px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '8px' }}><FileText size={12}/> Biografía / Experiencia</label>
-              <textarea name="descripcion" value={participant.descripcion} onChange={handleChange} readOnly={isReadOnly} rows="6" placeholder={isReadOnly ? "Sin descripción." : "Cuéntanos un poco sobre el perfil..."} style={{ ...inputStyle(isReadOnly), resize: 'none' }} />
+              <textarea
+                name="descripcion"
+                value={participant.descripcion}
+                onChange={handleChange}
+                readOnly={isReadOnly}
+                rows="6"
+                placeholder={isReadOnly ? "Sin descripción." : "Cuéntanos un poco sobre el perfil..."}
+                style={{ ...inputStyle(isReadOnly), resize: 'none', border: !isReadOnly && descOver ? '1.5px solid #ce1126' : '1.5px solid #f1f5f9' }}
+              />
+              {!isReadOnly && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
+                  {descOver ? (
+                    <span style={{ fontSize: '12px', color: '#ce1126', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      ⚠ Excede el límite de {DESC_MAX} caracteres. Reduce el texto para poder guardar.
+                    </span>
+                  ) : (
+                    <span />
+                  )}
+                  <span style={{ fontSize: '12px', fontWeight: '700', color: descOver ? '#ce1126' : 'var(--text-muted)', whiteSpace: 'nowrap', marginLeft: '8px' }}>
+                    {descLen} / {DESC_MAX}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -312,7 +339,7 @@ const ParticipantModal = ({ isOpen, onClose, onSave, mode, initialData, isReadOn
               <button type="button" onClick={onClose} style={{ flex: 1, padding: '16px', borderRadius: '32px', background: '#fff', border: '2px solid #e2e8f0', color: 'var(--text-secondary)', fontWeight: '800', cursor: 'pointer', transition: 'background-color var(--dur) var(--ease-standard), color var(--dur) var(--ease-standard), transform var(--dur-fast) var(--ease-out)' }}>
                 Cancelar
               </button>
-              <button type="submit" disabled={uploading} style={{ flex: 2, padding: '16px', borderRadius: '32px', background: '#ce1126', color: '#fff', fontWeight: '800', cursor: 'pointer', boxShadow: '0 8px 25px rgba(206,17,38,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+              <button type="submit" disabled={uploading || descOver} style={{ flex: 2, padding: '16px', borderRadius: '32px', background: uploading || descOver ? '#f1f5f9' : '#ce1126', color: uploading || descOver ? 'var(--text-muted)' : '#fff', fontWeight: '800', cursor: uploading || descOver ? 'not-allowed' : 'pointer', boxShadow: uploading || descOver ? 'none' : '0 8px 25px rgba(206,17,38,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: 'background-color 0.2s, color 0.2s, box-shadow 0.2s' }}>
                 {uploading ? 'Procesando...' : <><Check size={20}/> {initialData ? 'Guardar Cambios' : 'Confirmar Registro'}</>}
               </button>
             </>
