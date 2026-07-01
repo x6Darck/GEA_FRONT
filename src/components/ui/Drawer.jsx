@@ -1,3 +1,17 @@
+/**
+ * Panel lateral (drawer) de GEA con animación de apertura y cierre.
+ *
+ * Mismo patrón de animación diferida que {@link Modal}: mantiene el componente
+ * en el DOM durante `CLOSE_MS` ms tras `isOpen=false` para completar la transición.
+ * Bloquea el scroll del body mientras está abierto.
+ * El ancho máximo es `min(width, 100%)` para que en móvil siempre ocupe el 100% de pantalla.
+ *
+ * @param {boolean} isOpen
+ * @param {Function} onClose
+ * @param {string} title
+ * @param {React.ReactNode} children
+ * @param {string} [width='550px']
+ */
 import React, { useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 import styles from './Drawer.module.css';

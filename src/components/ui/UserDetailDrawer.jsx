@@ -1,3 +1,24 @@
+/**
+ * Drawer lateral de perfil de usuario (vista y edición).
+ *
+ * Modos: VIEW (solo lectura) y EDIT (formulario completo).
+ * El prop `initialMode` define cuál se muestra al abrir.
+ *
+ * Lógica de sincronización de sesión: si el usuario que se está editando
+ * coincide con el usuario logueado actualmente (por ID o correo), se invoca
+ * `updateUser` del `AuthContext` para mantener el nombre y foto del perfil
+ * en la barra sin necesidad de recargar la página.
+ *
+ * `getRolId` acepta cualquier representación que llega del backend (ID numérico,
+ * string con nombre o objeto `{id, nombre}`) y la normaliza a un ID string
+ * válido para el `<select>`.
+ *
+ * @param {boolean} isOpen
+ * @param {Function} onClose
+ * @param {Object} user - Usuario normalizado por {@link mapUsuarioDTO}.
+ * @param {'VIEW'|'EDIT'} [initialMode='VIEW']
+ * @param {Function} [onRefreshData] - Callback que recarga la lista de usuarios.
+ */
 import React, { useState, useEffect, useContext } from 'react';
 import Drawer from './Drawer';
 import { User, Mail, Phone, Lock, Shield, Building, Camera, X, Info } from 'lucide-react';

@@ -1,3 +1,20 @@
+/**
+ * Modal base de GEA con animación de apertura y cierre.
+ *
+ * Mantiene el componente en el DOM durante `CLOSE_MS` milisegundos después de que
+ * `isOpen` cambia a `false`, para que la animación CSS de salida termine antes de
+ * desmontar. `renderRef` evita activar la animación de salida en el primer render
+ * cuando el modal ya empieza cerrado.
+ * Bloquea el scroll del body mientras está abierto y lo restaura al cerrar.
+ * El clic fuera del panel (en el overlay) llama a `onClose`.
+ *
+ * @param {boolean} isOpen
+ * @param {Function} onClose
+ * @param {string} title
+ * @param {React.ReactNode} children
+ * @param {React.CSSProperties} [style] - Estilos adicionales para el panel.
+ * @param {React.CSSProperties} [bodyStyle] - Estilos adicionales para el cuerpo.
+ */
 import React, { useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 import styles from './Modal.module.css';

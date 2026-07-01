@@ -1,3 +1,14 @@
+/**
+ * Modal para publicar eventos aprobados pendientes de publicación.
+ *
+ * Carga automáticamente todos los eventos en estado APROBADA al abrirse,
+ * permite adjuntar una pieza gráfica opcional por evento y lanzarlos al público.
+ * La lista se refresca tras cada publicación exitosa para reflejar el estado actual.
+ *
+ * @param {boolean} isOpen
+ * @param {Function} onClose
+ * @param {Function} [onSuccess] - Callback invocado tras publicar exitosamente.
+ */
 import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
 import { getEventos, publicarEvento } from '../../services/eventos.service';

@@ -1,9 +1,20 @@
+/**
+ * Caché de oficinas a nivel de módulo ES.
+ *
+ * Reutiliza la misma promesa mientras el módulo esté cargado en memoria, evitando
+ * peticiones duplicadas al backend cuando múltiples componentes montan en paralelo.
+ * La invalidación manual existe para el caso (poco frecuente) de que un admin
+ * cree o elimine una oficina durante la sesión.
+ */
 import api from './api';
 
-// Caché a nivel módulo: la promesa se reutiliza mientras el módulo vive.
-// Se invalida al mutar (crear/eliminar oficina), lo que no ocurre en esta app.
 let _promise = null;
 
+/**
+ * Retorna la lista de oficinas, usando la promesa cacheada si ya existe.
+ * En caso de error de red, limpia el caché para que el siguiente llamado reintente.
+ * @returns {Promise<Object[]>}
+ */
 export const getOficinasCache = () => {
   if (!_promise) {
     _promise = api.get('/admin/oficinas')
@@ -13,6 +24,10 @@ export const getOficinasCache = () => {
   return _promise;
 };
 
+/**
+ * Fuerza la recarga de oficinas en el próximo llamado a {@link getOficinasCache}.
+ * Llamar después de crear o eliminar una oficina para mantener la UI sincronizada.
+ */
 export const invalidateOficinasCache = () => {
   _promise = null;
 };

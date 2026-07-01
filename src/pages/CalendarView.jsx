@@ -1,3 +1,19 @@
+/**
+ * Página principal del calendario público GEA.
+ *
+ * Muestra los eventos PUBLICADOS en cuadrícula mensual y en vista de lista.
+ * Al hacer click en un día se abre un modal con los eventos de ese día.
+ * Los usuarios con rol OFICINA o superior pueden crear eventos desde el calendario
+ * haciendo click en un día futuro (el click en un día pasado es inerte).
+ *
+ * Soporte de deep link: `?event=<id>` abre directamente el detalle del evento
+ * (enviado por correo o notificación push). Si el evento no está en la lista
+ * cargada, se solicita individualmente con `getEventoById`.
+ *
+ * `ingresoBadge` devuelve el ícono y colores del badge de tipo de ingreso
+ * (LIBRE / PAGO / PRIVADO) usado tanto en las tarjetas del calendario como
+ * en el modal de día.
+ */
 import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';

@@ -1,5 +1,18 @@
+/**
+ * Servicio de gestión de usuarios GEA (solo accesible para SUPER_ADMIN / ADMIN).
+ *
+ * Incluye un mapeo de roles que acepta tanto el ID numérico como el nombre interno
+ * del backend, para ser resiliente a cambios en la representación del rol entre versiones.
+ */
 import api from './api';
 
+/**
+ * Convierte el valor de rol del backend (ID numérico, nombre interno u objeto)
+ * al nombre legible para la UI. Centralizado aquí para que cualquier cambio en
+ * los nombres de rol del backend se resuelva en un solo lugar.
+ * @param {string|number|Object} rol
+ * @returns {string} Nombre de rol legible.
+ */
 const getRoleDisplayName = (rol) => {
   if (!rol) return 'Otros';
   
@@ -35,6 +48,13 @@ const getRoleDisplayName = (rol) => {
   return rolesMap[key] || key || 'Otros';
 };
 
+/**
+ * Normaliza un usuario crudo del backend al formato uniforme de la UI.
+ * Preserva `rol` e `idOficina` en su forma original para que el drawer de edición
+ * pueda rellenar los selectores correctamente.
+ * @param {Object} user - DTO crudo del backend.
+ * @returns {Object} Usuario normalizado.
+ */
 export const mapUsuarioDTO = (user) => ({
   id: user.id || user.idUsuario,
   nombres: user.nombres || user.nombre,
@@ -49,6 +69,12 @@ export const mapUsuarioDTO = (user) => ({
   oficinaNombre: user.oficina?.nombre || user.oficinaNombre || 'No asignada'
 });
 
+/**
+ * Obtiene la lista de usuarios del sistema con filtros opcionales.
+ * @param {Object} [params={}] - Parámetros de query (ej. { estado: 'ACTIVO' }).
+ * @param {import('axios').AxiosRequestConfig} [config={}]
+ * @returns {Promise<Object[]>} Lista de usuarios normalizados.
+ */
 export const getUsuarios = async (params = {}, config = {}) => {
   const dataList = await api.get('/admin/usuarios', { params, ...config });
   return (dataList || []).map(mapUsuarioDTO);

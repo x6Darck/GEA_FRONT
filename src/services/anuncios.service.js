@@ -1,5 +1,18 @@
+/**
+ * Servicio de anuncios GEA.
+ *
+ * Gestiona el ciclo de vida completo de anuncios internos:
+ * creación, revisión (aprobar/rechazar/devolver), publicación y visibilidad.
+ * El flujo de estados es PENDIENTE → APROBADA → PUBLICADA con posibilidad de RECHAZADA.
+ */
 import api from './api';
 
+/**
+ * Normaliza un anuncio crudo del backend al formato uniforme de la UI.
+ * Acepta múltiples alias de campo para ser compatible con diferentes versiones de la API.
+ * @param {Object} item - DTO crudo del backend.
+ * @returns {Object} Anuncio normalizado.
+ */
 export const mapAnuncioDTO = (item) => ({
   id: item.id || item.idSolicitud,
   titulo: item.titulo || item.title || item.tituloVisible || '',
@@ -26,6 +39,12 @@ export const mapAnuncioDTO = (item) => ({
   requierePiezaGrafica: item.requierePiezaGrafica !== undefined ? item.requierePiezaGrafica : false
 });
 
+/**
+ * Obtiene anuncios según el rol. OFICINA ve solo sus solicitudes propias;
+ * Comunicaciones ve todas las solicitudes del sistema.
+ * @param {string} [role='']
+ * @returns {Promise<Object[]>}
+ */
 export const getAnuncios = async (role = '') => {
   const isOficina = role === 'OFICINA' || role === 'USUARIO_AUTENTICADO_APP';
   const endpoint = isOficina ? '/app/solicitudes-anuncio/mis-solicitudes' : '/comunicaciones/solicitudes-anuncio';
@@ -33,6 +52,10 @@ export const getAnuncios = async (role = '') => {
   return (dataList || []).map(mapAnuncioDTO);
 };
 
+/**
+ * Obtiene todos los anuncios publicados visibles (endpoint público).
+ * @returns {Promise<Object[]>}
+ */
 export const getAnunciosPublicados = async () => {
   const dataList = await api.get('/app/anuncios/publicados');
   return (dataList || []).map(mapAnuncioDTO);

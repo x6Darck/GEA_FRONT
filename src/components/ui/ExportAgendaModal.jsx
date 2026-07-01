@@ -1,3 +1,16 @@
+/**
+ * Modal para exportar la agenda de eventos en PDF.
+ *
+ * Pre-rellena el rango de fechas con el mes actualmente visible en el calendario
+ * (recibido por `currentDate`). El PDF generado por el backend usa la marca GEA
+ * (colores, logo) y agrupa los eventos por día.
+ * El Blob descargado se convierte a un enlace temporal y se hace clic programáticamente
+ * para disparar la descarga sin abrir una nueva pestaña.
+ *
+ * @param {boolean} isOpen
+ * @param {Function} onClose
+ * @param {Date} [currentDate] - Fecha representativa del mes activo en el calendario.
+ */
 import React, { useState, useEffect } from 'react';
 import { FileText, Calendar, Download, X } from 'lucide-react';
 import { exportarAgendaPdf } from '../../services/eventos.service';

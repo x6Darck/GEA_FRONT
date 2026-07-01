@@ -1,3 +1,15 @@
+/**
+ * Instancia central de Axios para toda la aplicación GEA.
+ *
+ * Responsabilidades:
+ * - Apunta a `/api` usando el proxy de Vite en desarrollo o VITE_API_URL en producción.
+ * - Incluye credenciales (cookie HttpOnly `gea_auth`) en cada petición.
+ * - Desenvuelve automáticamente el wrapper `ApiResponse<T>` del backend,
+ *   retornando siempre `data` cuando `success === true`.
+ * - Maneja errores de red y HTTP con notificaciones toast con cooldown anti-spam.
+ * - Emite el evento global `auth-error` ante 401 en rutas no silenciosas,
+ *   permitiendo que {@link AuthContext} cierre la sesión y redirija al login.
+ */
 import axios from 'axios';
 import notification from '../utils/notification';
 

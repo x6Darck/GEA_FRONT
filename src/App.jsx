@@ -1,3 +1,16 @@
+/**
+ * Raíz de la aplicación GEA.
+ *
+ * Define el árbol de rutas con React Router v7 y establece las capas globales:
+ * - {@link ErrorBoundary} en la raíz captura errores de render no controlados.
+ * - {@link AuthProvider} provee el contexto de sesión a toda la app.
+ * - Todas las páginas internas están protegidas por {@link ProtectedRoute} con lista
+ *   de roles permitidos. Las páginas de acceso libre (calendario, galería de anuncios)
+ *   van sin protección pero dentro del layout.
+ * - Las páginas se cargan con `React.lazy` + `Suspense` para code-splitting automático.
+ * - {@link ToastContainer} vive fuera del Router para que los toasts persistan
+ *   durante navegaciones.
+ */
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import DashboardLayout from './components/layout/DashboardLayout';

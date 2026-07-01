@@ -1,3 +1,10 @@
+/**
+ * Layout principal del dashboard GEA.
+ *
+ * Compone {@link Sidebar} con el contenido de la ruta activa renderizado vía `<Outlet>`.
+ * En pantallas pequeñas el sidebar se colapsa y se accede con el botón hamburguesa.
+ * El overlay cierra el sidebar al hacer clic fuera en móvil.
+ */
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';

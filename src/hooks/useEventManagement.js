@@ -1,3 +1,19 @@
+/**
+ * Hook de gestión de eventos GEA.
+ *
+ * Centraliza toda la lógica de negocio relacionada con un evento específico,
+ * desacoplándola del componente visual {@link EventDetailModal}. Gestiona:
+ * - Estado del formulario de edición (inicializado desde el evento recibido).
+ * - Transiciones de estado: Aprobar / Rechazar / Devolver a OFICINA.
+ * - Guardado con lógica según estado actual: PUBLICADA actualiza la publicación,
+ *   serie recurrente con `aplicarASerie=true` propaga a todas las instancias,
+ *   caso normal actualiza solo la solicitud.
+ * - Publicación individual y de serie completa, con subida opcional de pieza gráfica.
+ * - Visibilidad (ocultar/mostrar en el calendario público) y eliminación.
+ *
+ * El `useEffect` de inicialización depende solo de `event.id` (no del objeto completo)
+ * para evitar pisar ediciones en curso cuando el objeto se recibe rehidratado.
+ */
 import { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import {
@@ -16,6 +32,12 @@ import { uploadArchivo } from '../services/archivos.service';
 import api from '../services/api';
 import notification from '../utils/notification';
 
+/**
+ * @param {Object} event - Evento normalizado por {@link mapEventoDTO}.
+ * @param {Function} [onSuccess] - Callback invocado tras cualquier acción exitosa (recarga la lista).
+ * @param {Function} onClose - Callback para cerrar el modal.
+ * @returns {Object} Estado y handlers listos para conectar al componente de detalle.
+ */
 export const useEventManagement = (event, onSuccess, onClose) => {
   const { user } = useContext(AuthContext);
   
@@ -107,6 +129,12 @@ export const useEventManagement = (event, onSuccess, onClose) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  /**
+   * Transiciona el estado del evento (Aprobar / Rechazar / Devolver).
+   * Para Rechazar y Devolver requiere texto antes de ejecutar la petición:
+   * la primera llamada activa el formulario de razón; la segunda lo envía.
+   * @param {'Aprobar'|'Rechazar'|'Devolver'} type
+   */
   const handleStatusUpdate = async (type) => {
     if (type === 'Rechazar' && !rejecting) { setRejecting(true); return; }
     if (type === 'Rechazar' && (!rejectReason || rejectReason.trim() === '')) {
@@ -139,6 +167,15 @@ export const useEventManagement = (event, onSuccess, onClose) => {
     }
   };
 
+  /**
+   * Guarda los cambios del formulario de edición.
+   * La rama de ejecución depende del estado y de si `aplicarASerie` está activo:
+   * 1. Serie + `aplicarASerie` → `updateEventoSerie` (propaga a todo el grupo).
+   * 2. Estado PUBLICADA → `updatePublicacionEvento` (sincroniza publicación visible).
+   * 3. Resto → `updateEvento` (actualiza solo la solicitud).
+   * Tras guardar actualiza el caché `event_hydra_<id>` en localStorage para que
+   * `mapEventoDTO` pueda hidratar participantes si el backend los omite.
+   */
   const handleSaveEdition = async () => {
     const frec = formData.frecuenciaRecurrencia || 'NINGUNA';
     if (frec !== 'NINGUNA') {
@@ -280,6 +317,11 @@ export const useEventManagement = (event, onSuccess, onClose) => {
     }
   };
 
+  /**
+   * Publica un evento individual. Si el usuario seleccionó una nueva pieza gráfica
+   * la sube primero; si no hay preview ni archivo nuevo, envía `piezaGraficaUrl: null`
+   * para no borrar una imagen ya existente antes de que el evento esté hidratado.
+   */
   const handlePublish = async () => {
     setPublishing(true);
     try {
@@ -311,6 +353,11 @@ export const useEventManagement = (event, onSuccess, onClose) => {
     }
   };
 
+  /**
+   * Ejecuta una acción sobre toda la serie recurrente (aprobar o eliminar).
+   * El endpoint de eliminación varía según el rol del usuario autenticado.
+   * @param {'aprobar'|'eliminar'} actionType
+   */
   const handleSerieAction = async (actionType) => {
     if (!event.idGrupoRecurrencia) return;
     if (actionType === 'eliminar' && !window.confirm('¿Estás seguro de eliminar TODA la serie de eventos? Esta acción no se puede deshacer.')) return;

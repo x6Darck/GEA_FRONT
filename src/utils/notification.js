@@ -1,8 +1,12 @@
 import { toast } from 'react-toastify';
 
 /**
- * Unified notification system for CallApp.
- * Provides a consistent style across the entire application.
+ * Sistema de notificaciones toast de GEA.
+ *
+ * Centraliza el estilo visual de todos los toasts para que cualquier cambio de
+ * marca (color, borde, fuente) se aplique a toda la aplicación desde un solo lugar.
+ * Usa `toastId = message` en errores para evitar mostrar el mismo mensaje dos veces
+ * cuando múltiples peticiones fallan simultáneamente.
  */
 const notification = {
   success: (message) => {

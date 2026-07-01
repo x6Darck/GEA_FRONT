@@ -1,3 +1,15 @@
+/**
+ * Página de gestión de solicitudes de evento GEA.
+ *
+ * Carga fuentes distintas según el rol:
+ * - ADMIN/COMUNICACIONES: `getEventosSolicitudes` + `getEventosPublicados` (todas las oficinas).
+ * - OFICINA: solo sus propias solicitudes vía `getEventosSolicitudes`.
+ *
+ * Los eventos se agrupan por oficina, filtran por estado (tabs) y fecha,
+ * y se paginan de 25 en 25 en el cliente para no saturar el DOM.
+ * El mapa `usersNamesMap` se construye una vez con `getUsuarios` para resolver
+ * el nombre del solicitante sin requests adicionales por cada evento.
+ */
 import React, { useState, useEffect, useMemo, useContext, useRef } from 'react';
 import { Search, Plus, Calendar, Filter, Trash2, Eye, EyeOff, MoreHorizontal, ChevronRight, FileText, CheckCircle, Clock, Layers, Star } from 'lucide-react';
 import styles from './Events.module.css';

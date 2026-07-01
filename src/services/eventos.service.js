@@ -1,5 +1,24 @@
+/**
+ * Servicio de eventos GEA.
+ *
+ * Centraliza todas las llamadas al backend relacionadas con solicitudes de evento,
+ * publicaciones y series recurrentes. Expone {@link mapEventoDTO} para normalizar
+ * la respuesta del backend en un formato uniforme que consume la UI.
+ */
 import api from './api';
 
+/**
+ * Normaliza un objeto de evento crudo del backend al formato interno de la UI.
+ *
+ * Aplica varias capas de resiliencia:
+ * - Acepta múltiples nombres de campo (camelCase, snake_case, aliases de versiones antiguas).
+ * - Si el backend no retorna participantes, intenta hidratar desde localStorage
+ *   usando la clave `event_hydra_<id>` o una clave difusa nombre+fecha.
+ * - Si al final no hay participantes pero sí un responsable, crea un participante
+ *   virtual tipo ORGANIZADOR para que la UI nunca quede vacía.
+ * @param {Object} evt - DTO crudo del backend.
+ * @returns {Object} Evento normalizado listo para consumir en componentes.
+ */
 export const mapEventoDTO = (evt) => {
   // Para depuración rápida si sigue fallando (ver consola F12)
   if (evt && (evt.nombreEvento || evt.idSolicitud)) {
@@ -113,6 +132,13 @@ export const mapEventoDTO = (evt) => {
   };
 };
 
+/**
+ * Obtiene las solicitudes de evento según el rol del usuario.
+ * OFICINA y USUARIO_AUTENTICADO_APP ven solo sus propias solicitudes;
+ * Comunicaciones/Admin ven todas.
+ * @param {string} [role=''] - Rol del usuario autenticado.
+ * @returns {Promise<Object[]>} Lista de eventos normalizados.
+ */
 export const getEventosSolicitudes = async (role = '') => {
   const isOficina = role === 'OFICINA' || role === 'USUARIO_AUTENTICADO_APP';
   const endpoint = isOficina ? '/oficina/solicitudes-evento' : '/comunicaciones/solicitudes-evento';
@@ -120,6 +146,10 @@ export const getEventosSolicitudes = async (role = '') => {
   return (dataList || []).map(mapEventoDTO);
 };
 
+/**
+ * Obtiene todos los eventos publicados y visibles (endpoint público).
+ * @returns {Promise<Object[]>}
+ */
 export const getEventosPublicados = async () => {
   const dataList = await api.get('/app/eventos/publicados');
   return (dataList || []).map(mapEventoDTO);
@@ -131,6 +161,12 @@ export const getOficinaById = async (id) => {
   return await api.get(`/oficina/${id}`);
 };
 
+/**
+ * Obtiene una solicitud de evento por ID usando el endpoint correcto según el rol.
+ * @param {number} id
+ * @param {string} [role='']
+ * @returns {Promise<Object>} Evento normalizado.
+ */
 export const getEventoById = async (id, role = '') => {
   const isOficina = role === 'OFICINA' || role === 'USUARIO_AUTENTICADO_APP';
   const endpoint = isOficina ? `/oficina/solicitudes-evento/${id}` : `/comunicaciones/solicitudes-evento/${id}`;
@@ -146,6 +182,12 @@ export const updateEvento = async (id, evento) => {
   return await api.put(`/oficina/solicitudes-evento/${id}`, evento);
 };
 
+/**
+ * Actualiza todos los eventos de una serie recurrente identificada por su UUID de grupo.
+ * @param {string} idGrupo - UUID del grupo de recurrencia.
+ * @param {Object} payload - Datos a propagar a todas las instancias.
+ * @returns {Promise<Object>} Evento maestro actualizado.
+ */
 export const updateEventoSerie = async (idGrupo, payload) => {
   return await api.put(`/oficina/solicitudes-evento/serie/${idGrupo}`, payload);
 };
@@ -198,12 +240,26 @@ export const publicarSerie = async (idGrupo, payload) => {
   return await api.post(`/comunicaciones/solicitudes-evento/serie/${idGrupo}/publicar`, payload);
 };
 
+/**
+ * Elimina toda una serie recurrente. El endpoint varía según el rol:
+ * OFICINA solo puede eliminar sus propias series; Comunicaciones puede eliminar cualquiera.
+ * @param {string} idGrupo
+ * @param {string} [role='']
+ * @returns {Promise<void>}
+ */
 export const eliminarSerie = async (idGrupo, role = '') => {
   const isOficina = role === 'OFICINA' || role === 'USUARIO_AUTENTICADO_APP';
   const endpoint = isOficina ? `/oficina/solicitudes-evento/serie/${idGrupo}` : `/comunicaciones/solicitudes-evento/serie/${idGrupo}`;
   return await api.delete(endpoint);
 };
 
+/**
+ * Descarga la agenda de eventos en PDF para el rango de fechas indicado.
+ * La respuesta es un Blob que el componente convierte en un enlace de descarga.
+ * @param {string} desde - Fecha inicio en formato YYYY-MM-DD.
+ * @param {string} hasta - Fecha fin en formato YYYY-MM-DD.
+ * @returns {Promise<Blob>}
+ */
 export const exportarAgendaPdf = async (desde, hasta) => {
   return await api.get(`/app/eventos/agenda/export/pdf?desde=${desde}&hasta=${hasta}`, {
     responseType: 'blob'

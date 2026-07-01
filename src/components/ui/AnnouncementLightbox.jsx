@@ -1,3 +1,14 @@
+/**
+ * Lightbox de anuncio para la galería pública de GEA.
+ *
+ * Muestra la pieza gráfica a tamaño completo (con `objectFit: contain` para no recortarla)
+ * y un bloque de metadatos: vigencia, lugar, responsable y correo de contacto.
+ * El overlay cierra el lightbox al hacer clic fuera del panel.
+ * Usa {@link resolveImageUrl} para normalizar URLs relativas/localhost antes de pasarlas al `<img>`.
+ *
+ * @param {Object} announcement - Anuncio normalizado por {@link mapAnuncioDTO}.
+ * @param {Function} onClose
+ */
 import React from 'react';
 import { X, MapPin, User, Calendar, Mail } from 'lucide-react';
 import { resolveImageUrl } from '../../utils/url';

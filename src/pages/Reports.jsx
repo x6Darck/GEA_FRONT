@@ -1,3 +1,20 @@
+/**
+ * Página de reportes y dashboard estadístico GEA.
+ *
+ * Dashboard: gráficos Recharts (AreaChart de eventos por mes, PieChart por estado,
+ * BarChart por oficina). Datos servidos por `getDashboardStats`, cuyo alcance
+ * es filtrado por el backend según el rol del usuario autenticado.
+ *
+ * Historial de reportes: lista paginada en cliente de reportes previos, descargables
+ * como Blob. El botón de descarga llama a `exportReporte` que devuelve el binario;
+ * el cliente crea un enlace temporal idéntico al de `ExportAgendaModal`.
+ *
+ * `CustomTooltip` es un componente estático (no tiene estado propio) que Recharts
+ * renderiza cuando el cursor se sitúa sobre una barra o área del gráfico.
+ *
+ * `ErrorBoundary` envuelve el bloque de gráficos porque Recharts puede lanzar
+ * durante el render si los datos tienen formato inesperado.
+ */
 import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { FileText, Download, Plus, Search, Calendar, Info, BarChart3, CheckCircle2, Clock, XCircle, TrendingUp, Building2, CalendarRange, Layers } from 'lucide-react';
 import styles from './Reports.module.css';

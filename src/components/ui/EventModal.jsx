@@ -1,3 +1,28 @@
+/**
+ * Modal de creación de solicitud de evento GEA.
+ *
+ * Formulario multi-sección: información general, logística (lugar/hora/recurrencia),
+ * equipo organizador + participantes, y requerimientos técnicos.
+ *
+ * Puntos de diseño no obvios:
+ * - Diálogo de confirmación SIAPAC: cuando el usuario selecciona un espacio físico
+ *   interno (no externo) se intercepta la selección y se solicita confirmación de
+ *   que el préstamo ya fue registrado en el sistema SIAPAC antes de añadirlo.
+ * - Detección de conflictos: antes de enviar, se cruza `lugaresSeleccionados` con
+ *   `allEvents` del calendario para advertir de solapamiento de horario en el mismo lugar.
+ * - Cache de participantes: tras crear el evento se guarda en `localStorage` con la
+ *   clave `event_hydra_<id>` y también con una clave fuzzy `event_hydra_f_<nombre>_<fecha>`
+ *   para que `mapEventoDTO` pueda hidratar los participantes antes de que el backend
+ *   responda con el registro completo.
+ * - ADMIN/COMUNICACIONES ven el selector de oficinas; usuarios de OFICINA tienen la
+ *   oficina fija (read-only) tomada del `AuthContext`.
+ *
+ * @param {boolean} isOpen
+ * @param {Function} onClose
+ * @param {Function} [onSuccess] - Callback invocado tras crear el evento.
+ * @param {string} [initialDate] - Fecha YYYY-MM-DD pre-rellenada (click en calendario).
+ * @param {Array} [allEvents] - Lista de eventos visibles para la detección de conflictos.
+ */
 import React, { useState, useEffect, useContext } from 'react';
 import Modal from './Modal';
 import ParticipantModal from './ParticipantModal';

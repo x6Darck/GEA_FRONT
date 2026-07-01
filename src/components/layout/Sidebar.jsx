@@ -1,3 +1,15 @@
+/**
+ * Barra de navegación lateral de la aplicación GEA.
+ *
+ * Muestra el perfil del usuario (foto, nombre, email) y los ítems de navegación
+ * filtrados según el rol:
+ * - Sin sesión → solo Calendario + Galería de Anuncios + botón de login.
+ * - Con sesión → Calendario, Eventos, Anuncios, Reportes (salvo CONSULTORIA), y
+ *   Usuarios (solo SUPER_ADMIN / ADMIN).
+ *
+ * En móvil se comporta como drawer que se cierra con `onClose` (llamado desde
+ * {@link DashboardLayout} al hacer clic en el overlay o en un ítem de navegación).
+ */
 import React, { useContext } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Calendar, CalendarDays, Megaphone, FileText, Users, X } from 'lucide-react';

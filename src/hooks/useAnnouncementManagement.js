@@ -1,3 +1,14 @@
+/**
+ * Hook de gestión de anuncios GEA.
+ *
+ * Espejo de {@link useEventManagement} para el dominio de anuncios.
+ * Centraliza la lógica de formulario, transiciones de estado y publicación
+ * desacoplándola del componente visual {@link AnnouncementDetailModal}.
+ *
+ * Diferencia clave respecto a eventos: los anuncios PUBLICADOS se sincronizan
+ * en una sola petición a `updatePublicacionAnuncio`, que actualiza tanto el título/
+ * descripción visible como los campos de la solicitud base (sincronización administrativa).
+ */
 import { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import {
@@ -12,6 +23,12 @@ import { uploadArchivo } from '../services/archivos.service';
 import api from '../services/api';
 import notification from '../utils/notification';
 
+/**
+ * @param {Object} announcement - Anuncio normalizado por {@link mapAnuncioDTO}.
+ * @param {Function} [onSuccess] - Callback invocado tras cualquier acción exitosa.
+ * @param {Function} onClose - Callback para cerrar el modal.
+ * @returns {Object} Estado y handlers listos para conectar al componente de detalle.
+ */
 export const useAnnouncementManagement = (announcement, onSuccess, onClose) => {
   const { user } = useContext(AuthContext);
   
@@ -120,6 +137,12 @@ export const useAnnouncementManagement = (announcement, onSuccess, onClose) => {
     }
   };
 
+  /**
+   * Guarda los cambios del formulario.
+   * Si el anuncio ya está PUBLICADO, llama a `updatePublicacionAnuncio` que
+   * sincroniza campos visibles y la solicitud base en una sola petición.
+   * Si no está publicado, llama solo a `updateAnuncio`.
+   */
   const handleSaveEdition = async () => {
     setManageLoading(true);
     try {

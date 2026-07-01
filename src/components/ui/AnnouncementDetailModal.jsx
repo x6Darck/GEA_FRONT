@@ -1,3 +1,25 @@
+/**
+ * Modal de detalle y gestión de una solicitud de anuncio GEA.
+ *
+ * Espejo funcional de {@link EventDetailModal} para la entidad Anuncio.
+ * Los roles y los paneles de acción siguen el mismo patrón:
+ * - **COMUNICACIONES/ADMIN**: revisa, aprueba y publica (con pieza gráfica obligatoria).
+ * - **OFICINA**: edita y reenvía si está PENDIENTE, RECHAZADA o EN_REVISION.
+ * - **CONSULTORIA**: `isReadOnly=true`, no ve ningún panel de acción.
+ *
+ * Diferencia clave con EventDetailModal: los anuncios tienen `fechaInicioPublicacion`
+ * y `fechaFinPublicacion` (vigencia de publicación), que son campos editables separados
+ * de la fecha del evento; además, los anuncios no tienen participantes ni series.
+ *
+ * El campo `correoContacto` se renderiza en modo lectura incluso durante la edición
+ * (backend lo gestiona; no es editable desde aquí).
+ *
+ * @param {boolean} isOpen
+ * @param {Function} onClose
+ * @param {Object} announcement - Anuncio normalizado por {@link mapAnuncioDTO}.
+ * @param {Function} [onSuccess] - Callback que refresca la lista de anuncios.
+ * @param {boolean} [isReadOnly=false] - Fuerza modo solo lectura (rol CONSULTORIA).
+ */
 import React, { useContext, useState } from 'react';
 import Modal from './Modal';
 import { AuthContext } from '../../context/AuthContext';

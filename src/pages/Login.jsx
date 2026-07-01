@@ -1,3 +1,11 @@
+/**
+ * Página de inicio de sesión de GEA.
+ *
+ * Llama a `authLogin` con `skipGlobalError: true` para que el interceptor
+ * no muestre un toast duplicado — el componente maneja el error de 401 con
+ * su propio bloque de mensajes en el formulario.
+ * Tras un login exitoso guarda al usuario en el `AuthContext` y redirige a `/calendario`.
+ */
 import React, { useState, useContext } from 'react';
 import { Eye, EyeOff, AlertCircle } from 'lucide-react';
 import styles from './Login.module.css';

@@ -1,5 +1,23 @@
+/**
+ * Formulario de participante de evento (drawer con portal).
+ *
+ * Funciona tanto en modo edición (`mode` = invitado/colaborador/organizador)
+ * como en modo solo-lectura (`isReadOnly=true`) para mostrar el perfil sin permitir cambios.
+ *
+ * Usa `createPortal` para renderizar en `document.body` y escapar del stacking context
+ * del modal padre, evitando que el z-index quede atrapado dentro del `EventDetailModal`.
+ * La imagen de perfil se sube a `/comunicaciones/archivos/upload` antes de guardar el participante.
+ * La biografía tiene un límite de 250 caracteres validado en el cliente.
+ *
+ * @param {boolean} isOpen
+ * @param {Function} onClose
+ * @param {Function} onSave - Callback `(participant) => void` invocado al confirmar.
+ * @param {'invitado'|'colaborador'|'organizador'} mode
+ * @param {Object} [initialData] - Datos previos del participante en modo edición.
+ * @param {boolean} [isReadOnly=false]
+ */
 import React, { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom'; // Importante para escapar de modales anidados
+import { createPortal } from 'react-dom';
 import { uploadArchivo } from '../../services/archivos.service';
 import { 
   User, 

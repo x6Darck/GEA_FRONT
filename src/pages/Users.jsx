@@ -1,3 +1,15 @@
+/**
+ * Página de gestión de usuarios GEA (solo accesible para ADMIN/SUPER_ADMIN).
+ *
+ * Agrupa los usuarios por rol usando `ROLE_ORDER` para el orden de los encabezados.
+ * El debounce de 500ms en el campo de búsqueda evita una petición por cada tecla pulsada.
+ *
+ * Flujo de creación: Modal de creación → `createUsuario` → `fetchUsers` para refrescar.
+ * Flujo de edición/vista: click en card → `UserDetailDrawer` en modo VIEW o EDIT.
+ *
+ * La foto de perfil se valida en el cliente (2 MB, JPG/PNG/WEBP) antes de subir
+ * a `/comunicaciones/archivos/upload` para evitar rechazos del backend.
+ */
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Plus, Edit2, Eye, Camera } from 'lucide-react';
 import styles from './Users.module.css';

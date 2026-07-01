@@ -1,7 +1,15 @@
 /**
- * Resuelve una URL de imagen para asegurar que sea absoluta y válida para etiquetas <img>.
- * @param {string} url - La URL original (puede ser relativa, absoluta o nula).
- * @returns {string|null} - La URL resuelta o null si no hay entrada.
+ * Resuelve una URL de imagen para que sea absoluta y apta para etiquetas `<img>`.
+ *
+ * Maneja cuatro casos:
+ * 1. URLs de localhost con puerto — las reescribe como relativas al servidor actual
+ *    para funcionar tanto en dev (puerto 5173) como en producción (sin cambiar config).
+ * 2. URLs externas absolutas, blobs y data URIs — las retorna sin modificar.
+ * 3. URLs relativas — construye la base dinámica usando `window.location.hostname`
+ *    y el puerto 8083 del backend, añadiendo el prefijo `/api` del context-path.
+ * 4. Nulo/vacío — retorna `null`.
+ * @param {string|null} url
+ * @returns {string|null}
  */
 export const resolveImageUrl = (url) => {
   if (!url) return null;

@@ -1,3 +1,11 @@
+/**
+ * Galería pública de anuncios GEA (accesible sin autenticación).
+ *
+ * Carga solo los anuncios en estado PUBLICADA con `getAnunciosPublicados`.
+ * Soporta deep link vía query param `?anuncio=<id>`: si llega ese parámetro
+ * (p.ej. desde un correo de notificación), se busca el anuncio en la lista
+ * ya cargada y se abre su {@link AnnouncementLightbox} automáticamente.
+ */
 import React, { useState, useEffect } from 'react';
 import { Megaphone, Calendar, LayoutGrid } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';

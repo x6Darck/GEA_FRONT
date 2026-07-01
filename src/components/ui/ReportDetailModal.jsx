@@ -1,3 +1,17 @@
+/**
+ * Modal de detalle de un reporte GEA generado.
+ *
+ * Muestra los metadatos del reporte (rango de fechas, formato, autor) y permite
+ * editar su título y descripción en línea sin cerrar el modal.
+ * Delega la descarga del archivo al callback `onExport` del padre, que ya tiene
+ * la lógica de fetch como Blob.
+ *
+ * @param {boolean} isOpen
+ * @param {Function} onClose
+ * @param {Object} report - Reporte normalizado por {@link mapReporteDTO}.
+ * @param {Function} onExport - Callback `(report) => void` para descargar el archivo.
+ * @param {Function} [onSuccess] - Callback que refresca la lista tras guardar edición.
+ */
 import React, { useState, useEffect } from 'react';
 import { X, FileText, Calendar, Clock, User, Download, Info, CheckCircle, Layers, Edit2, Save, RotateCcw } from 'lucide-react';
 import Modal from './Modal';

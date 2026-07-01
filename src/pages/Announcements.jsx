@@ -1,3 +1,15 @@
+/**
+ * Página de gestión de solicitudes de anuncio GEA.
+ *
+ * Estructura análoga a {@link Events}: mismos filtros de estado y fecha,
+ * paginación en cliente y modal de detalle (`AnnouncementDetailModal`).
+ * La diferencia es que los anuncios tienen pieza gráfica obligatoria al publicar
+ * y vigencia (`fechaInicioPublicacion` / `fechaFinPublicacion`) en vez de horario.
+ *
+ * El formulario de creación carga lugares físicos y tipos de evento bajo demanda
+ * para los campos de categoría y lugar. La pieza gráfica se sube antes de crear
+ * el anuncio y la URL resultante se incluye en el payload.
+ */
 import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { Info, Calendar, Mail, User, MapPin, AlertCircle, Clock, Plus, Search, Upload, FileText, CheckCircle, X, LayoutGrid } from 'lucide-react';
 import styles from './Events.module.css'; 

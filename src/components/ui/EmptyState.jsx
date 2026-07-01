@@ -1,3 +1,14 @@
+/**
+ * Estado vacío genérico de GEA.
+ * Se usa cuando una lista no tiene resultados (filtros activos, sin datos aún, etc.).
+ * El botón de acción es opcional: solo se renderiza si se pasan `action` y `actionLabel`.
+ *
+ * @param {React.ComponentType} [icon] - Ícono de Lucide React a mostrar.
+ * @param {string} [title='Sin resultados']
+ * @param {string} [description]
+ * @param {Function} [action] - Handler del botón de acción.
+ * @param {string} [actionLabel] - Texto del botón de acción.
+ */
 import React from 'react';
 
 const EmptyState = ({

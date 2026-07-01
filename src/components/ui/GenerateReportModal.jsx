@@ -1,3 +1,16 @@
+/**
+ * Modal para generar reportes PDF/Excel en GEA.
+ *
+ * Flujo de tres pasos: formulario (step 0) → generando (step 1) → éxito (step 2).
+ * Los filtros avanzados (oficina y tipo de evento) solo se cargan y muestran
+ * cuando el usuario es SUPER_ADMIN o ADMIN, para no exponer datos cruzados.
+ * Usa `Promise.allSettled` para cargar oficinas y tipos de evento en paralelo
+ * sin que el fallo de uno bloquee al otro.
+ *
+ * @param {boolean} isOpen
+ * @param {Function} onClose
+ * @param {Function} [onSuccess] - Callback que refresca el historial de reportes.
+ */
 import React, { useState, useEffect, useContext } from 'react';
 import { FileText, Calendar, CheckCircle, Download, Info, Building, Tag, ShieldCheck } from 'lucide-react';
 import Modal from './Modal';

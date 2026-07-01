@@ -1,12 +1,19 @@
 /**
- * Utilidades para el manejo de fechas en CALLAPP.
- * Garantiza que las fechas enviadas por el backend (LocalDate/LocalDateTime)
- * sean interpretadas correctamente en el entorno local del usuario sin desplazamientos por Timezone.
+ * Utilidades de fechas para GEA.
+ *
+ * El backend Java usa `LocalDate` / `LocalDateTime` sin zona horaria explícita.
+ * Si JavaScript los parsea con `new Date(str)`, Chrome los trata como UTC y produce
+ * un desfase de varias horas. Estas funciones evitan ese problema construyendo fechas
+ * directamente con los componentes año/mes/día locales.
  */
 
 /**
- * Parsea una cadena de fecha (YYYY-MM-DD o ISO) a un objeto Date local.
- * Si solo viene la fecha, se asume medianoche local.
+ * Parsea una cadena de fecha del backend a un objeto `Date` en hora local.
+ * - `YYYY-MM-DD` → construye con `new Date(year, month-1, day)` para evitar offset UTC.
+ * - ISO con zona horaria (Z o ±HH:mm) → delega al constructor estándar de JS.
+ * - ISO sin zona horaria → reemplaza `T` por espacio para que el navegador lo trate como local.
+ * @param {string|null} dateStr
+ * @returns {Date|null}
  */
 export const parseLocalDate = (dateStr) => {
   if (!dateStr) return null;

@@ -1,3 +1,28 @@
+/**
+ * Modal de detalle y gestión de una solicitud de evento GEA.
+ *
+ * Punto único de interacción post-creación para todos los roles:
+ * - **COMUNICACIONES/ADMIN**: revisa (Aprobar / Rechazar / Devolver a revisión),
+ *   publica con pieza gráfica, gestiona la serie recurrente (aprobar/publicar/eliminar toda la serie).
+ * - **OFICINA**: edita y reenvía cuando la solicitud está RECHAZADA o EN_REVISION.
+ * - **CONSULTORIA**: acceso de solo lectura, no ve paneles de acción.
+ * - **PUBLICADA**: el admin puede activar/desactivar visibilidad sin re-publicar.
+ *
+ * La edición en modo serie tiene dos alcances: "solo este evento" (`aplicarASerie=false`)
+ * y "toda la serie" (`aplicarASerie=true`). El hook {@link useEventManagement} despacha
+ * la llamada correcta según ese flag.
+ *
+ * Las instancias secundarias (`esPrincipal=false`) no pueden modificar la frecuencia
+ * de recurrencia; el formulario muestra ese bloque como informativo.
+ *
+ * El "Blindaje V12" en el badge de organizador hace fallback a la foto del usuario
+ * logueado si el organizador no tiene foto pero su nombre coincide con el contexto.
+ *
+ * @param {boolean} isOpen
+ * @param {Function} onClose
+ * @param {Object} event - Evento normalizado por {@link mapEventoDTO}.
+ * @param {Function} [onSuccess] - Callback que refresca la lista de eventos.
+ */
 import React, { useContext, useState } from 'react';
 import Modal from './Modal';
 import { AuthContext } from '../../context/AuthContext';

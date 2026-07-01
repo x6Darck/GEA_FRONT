@@ -1,21 +1,23 @@
+/**
+ * Barrera de error global de GEA (React Error Boundary).
+ *
+ * Captura excepciones no controladas en cualquier componente hijo y muestra
+ * una pantalla de fallback en lugar de romper toda la app. Es necesario como
+ * clase porque `getDerivedStateFromError` y `componentDidCatch` no tienen
+ * equivalente en hooks de React (a julio 2026).
+ *
+ * Props:
+ * - `fallback` JSX: reemplaza el fallback por defecto.
+ * - `onError(error, errorInfo)`: callback para enviar el error a un servicio externo.
+ * - `resetOnPropsChange`: al cambiar esta prop, limpia el estado de error
+ *   (útil para modales que se cierran y reabren con un nuevo item).
+ * - `isModal` boolean: ajusta el estilo del fallback para el interior de modales.
+ *
+ * En producción, el detalle técnico del error queda oculto al usuario final.
+ * En desarrollo (`import.meta.env.DEV`) se muestra el stack para depuración rápida.
+ */
 import React from 'react';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
-
-/**
- * ErrorBoundary — Estándar de la industria React
- * Captura errores de JavaScript en el árbol de componentes hijo y muestra
- * una UI de fallback en lugar de romper toda la aplicación.
- *
- * Uso:
- *   <ErrorBoundary>
- *     <ComponenteQuePuedeFallar />
- *   </ErrorBoundary>
- *
- * Props opcionales:
- *   - fallback: JSX personalizado para el estado de error
- *   - onError: callback(error, errorInfo) para logging externo
- *   - resetOnPropsChange: si cambian estas props, resetear el error
- */
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);

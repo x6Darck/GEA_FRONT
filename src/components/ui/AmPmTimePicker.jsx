@@ -1,3 +1,15 @@
+/**
+ * Selector de hora en formato 12h (AM/PM) para GEA.
+ *
+ * Recibe y emite horas en formato 24h (`HH:mm:ss`) para ser compatible con el backend Java.
+ * La conversión 12h ↔ 24h ocurre internamente: el estado interno usa hora/minuto/ampm,
+ * y `updateTime` reconvierte a 24h antes de llamar a `onChange`.
+ * Los minutos están restringidos a intervalos de 15 (00, 15, 30, 45).
+ *
+ * @param {string|number[]} value - Hora actual en formato `HH:mm` o array `[H, m]`.
+ * @param {Function} onChange - Callback que recibe `(syntheticEvent, '${H24}:${mm}:00')`.
+ * @param {boolean} [disabled]
+ */
 import React, { useState, useEffect } from 'react';
 
 const AmPmTimePicker = ({ value, onChange, disabled }) => {
